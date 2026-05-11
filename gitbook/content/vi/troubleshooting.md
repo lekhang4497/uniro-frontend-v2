@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Các vấn đề và giải pháp phổ biến khi dùng 9Router.
+Các vấn đề và giải pháp phổ biến khi dùng Uniro.
 
 ---
 
@@ -78,7 +78,7 @@ Các vấn đề và giải pháp phổ biến khi dùng 9Router.
 **Giải pháp:**
 
 1. **Auto-refresh (mặc định):**
-   9Router tự refresh tokens. Đợi 30 giây rồi thử lại.
+   Uniro tự refresh tokens. Đợi 30 giây rồi thử lại.
 
 2. **Kết nối lại thủ công:**
    ```
@@ -135,15 +135,15 @@ Các vấn đề và giải pháp phổ biến khi dùng 9Router.
 **Vấn đề:** Lỗi "ECONNREFUSED" hoặc "Cannot connect to localhost:20128".
 
 **Nguyên nhân:**
-- 9Router không chạy
+- Uniro không chạy
 - Port 20128 bị chặn
 - Firewall chặn kết nối
 
 **Giải pháp:**
 
-1. **Khởi động 9Router:**
+1. **Khởi động Uniro:**
    ```bash
-   9router
+   uniro
    ```
    Dashboard sẽ mở tại http://localhost:3000
 
@@ -164,7 +164,7 @@ Các vấn đề và giải pháp phổ biến khi dùng 9Router.
 4. **Dùng cloud endpoint:**
    Nếu localhost không hoạt động (ví dụ: Cursor IDE):
    ```
-   Endpoint: https://9router.com/v1
+   Endpoint: https://www.uniro.tech/v1
    ```
 
 ---
@@ -175,15 +175,15 @@ Các vấn đề và giải pháp phổ biến khi dùng 9Router.
 
 **Nguyên nhân:**
 - Port 3000 đã được dùng
-- 9Router bị crash
+- Uniro bị crash
 - Vấn đề cache browser
 
 **Giải pháp:**
 
-1. **Kiểm tra 9Router có chạy không:**
+1. **Kiểm tra Uniro có chạy không:**
    ```bash
    # Check process
-   ps aux | grep 9router
+   ps aux | grep uniro
    
    # Check port 3000
    lsof -i :3000
@@ -199,13 +199,13 @@ Các vấn đề và giải pháp phổ biến khi dùng 9Router.
    taskkill /PID <PID> /F
    ```
 
-3. **Khởi động lại 9Router:**
+3. **Khởi động lại Uniro:**
    ```bash
    # Stop
-   pkill -f 9router
+   pkill -f uniro
    
    # Start
-   9router
+   uniro
    ```
 
 4. **Xóa cache browser:**
@@ -346,6 +346,6 @@ Các vấn đề và giải pháp phổ biến khi dùng 9Router.
 
 ## Cần trợ giúp thêm?
 
-- **GitHub Issues:** [github.com/decolua/9router/issues](https://github.com/decolua/9router/issues)
-- **Documentation:** [9router.com/docs](https://9router.com/docs)
+- **GitHub Issues:** [github.com/your-org/uniro/issues](https://github.com/your-org/uniro/issues)
+- **Documentation:** [www.uniro.tech/docs](https://www.uniro.tech/docs)
 - **FAQ:** [faq.md](faq.md)

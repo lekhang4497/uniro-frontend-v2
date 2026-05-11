@@ -1,4 +1,4 @@
-# 9Router Embeddings Tests
+# Uniro Embeddings Tests
 
 Unit tests for the `/v1/embeddings` endpoint implementation.
 

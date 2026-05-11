@@ -1,15 +1,15 @@
 # 🏠 Localhost Deployment
 
-Run 9Router on your local machine for development and personal use.
+Run Uniro on your local machine for development and personal use.
 
 ---
 
 ## 📦 Installation
 
-Install 9Router globally via npm:
+Install Uniro globally via npm:
 
 ```bash
-npm install -g 9router
+npm install -g uniro
 ```
 
 **Requirements:**
@@ -20,10 +20,10 @@ npm install -g 9router
 
 ## 🚀 Starting the Server
 
-Start 9Router with a single command:
+Start Uniro with a single command:
 
 ```bash
-9router
+uniro
 ```
 
 The dashboard will automatically open in your browser at `http://localhost:3000`
@@ -31,7 +31,7 @@ The dashboard will automatically open in your browser at `http://localhost:3000`
 **Default Configuration:**
 - **Dashboard**: `http://localhost:3000`
 - **API Endpoint**: `http://localhost:20128/v1`
-- **Data Directory**: `~/.9router`
+- **Data Directory**: `~/.uniro`
 
 ---
 
@@ -42,7 +42,7 @@ The dashboard will automatically open in your browser at `http://localhost:3000`
 Set a custom data directory using environment variable:
 
 ```bash
-DATA_DIR=/path/to/data 9router
+DATA_DIR=/path/to/data uniro
 ```
 
 ### Custom Port
@@ -53,10 +53,10 @@ The API port (20128) and dashboard port (3000) are configured in the application
 
 ## 🛑 Stopping the Server
 
-Press `Ctrl+C` in the terminal where 9Router is running.
+Press `Ctrl+C` in the terminal where Uniro is running.
 
 ```bash
-# In the terminal running 9router
+# In the terminal running uniro
 ^C  # Press Ctrl+C
 ```
 
@@ -69,25 +69,25 @@ The server will gracefully shut down and save all data.
 Simply run the start command again:
 
 ```bash
-9router
+uniro
 ```
 
 All your configurations, API keys, and combos are preserved in the data directory.
 
 ---
 
-## 📊 Updating 9Router
+## 📊 Updating Uniro
 
 Update to the latest version:
 
 ```bash
-npm update -g 9router
+npm update -g uniro
 ```
 
 Check your current version:
 
 ```bash
-npm list -g 9router
+npm list -g uniro
 ```
 
 ---
@@ -113,7 +113,7 @@ If you encounter permission errors during installation:
 
 ```bash
 # Use sudo (not recommended)
-sudo npm install -g 9router
+sudo npm install -g uniro
 
 # Or fix npm permissions (recommended)
 mkdir ~/.npm-global
@@ -128,10 +128,10 @@ If the data directory is not accessible:
 
 ```bash
 # Check permissions
-ls -la ~/.9router
+ls -la ~/.uniro
 
 # Fix permissions
-chmod 755 ~/.9router
+chmod 755 ~/.uniro
 ```
 
 ---
@@ -139,7 +139,7 @@ chmod 755 ~/.9router
 ## 📁 Data Directory Structure
 
 ```
-~/.9router/
+~/.uniro/
 ├── db.json           # Main database (providers, combos, settings)
 ├── logs/             # Application logs
 └── cache/            # Temporary cache files
@@ -149,10 +149,10 @@ chmod 755 ~/.9router
 
 ```bash
 # Backup
-cp -r ~/.9router ~/.9router.backup
+cp -r ~/.uniro ~/.uniro.backup
 
 # Restore
-cp -r ~/.9router.backup ~/.9router
+cp -r ~/.uniro.backup ~/.uniro
 ```
 
 ---

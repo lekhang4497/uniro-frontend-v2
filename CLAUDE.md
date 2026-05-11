@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**9Router** (`9router-app`) — a self-hosted LLM router dashboard. Next.js 16 (App Router) + React 19, JavaScript only (no TypeScript; uses `jsconfig.json`). Exposes an **OpenAI-compatible API** at `:20128/v1` so CLI tools (Claude Code, Codex, Cursor, Cline, OpenClaw...) can use it as a drop-in endpoint while it does multi-provider routing, format translation, token refresh, quota tracking, and "RTK" token compression.
+**Uniro** (`uniro-app`) — a self-hosted LLM router dashboard. Next.js 16 (App Router) + React 19, JavaScript only (no TypeScript; uses `jsconfig.json`). Exposes an **OpenAI-compatible API** at `:20128/v1` so CLI tools (Claude Code, Codex, Cursor, Cline, OpenClaw...) can use it as a drop-in endpoint while it does multi-provider routing, format translation, token refresh, quota tracking, and "RTK" token compression.
 
-This is the published npm package `9router`. The dashboard, API gateway, MITM cert proxy, and Cloudflare Worker companion all live in this single repo.
+This is the published npm package `uniro`. The dashboard, API gateway, MITM cert proxy, and Cloudflare Worker companion all live in this single repo.
 
 ---
 
@@ -81,7 +81,7 @@ There are additional standalone DB files for hot/append-heavy data (`src/lib/usa
 
 A **separate Node process** (not part of Next) that intercepts HTTPS traffic from CLI tools that don't accept a custom endpoint (`copilot`, `cursor`, `antigravity`, `kiro`). It generates a CA cert (`cert/`), runs its own server (`server.js`), and is managed from the dashboard via `manager.js`. The Dockerfile explicitly copies `src/mitm` + `node-forge` into the runtime image because Next's file tracing doesn't see it.
 
-`src/mitm/dev/` was a git submodule in the upstream repo (`decolua/9router-dev`); it has been removed in this fork.
+`src/mitm/dev/` was a git submodule in the upstream repo (`your-org/uniro-dev`); it has been removed in this fork.
 
 ---
 
