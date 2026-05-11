@@ -277,6 +277,19 @@ select { color-scheme: light; }
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
 }
 
+/* ============================================================
+   Tailwind v4 default border color
+   In v4, bare `border` resolves to `currentColor` (i.e. the text
+   color), which makes every shadcn component render a near-black
+   outline against a light card. shadcn's v4 setup expects this
+   base reset that pins the default border + outline to the theme.
+   ============================================================ */
+@layer base {
+  *, ::before, ::after {
+    border-color: var(--border);
+  }
+}
+
 /* Base */
 body {
   background-color: var(--background);
