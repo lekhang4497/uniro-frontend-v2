@@ -1,7 +1,13 @@
 "use client";
 
-import { cn } from "@/shared/utils/cn";
+import { Label } from "@/shared/components/ui/label";
+import { cn } from "@/lib/utils";
 
+// Wrapper preserves legacy native-<select>-with-options API. shadcn's Radix
+// Select is fancier but isn't a drop-in for plain options arrays — and uses
+// custom rendering that doesn't accept arbitrary `selectClassName`/event types
+// the callsites expect. This keeps the existing API while restyling with
+// Uniro tokens.
 export default function Select({
   label,
   options = [],
@@ -19,10 +25,10 @@ export default function Select({
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       {label && (
-        <label className="text-sm font-medium text-text-main">
+        <Label>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
+          {required && <span className="text-destructive ml-1">*</span>}
+        </Label>
       )}
       <div className="relative">
         <select
@@ -30,38 +36,33 @@ export default function Select({
           onChange={onChange}
           disabled={disabled}
           className={cn(
-            "w-full py-2.5 px-3 pr-10 text-sm text-text-main",
-            "bg-surface-2 border border-transparent rounded-[10px] appearance-none",
-            "focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500/40",
-            "transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed",
+            "flex h-9 w-full appearance-none rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm shadow-sm",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             "text-[16px] sm:text-sm",
-            error && "ring-1 ring-red-500 focus:ring-2 focus:ring-red-500/40 border-red-500/40",
+            error && "border-destructive focus-visible:ring-destructive",
             selectClassName
           )}
           {...props}
         >
-          <option value="" disabled>
-            {placeholder}
-          </option>
+          <option value="" disabled>{placeholder}</option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
         </select>
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-text-muted">
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
           <span className="material-symbols-outlined text-[20px]">expand_more</span>
         </div>
       </div>
       {error && (
-        <p className="text-xs text-red-500 flex items-center gap-1">
+        <p className="text-xs text-destructive flex items-center gap-1">
           <span className="material-symbols-outlined text-[14px]">error</span>
           {error}
         </p>
       )}
-      {hint && !error && (
-        <p className="text-xs text-text-muted">{hint}</p>
-      )}
+      {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }

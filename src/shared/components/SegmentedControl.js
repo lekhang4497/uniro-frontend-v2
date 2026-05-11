@@ -1,6 +1,12 @@
 "use client";
 
-import { cn } from "@/shared/utils/cn";
+import { cn } from "@/lib/utils";
+
+const sizes = {
+  sm: "h-7 text-xs",
+  md: "h-9 text-sm",
+  lg: "h-11 text-base",
+};
 
 export default function SegmentedControl({
   options = [],
@@ -9,17 +15,10 @@ export default function SegmentedControl({
   size = "md",
   className,
 }) {
-  const sizes = {
-    sm: "h-7 text-xs",
-    md: "h-9 text-sm",
-    lg: "h-11 text-base",
-  };
-
   return (
     <div
       className={cn(
-        "inline-flex items-center p-1 rounded-[10px] overflow-x-auto",
-        "bg-surface-2",
+        "inline-flex items-center p-1 rounded-md overflow-x-auto bg-muted",
         className
       )}
     >
@@ -28,11 +27,11 @@ export default function SegmentedControl({
           key={option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "shrink-0 px-4 rounded-[8px] font-medium transition-all",
+            "shrink-0 px-4 rounded-sm font-medium transition-all",
             sizes[size],
             value === option.value
-              ? "bg-surface text-text-main shadow-sm"
-              : "text-text-muted hover:text-text-main"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           )}
         >
           {option.icon && (

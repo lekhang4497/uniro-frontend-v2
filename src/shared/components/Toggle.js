@@ -1,6 +1,13 @@
 "use client";
 
-import { cn } from "@/shared/utils/cn";
+import { Switch } from "@/shared/components/ui/switch";
+import { cn } from "@/lib/utils";
+
+const sizeClasses = {
+  sm: "h-4 w-8 [&_[data-state]]:size-3 data-[state=checked]:[&_[data-state]]:translate-x-4",
+  md: "",
+  lg: "h-7 w-14 [&_[data-state]]:size-6 data-[state=checked]:[&_[data-state]]:translate-x-7",
+};
 
 export default function Toggle({
   checked = false,
@@ -11,57 +18,20 @@ export default function Toggle({
   size = "md",
   className,
 }) {
-  const sizes = {
-    sm: { track: "w-8 h-4", thumb: "size-3", translate: "translate-x-4" },
-    md: { track: "w-11 h-6", thumb: "size-5", translate: "translate-x-5" },
-    lg: { track: "w-14 h-7", thumb: "size-6", translate: "translate-x-7" },
-  };
-
-  const handleClick = () => {
-    if (!disabled && onChange) onChange(!checked);
-  };
-
   return (
     <div
-      className={cn(
-        "flex items-center gap-3",
-        disabled && "opacity-50 cursor-not-allowed",
-        className
-      )}
+      className={cn("flex items-center gap-3", disabled && "opacity-50 cursor-not-allowed", className)}
     >
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
+      <Switch
+        checked={!!checked}
+        onCheckedChange={(v) => !disabled && onChange && onChange(v)}
         disabled={disabled}
-        onClick={handleClick}
-        className={cn(
-          "relative inline-flex shrink-0 cursor-pointer rounded-full",
-          "transition-colors duration-200 ease-in-out",
-          "focus:outline-none focus:ring-2 focus:ring-brand-500/30",
-          checked ? "bg-brand-500" : "bg-surface-3",
-          sizes[size].track,
-          disabled && "cursor-not-allowed"
-        )}
-      >
-        <span
-          className={cn(
-            "pointer-events-none inline-block rounded-full bg-white shadow-sm",
-            "transform transition duration-200 ease-in-out",
-            checked ? sizes[size].translate : "translate-x-0.5",
-            sizes[size].thumb,
-            "mt-0.5"
-          )}
-        />
-      </button>
+        className={sizeClasses[size]}
+      />
       {(label || description) && (
         <div className="flex flex-col">
-          {label && (
-            <span className="text-sm font-medium text-text-main">{label}</span>
-          )}
-          {description && (
-            <span className="text-xs text-text-muted">{description}</span>
-          )}
+          {label && <span className="text-sm font-medium text-foreground">{label}</span>}
+          {description && <span className="text-xs text-muted-foreground">{description}</span>}
         </div>
       )}
     </div>

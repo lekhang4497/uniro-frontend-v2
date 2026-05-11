@@ -1,8 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
-import { cn } from "@/shared/utils/cn";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/shared/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import Button from "./Button";
+
+const sizeMap = {
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
+  full: "sm:max-w-4xl",
+};
 
 export default function Modal({
   isOpen,
@@ -16,89 +30,40 @@ export default function Modal({
   showTrafficLights = true,
   className,
 }) {
-  const sizes = {
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
-    full: "max-w-4xl",
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen]);
-
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && isOpen) onClose();
-    };
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-[2px] fade-in"
-        onClick={closeOnOverlay ? onClose : undefined}
-      />
-
-      {/* Modal content */}
-      <div
-        className={cn(
-          "relative w-full bg-surface",
-          "border border-border-subtle",
-          "rounded-[14px] shadow-[var(--shadow-elev)]",
-          "fade-in",
-          sizes[size],
-          className
-        )}
+    <Dialog
+      open={!!isOpen}
+      onOpenChange={(open) => {
+        if (!open && onClose) onClose();
+      }}
+    >
+      <DialogContent
+        className={cn("p-0 gap-0", sizeMap[size], className)}
+        onInteractOutside={closeOnOverlay ? undefined : (e) => e.preventDefault()}
+        onPointerDownOutside={closeOnOverlay ? undefined : (e) => e.preventDefault()}
       >
-        {/* Header */}
-        {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-2 border-b border-border-subtle">
-            <div className="flex items-center">
-              {showTrafficLights && (
-                <div className="flex items-center gap-2 mr-4 ml-2">
-                  <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-                  <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-                  <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
-                </div>
-              )}
-              {title && (
-                <h2 className="text-lg font-semibold text-text-main">{title}</h2>
-              )}
-            </div>
-            {showCloseButton && (
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-[10px] text-text-muted hover:bg-surface-2 hover:text-text-main transition-colors"
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
+        {(title || showTrafficLights) && (
+          <DialogHeader className="flex flex-row items-center gap-2 p-3 border-b border-border space-y-0">
+            {showTrafficLights && (
+              <div className="flex items-center gap-2 ml-1">
+                <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
+                <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
+                <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
+              </div>
             )}
-          </div>
+            {title && <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>}
+          </DialogHeader>
         )}
 
-        {/* Body */}
         <div className="p-6 max-h-[calc(85vh-100px)] overflow-y-auto custom-scrollbar">{children}</div>
 
-        {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-border-subtle">
+          <DialogFooter className="flex items-center justify-end gap-3 p-6 border-t border-border">
             {footer}
-          </div>
+          </DialogFooter>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -130,7 +95,7 @@ export function ConfirmModal({
         </>
       }
     >
-      <p className="text-text-muted">{message}</p>
+      <p className="text-muted-foreground">{message}</p>
     </Modal>
   );
 }
