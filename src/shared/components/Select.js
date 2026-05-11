@@ -1,13 +1,9 @@
 "use client";
 
+import { AlertCircle, ChevronDown } from "lucide-react";
 import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/lib/utils";
 
-// Wrapper preserves legacy native-<select>-with-options API. shadcn's Radix
-// Select is fancier but isn't a drop-in for plain options arrays — and uses
-// custom rendering that doesn't accept arbitrary `selectClassName`/event types
-// the callsites expect. This keeps the existing API while restyling with
-// Uniro tokens.
 export default function Select({
   label,
   options = [],
@@ -53,12 +49,12 @@ export default function Select({
           ))}
         </select>
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
-          <span className="material-symbols-outlined text-[20px]">expand_more</span>
+          <ChevronDown className="h-4 w-4" />
         </div>
       </div>
       {error && (
         <p className="text-xs text-destructive flex items-center gap-1">
-          <span className="material-symbols-outlined text-[14px]">error</span>
+          <AlertCircle className="h-3.5 w-3.5" />
           {error}
         </p>
       )}

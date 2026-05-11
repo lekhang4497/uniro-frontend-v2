@@ -1,26 +1,21 @@
 "use client";
 
 import { forwardRef } from "react";
+import { Loader2 } from "lucide-react";
 import { Button as ShadButton } from "@/shared/components/ui/button";
+import { Icon } from "./Icon";
 import { cn } from "@/lib/utils";
 
-// Legacy -> shadcn variant mapping
 const variantMap = {
   primary: "default",
   secondary: "secondary",
   outline: "outline",
   ghost: "ghost",
   danger: "destructive",
-  // success has no shadcn equivalent — keep custom class
   success: "default",
 };
 
-// Legacy size labels -> shadcn sizes
-const sizeMap = {
-  sm: "sm",
-  md: "default",
-  lg: "lg",
-};
+const sizeMap = { sm: "sm", md: "default", lg: "lg" };
 
 const Button = forwardRef(function Button(
   {
@@ -52,13 +47,13 @@ const Button = forwardRef(function Button(
       {...props}
     >
       {loading ? (
-        <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+        <Loader2 className="animate-spin h-4 w-4" />
       ) : icon ? (
-        <span className="material-symbols-outlined text-[18px]">{icon}</span>
+        <Icon name={typeof icon === "string" ? icon : undefined} icon={typeof icon !== "string" ? icon : undefined} size={16} />
       ) : null}
       {children}
       {iconRight && !loading && (
-        <span className="material-symbols-outlined text-[18px]">{iconRight}</span>
+        <Icon name={typeof iconRight === "string" ? iconRight : undefined} icon={typeof iconRight !== "string" ? iconRight : undefined} size={16} />
       )}
     </ShadButton>
   );

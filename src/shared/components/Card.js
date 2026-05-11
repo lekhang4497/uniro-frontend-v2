@@ -1,6 +1,7 @@
 "use client";
 
 import { Card as ShadCard } from "@/shared/components/ui/card";
+import { Icon } from "./Icon";
 import { cn } from "@/lib/utils";
 
 const paddings = {
@@ -38,7 +39,7 @@ export default function Card({
           <div className="flex items-center gap-3">
             {icon && (
               <div className="p-2 rounded-[10px] bg-muted text-muted-foreground">
-                <span className="material-symbols-outlined text-[20px]">{icon}</span>
+                <Icon name={typeof icon === "string" ? icon : undefined} icon={typeof icon !== "string" ? icon : undefined} size={20} />
               </div>
             )}
             <div>

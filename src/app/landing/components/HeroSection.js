@@ -1,5 +1,7 @@
 "use client";
 
+import { Code2, Rocket } from "lucide-react";
+
 export default function HeroSection() {
   return (
     <section className="relative pt-32 pb-20 px-6 min-h-[90vh] flex flex-col items-center justify-center overflow-hidden">
@@ -27,16 +29,16 @@ export default function HeroSection() {
         {/* CTA Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-4 w-full">
           <button className="h-12 px-8 rounded-lg bg-[#d97757] hover:bg-[#e0650a] text-[#141413] text-base font-bold transition-all shadow-[0_0_15px_rgba(217,119,87,0.4)] flex items-center gap-2">
-            <span className="material-symbols-outlined">rocket_launch</span>
+            <Rocket className="h-5 w-5" />
             Get Started
           </button>
-          <a 
-            href="https://github.com/your-org/uniro" 
-            target="_blank" 
+          <a
+            href="https://github.com/your-org/uniro"
+            target="_blank"
             rel="noopener noreferrer"
             className="h-12 px-8 rounded-lg border border-[#2a2926] bg-[#1f1e1c] hover:bg-[#2a2926] text-white text-base font-bold transition-all flex items-center gap-2"
           >
-            <span className="material-symbols-outlined">code</span>
+            <Code2 className="h-5 w-5" />
             View on GitHub
           </a>
         </div>

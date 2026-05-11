@@ -1,7 +1,9 @@
 "use client";
 
+import { AlertCircle } from "lucide-react";
 import { Input as ShadInput } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { Icon } from "./Icon";
 import { cn } from "@/lib/utils";
 
 export default function Input({
@@ -30,7 +32,7 @@ export default function Input({
       <div className="relative">
         {icon && (
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-            <span className="material-symbols-outlined text-[20px]">{icon}</span>
+            <Icon name={typeof icon === "string" ? icon : undefined} icon={typeof icon !== "string" ? icon : undefined} size={18} />
           </div>
         )}
         <ShadInput
@@ -51,7 +53,7 @@ export default function Input({
       </div>
       {error && (
         <p className="text-xs text-destructive flex items-center gap-1">
-          <span className="material-symbols-outlined text-[14px]">error</span>
+          <AlertCircle className="h-3.5 w-3.5" />
           {error}
         </p>
       )}

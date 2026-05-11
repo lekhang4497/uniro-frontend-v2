@@ -39,7 +39,9 @@
   --accent-foreground: #141413;
   --destructive: #b54838;
   --destructive-foreground: #faf9f5;
-  --border: #d8d6cc;
+  /* Softer border: closer to bg so card outline reads as a quiet seam,
+     not a hard rule. Hex eef0e8 ≈ +6% lightness vs --background. */
+  --border: #eceae0;
   --input: #d8d6cc;
   --ring: #d97757;
   --radius: 0.625rem;
@@ -121,7 +123,9 @@
   --accent-foreground: #faf9f5;
   --destructive: #c25a48;
   --destructive-foreground: #faf9f5;
-  --border: #2a2926;
+  /* Softer dark border: just above card surface, not lighter than secondary.
+     #24221f sits ≈ +3% above --card (#1f1e1c) — subtle seam, not a glare. */
+  --border: #24221f;
   --input: #2a2926;
   --ring: #d97757;
 

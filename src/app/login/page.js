@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, Button, Input } from "@/shared/components";
+import { UniroMark } from "@/shared/components/UniroMark";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -86,7 +87,8 @@ export default function LoginPage() {
       {/* Faint grid background */}
       <div className="landing-grid absolute inset-0 pointer-events-none" aria-hidden="true" />
       <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="flex flex-col items-center mb-8">
+          <UniroMark size={48} className="text-primary mb-3" />
           <h1 className="text-3xl font-bold text-primary mb-2">Uniro</h1>
           <p className="text-text-muted">Enter your password to access the dashboard</p>
         </div>

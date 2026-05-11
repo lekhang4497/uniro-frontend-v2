@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge as ShadBadge } from "@/shared/components/ui/badge";
+import { Icon } from "./Icon";
 import { cn } from "@/lib/utils";
 
 const variants = {
@@ -38,7 +39,7 @@ export default function Badge({
   return (
     <ShadBadge className={cn("font-semibold gap-1.5", variants[variant], sizes[size], className)}>
       {dot && <span className={cn("size-1.5 rounded-full", dotColors[variant])} />}
-      {icon && <span className="material-symbols-outlined text-[14px]">{icon}</span>}
+      {icon && <Icon name={typeof icon === "string" ? icon : undefined} icon={typeof icon !== "string" ? icon : undefined} size={12} />}
       {children}
     </ShadBadge>
   );

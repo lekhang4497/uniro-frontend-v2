@@ -1,20 +1,17 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { Skeleton as ShadSkeleton } from "@/shared/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
+const spinnerSizes = { sm: 16, md: 24, lg: 32, xl: 48 };
+
 export function Spinner({ size = "md", className }) {
-  const sizes = { sm: "size-4", md: "size-6", lg: "size-8", xl: "size-12" };
   return (
-    <span
-      className={cn(
-        "material-symbols-outlined animate-spin text-primary",
-        sizes[size],
-        className
-      )}
-    >
-      progress_activity
-    </span>
+    <Loader2
+      size={spinnerSizes[size] ?? 24}
+      className={cn("animate-spin text-primary", className)}
+    />
   );
 }
 

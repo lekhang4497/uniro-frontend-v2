@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "./Icon";
 import { cn } from "@/lib/utils";
 
 const sizes = {
@@ -27,7 +28,7 @@ export default function SegmentedControl({
           key={option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "shrink-0 px-4 rounded-sm font-medium transition-all",
+            "shrink-0 inline-flex items-center gap-1.5 px-4 rounded-sm font-medium transition-all",
             sizes[size],
             value === option.value
               ? "bg-background text-foreground shadow-sm"
@@ -35,9 +36,7 @@ export default function SegmentedControl({
           )}
         >
           {option.icon && (
-            <span className="material-symbols-outlined text-[16px] mr-1.5">
-              {option.icon}
-            </span>
+            <Icon name={typeof option.icon === "string" ? option.icon : undefined} icon={typeof option.icon !== "string" ? option.icon : undefined} size={14} />
           )}
           {option.label}
         </button>
