@@ -169,12 +169,12 @@ export async function GET() {
       ? config.inferenceModels.map((m) => (typeof m === "string" ? m : m?.name)).filter(Boolean)
       : [];
     const managedMcp = Array.isArray(config?.managedMcpServers) ? config.managedMcpServers : [];
-    const has9Router = !!(config?.inferenceProvider === PROVIDER && baseUrl);
+    const hasUniro = !!(config?.inferenceProvider === PROVIDER && baseUrl);
 
     return NextResponse.json({
       installed: true,
       config,
-      has9Router,
+      hasUniro,
       configPath,
       cowork: {
         appliedId,

@@ -8,6 +8,10 @@ import { waitForHealth, probeUrlAlive } from "./networkProbe.js";
 
 initDbHooks(getSettings, updateSettings);
 
+// TODO(uniro-rebrand): replace the 9router.com tunnel host + salt with Uniro tunnel
+// infrastructure once available. Until a Uniro tunnel worker is provisioned, keeping
+// the existing 9router.com host (and the legacy MACHINE_ID_SALT so existing short IDs
+// stay stable) so the tunnel feature continues to work.
 const WORKER_URL = process.env.TUNNEL_WORKER_URL || "https://9router.com";
 const MACHINE_ID_SALT = "9router-tunnel-salt";
 

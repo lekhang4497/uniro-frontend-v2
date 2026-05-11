@@ -109,7 +109,7 @@ async function autoStartMitm() {
     const activeKey = keys.find(k => k.isActive !== false);
 
     console.log("[InitApp] MITM was enabled, auto-starting...");
-    await startMitm(activeKey?.key || "sk_9router", password);
+    await startMitm(activeKey?.key || "sk_uniro", password);
     console.log("[InitApp] MITM auto-started");
     try {
       await restoreToolDNS(password);
@@ -137,6 +137,7 @@ async function safeRestartTunnel(reason) {
   // Alive check: process up + URL responds → skip
   if (isCloudflaredRunning()) {
     const state = loadState();
+    // TODO(uniro-rebrand): swap *.9router.com to Uniro tunnel host once provisioned.
     const publicUrl = state?.shortId ? `https://r${state.shortId}.9router.com` : null;
     if (publicUrl && await probeUrlAlive(publicUrl)) return;
   }
