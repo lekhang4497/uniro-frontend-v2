@@ -22,70 +22,76 @@
    aliases so pre-migration components keep working.
    ============================================================ */
 :root {
-  /* shadcn semantic tokens — light */
+  /* shadcn semantic tokens — light (Uniro warm-paper palette,
+     reconciled with the Anthropic-style design handoff in
+     /design/Dashboard.html — slightly warmer foreground +
+     paper-toned secondary). */
   --background: #faf9f5;
-  --foreground: #141413;
+  --foreground: #1d1c19;
   --card: #ffffff;
-  --card-foreground: #141413;
+  --card-foreground: #1d1c19;
   --popover: #ffffff;
-  --popover-foreground: #141413;
+  --popover-foreground: #1d1c19;
   --primary: #d97757;
-  --primary-foreground: #faf9f5;
-  --secondary: #e8e6dc;
-  --secondary-foreground: #141413;
-  --muted: #e8e6dc;
-  --muted-foreground: #6b6960;
-  --accent: #e8e6dc;
-  --accent-foreground: #141413;
-  --destructive: #b54838;
-  --destructive-foreground: #faf9f5;
-  /* Softer border: closer to bg so card outline reads as a quiet seam,
-     not a hard rule. Hex eef0e8 ≈ +6% lightness vs --background. */
-  --border: #eceae0;
-  --input: #d8d6cc;
+  --primary-foreground: #ffffff;
+  --primary-hover: #c9613f;
+  --secondary: #f0ebe1;
+  --secondary-foreground: #1d1c19;
+  --muted: #f0ebe1;
+  --muted-foreground: #6b6657;
+  --accent: #f0ebe1;
+  --accent-foreground: #1d1c19;
+  --destructive: #b35b4a;
+  --destructive-foreground: #ffffff;
+  --border: #e7e2d4;
+  --border-strong: #d8d2c2;
+  --subtle: #9a9382;
+  --input: #d8d2c2;
   --ring: #d97757;
   --radius: 0.625rem;
 
-  /* Uniro-specific extended accents */
+  /* Uniro-specific extended accents (Anthropic-tuned warm palette) */
   --uniro-orange: #d97757;
-  --uniro-blue: #6a9bcc;
-  --uniro-green: #788c5d;
-  --uniro-dark: #141413;
+  --uniro-blue: #5c7eb8;
+  --uniro-green: #5a8c5a;
+  --uniro-warning: #c08a3c;
+  --uniro-danger: #b35b4a;
+  --uniro-dark: #1d1c19;
   --uniro-light: #faf9f5;
-  --uniro-mid-gray: #b0aea5;
-  --uniro-light-gray: #e8e6dc;
+  --uniro-mid-gray: #9a9382;
+  --uniro-light-gray: #f0ebe1;
 
-  /* Brand orange tonal scale (centered on #d97757) */
-  --color-brand-50: #fbf1ec;
-  --color-brand-100: #f7dcce;
+  /* Brand orange tonal scale (centered on #d97757, warm-paper-tuned) */
+  --color-brand-50: #fbece4;
+  --color-brand-100: #f6d6c5;
   --color-brand-200: #efbba2;
   --color-brand-300: #e69b78;
   --color-brand-400: #df8763;
   --color-brand-500: #d97757;
-  --color-brand-600: #c25e40;
-  --color-brand-700: #9d4a33;
+  --color-brand-600: #c9613f;
+  --color-brand-700: #a14a2d;
   --color-brand-800: #783828;
   --color-brand-900: #54271c;
 
   /* Legacy aliases for unmigrated components */
   --color-primary: var(--primary);
-  --color-primary-hover: var(--color-brand-600);
+  --color-primary-hover: var(--primary-hover);
   --color-bg: var(--background);
-  --color-bg-alt: #f3f1ea;
+  --color-bg-alt: #f4f1ea;
   --color-surface: var(--card);
   --color-surface-2: var(--secondary);
-  --color-surface-3: #ddd9cd;
-  --color-sidebar: rgba(232, 230, 220, 0.85);
+  --color-surface-3: var(--border-strong);
+  --color-sidebar: rgba(244, 241, 234, 0.85);
   --color-border: var(--border);
-  --color-border-subtle: #e8e6dc;
+  --color-border-subtle: var(--secondary);
   --color-text: var(--foreground);
   --color-text-main: var(--foreground);
   --color-text-muted: var(--muted-foreground);
-  --color-text-subtle: var(--uniro-mid-gray);
+  --color-text-subtle: var(--subtle);
   --color-accent: var(--primary);
   --color-danger: var(--destructive);
   --color-success: var(--uniro-green);
-  --color-warning: #c08a3a;
+  --color-warning: var(--uniro-warning);
   --color-info: var(--uniro-blue);
 
   /* Radius */
@@ -106,60 +112,74 @@
 }
 
 .dark {
-  /* shadcn semantic tokens — dark */
-  --background: #141413;
-  --foreground: #faf9f5;
-  --card: #1f1e1c;
-  --card-foreground: #faf9f5;
-  --popover: #1f1e1c;
-  --popover-foreground: #faf9f5;
-  --primary: #d97757;
-  --primary-foreground: #faf9f5;
-  --secondary: #2a2926;
-  --secondary-foreground: #faf9f5;
-  --muted: #2a2926;
-  --muted-foreground: #b0aea5;
-  --accent: #2a2926;
-  --accent-foreground: #faf9f5;
-  --destructive: #c25a48;
-  --destructive-foreground: #faf9f5;
-  /* Softer dark border: just above card surface, not lighter than secondary.
-     #24221f sits ≈ +3% above --card (#1f1e1c) — subtle seam, not a glare. */
-  --border: #24221f;
-  --input: #2a2926;
-  --ring: #d97757;
+  /* shadcn semantic tokens — dark (Anthropic-handoff calibrated) */
+  --background: #1a1816;
+  --foreground: #f2efe8;
+  --card: #262220;
+  --card-foreground: #f2efe8;
+  --popover: #262220;
+  --popover-foreground: #f2efe8;
+  --primary: #e58e6c;
+  --primary-foreground: #1a1816;
+  --primary-hover: #d9744f;
+  --secondary: #2f2b28;
+  --secondary-foreground: #f2efe8;
+  --muted: #2f2b28;
+  --muted-foreground: #a8a094;
+  --accent: #2f2b28;
+  --accent-foreground: #f2efe8;
+  --destructive: #d97b69;
+  --destructive-foreground: #1a1816;
+  /* Subtle dark border, just above card surface so the seam is felt
+     not seen. */
+  --border: #28241f;
+  --border-strong: #4a423a;
+  --subtle: #74695a;
+  --input: #2f2b28;
+  --ring: #e58e6c;
 
-  /* Brand scale identical across modes */
-  --color-brand-50: #fbf1ec;
-  --color-brand-100: #f7dcce;
+  /* Brand scale — dark mode uses translucent oranges for low-contrast tints */
+  --color-brand-50: rgba(217, 119, 87, 0.14);
+  --color-brand-100: rgba(217, 119, 87, 0.22);
   --color-brand-200: #efbba2;
   --color-brand-300: #e69b78;
   --color-brand-400: #df8763;
-  --color-brand-500: #d97757;
-  --color-brand-600: #c25e40;
-  --color-brand-700: #9d4a33;
+  --color-brand-500: #e58e6c;
+  --color-brand-600: #d9744f;
+  --color-brand-700: #f0a385;
   --color-brand-800: #783828;
   --color-brand-900: #54271c;
 
+  /* Uniro extended accents — dark */
+  --uniro-orange: #e58e6c;
+  --uniro-blue: #8aa5d6;
+  --uniro-green: #7fb27f;
+  --uniro-warning: #d9aa6a;
+  --uniro-danger: #d97b69;
+  --uniro-dark: #1a1816;
+  --uniro-light: #f2efe8;
+  --uniro-mid-gray: #a8a094;
+  --uniro-light-gray: #2f2b28;
+
   /* Legacy aliases — dark mode */
   --color-primary: var(--primary);
-  --color-primary-hover: var(--color-brand-400);
+  --color-primary-hover: var(--primary-hover);
   --color-bg: var(--background);
-  --color-bg-alt: #1a1917;
+  --color-bg-alt: #232020;
   --color-surface: var(--card);
-  --color-surface-2: #2a2926;
-  --color-surface-3: #34322f;
-  --color-sidebar: rgba(31, 30, 28, 0.85);
+  --color-surface-2: var(--secondary);
+  --color-surface-3: var(--border-strong);
+  --color-sidebar: rgba(35, 32, 32, 0.85);
   --color-border: var(--border);
-  --color-border-subtle: #242321;
+  --color-border-subtle: var(--secondary);
   --color-text: var(--foreground);
   --color-text-main: var(--foreground);
   --color-text-muted: var(--muted-foreground);
-  --color-text-subtle: #7a7870;
+  --color-text-subtle: var(--subtle);
   --color-accent: var(--primary);
   --color-danger: var(--destructive);
   --color-success: var(--uniro-green);
-  --color-warning: #d4a14a;
+  --color-warning: var(--uniro-warning);
   --color-info: var(--uniro-blue);
 
   --shadow-soft: 0 1px 2px 0 rgba(0,0,0,0.35);
@@ -201,8 +221,10 @@ select { color-scheme: light; }
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-subtle: var(--subtle);
 
   /* Uniro extended palette */
   --color-uniro-orange: var(--uniro-orange);
@@ -273,9 +295,14 @@ select { color-scheme: light; }
   --shadow-elev: var(--shadow-elev);
   --shadow-focus: var(--shadow-focus);
 
-  /* Font */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
+  /* Font — matches the Anthropic-style design handoff: DM Sans for
+     body, Source Serif 4 for display, JetBrains Mono for numbers
+     and code. next/font binds the family names to CSS variables
+     in layout.js (--font-dm-sans / --font-serif / --font-mono);
+     fallbacks here guard against the variable not being set yet. */
+  --font-sans: var(--font-dm-sans, 'DM Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-serif: var(--font-serif, 'Source Serif 4'), 'Tiempos Headline', Charter, 'Georgia', 'Times New Roman', Times, serif;
+  --font-mono: var(--font-mono, 'JetBrains Mono'), ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 /* ============================================================
@@ -536,4 +563,157 @@ button { -webkit-user-select: none; user-select: none; }
   border: none;
   border-top: 1px solid var(--border);
   margin: 1.5rem 0;
+}
+
+/* ============================================================
+   Anthropic-handoff design system: utility primitives
+   These mirror the prototype in design/Dashboard.html so any new
+   surfaces can lean on them without re-implementing the look.
+   ============================================================ */
+
+.serif { font-family: var(--font-serif); }
+.mono  { font-family: var(--font-mono); }
+.ms    {
+  font-family: "Material Symbols Rounded";
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  user-select: none;
+}
+
+/* Subtle dot grid on the main canvas */
+.canvas-bg {
+  background: var(--background);
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.025) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+.dark .canvas-bg {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0);
+}
+
+/* Card primitive (design-package class — coexists with shadcn Card) */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-brand-lg);
+}
+
+/* Button variants from the design handoff */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 120ms cubic-bezier(.4, 0, .2, 1);
+  font-family: inherit;
+}
+.btn:hover  { border-color: var(--border-strong); transform: translateY(-0.5px); }
+.btn:active { transform: translateY(0); }
+.btn.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-warm);
+}
+.btn.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.btn.ghost   { background: transparent; }
+.btn.ghost:hover  { background: var(--secondary); }
+.btn.subtle  { background: var(--secondary); border-color: transparent; }
+.btn.subtle:hover { background: var(--color-brand-50); color: var(--primary); }
+.btn.icon    { padding: 6px; aspect-ratio: 1; justify-content: center; }
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--secondary);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.chip.ok    { background: color-mix(in srgb, var(--uniro-green) 18%, transparent);   color: var(--uniro-green); }
+.chip.warn  { background: color-mix(in srgb, var(--uniro-warning) 18%, transparent); color: var(--uniro-warning); }
+.chip.bad   { background: color-mix(in srgb, var(--uniro-danger) 18%, transparent);  color: var(--uniro-danger); }
+.chip.info  { background: color-mix(in srgb, var(--uniro-blue) 18%, transparent);    color: var(--uniro-blue); }
+.chip.brand { background: var(--color-brand-50); color: var(--primary); }
+
+/* Pulsing status dot */
+.dot-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--uniro-green);
+  position: relative;
+}
+.dot-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: inherit;
+  opacity: 0.5;
+  animation: dotPulse 2.2s cubic-bezier(.4, 0, .2, 1) infinite;
+}
+.dot-pulse.warn  { background: var(--uniro-warning); }
+.dot-pulse.error { background: var(--uniro-danger); }
+@keyframes dotPulse {
+  0%   { transform: scale(1);   opacity: 0.5; }
+  70%  { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* Provider avatar (mono monogram tile) */
+.pa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Keyboard hints */
+kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 5px;
+  min-width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 var(--border);
+}
+
+/* Sparkline / bar primitives */
+.spark { display: block; }
+.bar       { background: var(--primary); border-radius: 2px 2px 0 0; transition: opacity 120ms; }
+.bar.alt   { background: color-mix(in srgb, var(--uniro-blue) 60%, transparent); }
+.bar:hover { opacity: 0.7; }
+
+/* Live row entrance — used by activity tickers */
+.row-in { animation: rowIn 320ms cubic-bezier(.2, .7, .2, 1); }
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(-6px); background: var(--color-brand-50); }
+  to   { opacity: 1; transform: translateY(0);   background: transparent; }
 }

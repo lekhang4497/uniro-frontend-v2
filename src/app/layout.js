@@ -1,5 +1,6 @@
-import { Inter, Source_Serif_4 } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import "material-symbols/outlined.css";
+import "material-symbols/rounded.css";
 import "./globals.css";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import "@/lib/initCloudSync"; // Auto-initialize cloud sync
@@ -10,15 +11,24 @@ import { RuntimeI18nProvider } from "@/i18n/RuntimeI18nProvider";
 // Hook console immediately at module load time (server-side only, runs once)
 initConsoleLogCapture();
 
-const inter = Inter({
+// Body sans — DM Sans, matching the Anthropic-handoff prototype.
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-dm-sans",
+  display: "swap",
 });
 
-// Display serif for brand name + page headings — Claude/Anthropic-style.
+// Display serif — Source Serif 4. Used for brand mark + h1 headings.
 const serif = Source_Serif_4({
   subsets: ["latin"],
   variable: "--font-serif",
+  display: "swap",
+});
+
+// Mono — JetBrains Mono. For tabular numbers, code, kbd, URL fields.
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -44,7 +54,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className={`${inter.variable} ${serif.variable} font-sans antialiased`}>
+      <body className={`${dmSans.variable} ${serif.variable} ${mono.variable} font-sans antialiased`}>
         <ThemeProvider>
           <RuntimeI18nProvider>
             {children}

@@ -6,41 +6,55 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { APP_CONFIG, UPDATER_CONFIG } from "@/shared/constants/config";
-import { MEDIA_PROVIDER_KINDS } from "@/shared/constants/providers";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import Button from "./Button";
 import { ConfirmModal } from "./Modal";
 import { UniroMark } from "./UniroMark";
 
-// const VISIBLE_MEDIA_KINDS = ["embedding", "image", "imageToText", "tts", "stt", "webSearch", "webFetch", "video", "music"];
-const VISIBLE_MEDIA_KINDS = ["embedding", "image", "tts", "stt"];
-// Combined entry: webSearch + webFetch share one page at /dashboard/media-providers/web
-const COMBINED_WEB_ITEM = { id: "web", label: "Web Fetch & Search", icon: "travel_explore", href: "/dashboard/media-providers/web" };
-
-const navItems = [
-  { href: "/dashboard/endpoint", label: "Endpoint", icon: "api" },
-  { href: "/dashboard/providers", label: "Providers", icon: "dns" },
-  // { href: "/dashboard/basic-chat", label: "Basic Chat", icon: "chat" }, // Hidden
-  { href: "/dashboard/combos", label: "Combos", icon: "layers" },
-  { href: "/dashboard/usage", label: "Usage", icon: "bar_chart" },
-  { href: "/dashboard/quota", label: "Quota Tracker", icon: "data_usage" },
-  { href: "/dashboard/mitm", label: "MITM", icon: "security" },
-  { href: "/dashboard/cli-tools", label: "CLI Tools", icon: "terminal" },
-];
-
-const debugItems = [
-  { href: "/dashboard/console-log", label: "Console Log", icon: "terminal" },
-  { href: "/dashboard/translator", label: "Translator", icon: "translate" },
-];
-
-const systemItems = [
-  { href: "/dashboard/proxy-pools", label: "Proxy Pools", icon: "lan" },
-  { href: "/dashboard/skills", label: "Skills", icon: "extension" },
+// Sidebar nav grouped per the Anthropic-handoff design.
+// Each item maps to an existing Next.js route — no new routes added.
+const NAV_GROUPS = [
+  {
+    label: "Endpoint",
+    items: [
+      { href: "/dashboard/endpoint",  label: "Endpoint",  icon: "hub" },
+      { href: "/dashboard/providers", label: "Providers", icon: "extension" },
+      { href: "/dashboard/combos",    label: "Combos",    icon: "layers" },
+      { href: "/dashboard/cli-tools", label: "CLI Tools", icon: "terminal" },
+    ],
+  },
+  {
+    label: "Beyond text",
+    items: [
+      { href: "/dashboard/media-providers/embedding", label: "Embeddings",   icon: "data_array" },
+      { href: "/dashboard/media-providers/image",     label: "Images",       icon: "image" },
+      { href: "/dashboard/media-providers/tts",       label: "Voice TTS",    icon: "record_voice_over" },
+      { href: "/dashboard/media-providers/stt",       label: "Voice STT",    icon: "mic" },
+      { href: "/dashboard/media-providers/web",       label: "Web & Search", icon: "travel_explore" },
+    ],
+  },
+  {
+    label: "Observability",
+    items: [
+      { href: "/dashboard/usage",       label: "Usage",       icon: "monitoring" },
+      { href: "/dashboard/quota",       label: "Quota",       icon: "data_usage" },
+      { href: "/dashboard/mitm",        label: "MITM Proxy",  icon: "lan", dot: "ok" },
+      { href: "/dashboard/console-log", label: "Console",     icon: "monitor" },
+    ],
+  },
+  {
+    label: "Workspace",
+    items: [
+      { href: "/dashboard/proxy-pools", label: "Proxy Pools",  icon: "device_hub" },
+      { href: "/dashboard/skills",      label: "Agent Skills", icon: "extension" },
+      { href: "/dashboard/translator",  label: "Translator",   icon: "translate", requiresFlag: "enableTranslator" },
+      { href: "/dashboard/profile",     label: "Settings",     icon: "settings" },
+    ],
+  },
 ];
 
 export default function Sidebar({ onClose }) {
   const pathname = usePathname();
-  const [mediaOpen, setMediaOpen] = useState(false);
   const [showShutdownModal, setShowShutdownModal] = useState(false);
   const [isShuttingDown, setIsShuttingDown] = useState(false);
   const [isDisconnected, setIsDisconnected] = useState(false);
@@ -129,214 +143,127 @@ export default function Sidebar({ onClose }) {
           <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
         </div>
 
-        {/* Logo — Anthropic-style understated serif wordmark */}
-        <div className="px-6 py-4 flex flex-col gap-2">
-          <Link href="/dashboard" className="flex items-center gap-2.5 group">
-            <UniroMark size={22} className="text-primary" />
-            <div className="flex items-baseline gap-1.5">
-              <h1 className="brand-mark text-2xl text-foreground">
+        {/* Brand — gradient tile + serif wordmark + tagline */}
+        <div className="px-4 py-3 border-b border-border flex items-center gap-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2.5 flex-1 min-w-0 group">
+            <span
+              className="grid place-items-center shrink-0 w-8 h-8 rounded-[9px] text-white"
+              style={{
+                background: "linear-gradient(135deg, var(--primary) 0%, var(--color-brand-700) 100%)",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)",
+              }}
+            >
+              <UniroMark size={18} className="text-white" />
+            </span>
+            <div className="flex flex-col leading-none min-w-0">
+              <span className="brand-mark text-[17px] font-bold tracking-[-0.02em] text-foreground truncate">
                 {APP_CONFIG.name}
-              </h1>
-              <span className="text-[11px] text-muted-foreground">v{APP_CONFIG.version}</span>
+              </span>
+              <span className="text-[10.5px] text-muted-foreground mt-1">your AI endpoint</span>
             </div>
           </Link>
-          {updateInfo && (
-            <div className="flex flex-col gap-1.5 rounded p-1 -m-1">
-              <span className="text-xs font-semibold text-green-600 dark:text-amber-500">
-                ↑ New version available: v{updateInfo.latestVersion}
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowUpdateModal(true)}
-                  className="px-2 py-1 rounded bg-green-600 hover:bg-green-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white text-[11px] font-semibold transition-colors cursor-pointer"
-                >
-                  Update now
-                </button>
-                <button
-                  onClick={() => copy(INSTALL_CMD)}
-                  title="Copy install command"
-                  className="flex-1 text-left hover:opacity-80 transition-opacity cursor-pointer min-w-0"
-                >
-                  <code className="block text-[10px] text-green-600/80 dark:text-amber-400/70 font-mono truncate">
-                    {copied ? "✓ copied!" : INSTALL_CMD}
-                  </code>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4 py-2 space-y-0.5 overflow-y-auto custom-scrollbar">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className={cn(
-                "flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
-                isActive(item.href)
-                  ? "bg-primary/10 text-primary"
-                  : "text-text-muted hover:bg-surface-2 hover:text-text-main"
-              )}
-            >
-              <span
-                className={cn(
-                  "material-symbols-outlined text-[18px]",
-                  isActive(item.href) ? "fill-1" : "group-hover:text-primary transition-colors"
-                )}
+        {updateInfo && (
+          <div className="mx-4 mt-3 mb-1 flex flex-col gap-1.5 rounded-lg border border-[var(--uniro-warning)]/40 bg-[color-mix(in_srgb,var(--uniro-warning)_10%,transparent)] p-2.5">
+            <span className="text-xs font-semibold text-[var(--uniro-warning)]">
+              ↑ New version available: v{updateInfo.latestVersion}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowUpdateModal(true)}
+                className="px-2 py-1 rounded bg-[var(--uniro-warning)] hover:opacity-90 text-white text-[11px] font-semibold transition-opacity cursor-pointer"
               >
-                {item.icon}
-              </span>
-              <span className="text-[13px] font-medium">{item.label}</span>
-            </Link>
-          ))}
-
-          {/* System section */}
-          <div className="pt-3 mt-2 space-y-0.5">
-            <p className="px-4 text-xs font-semibold text-text-muted/60 uppercase tracking-wider mb-2">
-              System
-            </p>
-
-            {/* Media Providers accordion */}
-            <button
-              onClick={() => setMediaOpen((v) => !v)}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
-                pathname.startsWith("/dashboard/media-providers")
-                  ? "bg-primary/10 text-primary"
-                  : "text-text-muted hover:bg-surface-2 hover:text-text-main"
-              )}
-            >
-              <span className="material-symbols-outlined text-[18px]">perm_media</span>
-              <span className="text-[13px] font-medium flex-1 text-left">Media Providers</span>
-              <span className="material-symbols-outlined text-[14px] transition-transform" style={{ transform: mediaOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-                expand_more
-              </span>
-            </button>
-            {mediaOpen && (
-              <div className="pl-4">
-                {MEDIA_PROVIDER_KINDS.filter((k) => VISIBLE_MEDIA_KINDS.includes(k.id)).map((kind) => (
-                  <Link
-                    key={kind.id}
-                    href={`/dashboard/media-providers/${kind.id}`}
-                    onClick={onClose}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-1 rounded-lg transition-all group",
-                      pathname.startsWith(`/dashboard/media-providers/${kind.id}`)
-                        ? "bg-primary/10 text-primary"
-                        : "text-text-muted hover:bg-surface-2 hover:text-text-main"
-                    )}
-                  >
-                    <span className="material-symbols-outlined text-[16px]">{kind.icon}</span>
-                    <span className="text-sm">{kind.label}</span>
-                  </Link>
-                ))}
-                <Link
-                  key={COMBINED_WEB_ITEM.id}
-                  href={COMBINED_WEB_ITEM.href}
-                  onClick={onClose}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-1 rounded-lg transition-all group",
-                    pathname.startsWith(COMBINED_WEB_ITEM.href)
-                      ? "bg-primary/10 text-primary"
-                      : "text-text-muted hover:bg-surface-2 hover:text-text-main"
-                  )}
-                >
-                  <span className="material-symbols-outlined text-[16px]">{COMBINED_WEB_ITEM.icon}</span>
-                  <span className="text-sm">{COMBINED_WEB_ITEM.label}</span>
-                </Link>
-              </div>
-            )}
-
-            {systemItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
-                  isActive(item.href)
-                    ? "bg-primary/10 text-primary"
-                    : "text-text-muted hover:bg-surface-2 hover:text-text-main"
-                )}
+                Update now
+              </button>
+              <button
+                onClick={() => copy(INSTALL_CMD)}
+                title="Copy install command"
+                className="flex-1 text-left hover:opacity-80 transition-opacity cursor-pointer min-w-0"
               >
-                <span
-                  className={cn(
-                    "material-symbols-outlined text-[18px]",
-                    isActive(item.href) ? "fill-1" : "group-hover:text-primary transition-colors"
-                  )}
-                >
-                  {item.icon}
-                </span>
-                <span className="text-[13px] font-medium">{item.label}</span>
-              </Link>
-            ))}
-
-            {/* Debug items (inside System section, before Settings) */}
-            {debugItems.map((item) => {
-              const show = item.href !== "/dashboard/translator" || enableTranslator;
-              return show ? (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
-                    isActive(item.href)
-                      ? "bg-primary/10 text-primary"
-                      : "text-text-muted hover:bg-surface-2 hover:text-text-main"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "material-symbols-outlined text-[18px]",
-                      isActive(item.href) ? "fill-1" : "group-hover:text-primary transition-colors"
-                    )}
-                  >
-                    {item.icon}
-                  </span>
-                  <span className="text-[13px] font-medium">{item.label}</span>
-                </Link>
-              ) : null;
-            })}
-
-            {/* Settings */}
-            <Link
-              href="/dashboard/profile"
-              onClick={onClose}
-              className={cn(
-                "flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
-                isActive("/dashboard/profile")
-                  ? "bg-primary/10 text-primary"
-                  : "text-text-muted hover:bg-surface-2 hover:text-text-main"
-              )}
-            >
-              <span
-                className={cn(
-                  "material-symbols-outlined text-[18px]",
-                  isActive("/dashboard/profile") ? "fill-1" : "group-hover:text-primary transition-colors"
-                )}
-              >
-                settings
-              </span>
-              <span className="text-[13px] font-medium">Settings</span>
-            </Link>
+                <code className="block text-[10px] text-[var(--uniro-warning)]/80 mono truncate">
+                  {copied ? "✓ copied!" : INSTALL_CMD}
+                </code>
+              </button>
+            </div>
           </div>
+        )}
+
+        {/* Navigation — grouped per the design handoff. Active items get
+            the brand-50 wash, primary text, and a 3px left indicator bar. */}
+        <nav className="flex-1 px-2 py-2 overflow-y-auto custom-scrollbar">
+          {NAV_GROUPS.map((group) => {
+            // Hide items behind a feature flag (e.g. translator).
+            const visibleItems = group.items.filter((it) =>
+              !it.requiresFlag || (it.requiresFlag === "enableTranslator" ? enableTranslator : false)
+            );
+            if (visibleItems.length === 0) return null;
+            return (
+              <div key={group.label} className="mb-3.5">
+                <div className="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-subtle">
+                  {group.label}
+                </div>
+                {visibleItems.map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onClose}
+                      className={cn(
+                        "relative flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13px] transition-colors mb-px",
+                        active
+                          ? "bg-[var(--color-brand-50)] text-primary font-semibold"
+                          : "text-foreground font-medium hover:bg-secondary"
+                      )}
+                    >
+                      {active && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary"
+                        />
+                      )}
+                      <span
+                        className={cn(
+                          "material-symbols-outlined text-[18px] shrink-0",
+                          active ? "" : "text-muted-foreground"
+                        )}
+                      >
+                        {item.icon}
+                      </span>
+                      <span className="flex-1 truncate text-left">{item.label}</span>
+                      {item.dot === "ok" && (
+                        <span className="dot-pulse" style={{ width: 6, height: 6 }} aria-hidden="true" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          })}
         </nav>
 
-        {/* Footer section */}
-        <div className="p-3 border-t border-border-subtle">
-          {/* Shutdown button */}
-          <Button
-            variant="outline"
-            fullWidth
-            icon="power_settings_new"
+        {/* Footer — server status card + shutdown */}
+        <div
+          className="px-4 py-3 border-t border-border space-y-3"
+          style={{ background: "var(--color-bg-alt)" }}
+        >
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="dot-pulse" aria-hidden="true" />
+              <span className="text-[11px] font-semibold text-[var(--uniro-green)]">Endpoint online</span>
+              <span className="ml-auto text-[10px] text-subtle">v{APP_CONFIG.version}</span>
+            </div>
+            <div className="mono text-[10.5px] text-muted-foreground truncate">localhost:20128/v1</div>
+          </div>
+          <button
+            type="button"
             onClick={() => setShowShutdownModal(true)}
-            className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300"
+            className="w-full inline-flex items-center justify-center gap-1.5 h-7 rounded-md text-[11px] font-medium text-muted-foreground hover:text-[var(--uniro-danger)] hover:bg-[color-mix(in_srgb,var(--uniro-danger)_10%,transparent)] transition-colors"
           >
+            <span className="material-symbols-outlined text-[14px]">power_settings_new</span>
             Shutdown
-          </Button>
+          </button>
         </div>
       </aside>
 
