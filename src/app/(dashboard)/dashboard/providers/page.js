@@ -302,12 +302,25 @@ export default function ProvidersPage() {
 
   return (
     <div className="flex min-w-0 flex-col gap-6 px-1 sm:px-0">
+      {/* Page lede — Anthropic-handoff pattern */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-[28px] mb-1">Providers</h1>
+          <p className="text-sm text-muted-foreground">Connect upstream models, OAuth flows, API keys, and compatible endpoints.</p>
+        </div>
+        {connections.length > 0 && (
+          <span className="chip ok shrink-0 self-start">
+            {connections.filter((c) => c.isActive !== false).length} connected
+          </span>
+        )}
+      </div>
+
       {!hasAnyResult && (
         <div className="text-center py-8 border border-dashed border-border rounded-xl">
-          <span className="material-symbols-outlined text-[32px] text-text-muted mb-2">
+          <span className="material-symbols-outlined text-[32px] text-muted-foreground mb-2">
             search_off
           </span>
-          <p className="text-text-muted text-sm">No providers match your search</p>
+          <p className="text-muted-foreground text-sm">No providers match your search</p>
         </div>
       )}
 

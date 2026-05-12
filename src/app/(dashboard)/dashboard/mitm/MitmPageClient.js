@@ -76,6 +76,28 @@ export default function MitmPageClient() {
 
   return (
     <div className="flex w-full flex-col gap-6">
+      {/* Page banner — Anthropic-handoff status header */}
+      <header className="card flex flex-wrap items-center gap-5 px-6 py-4">
+        <div className="flex items-center gap-3">
+          <span
+            className={`dot-pulse ${mitmStatus.running ? "" : "error"}`}
+            aria-hidden="true"
+          />
+          <div>
+            <h1 className="brand-mark text-base mb-0.5">
+              MITM proxy {mitmStatus.running ? "intercepting" : "paused"}
+            </h1>
+            <div className="text-xs text-muted-foreground">
+              Port 7878 · {mitmTools.length} CLI tools routed · CA {mitmStatus.certExists ? "installed" : "not installed"}
+            </div>
+          </div>
+        </div>
+        <div className="flex-1" />
+        <span className={`chip ${mitmStatus.running ? "ok" : "bad"} text-[11px]`}>
+          {mitmStatus.running ? "active" : "offline"}
+        </span>
+      </header>
+
       {/* MITM Server Card */}
       <MitmServerCard
         apiKeys={apiKeys}

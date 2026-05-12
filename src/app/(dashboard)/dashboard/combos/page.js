@@ -127,17 +127,22 @@ export default function CombosPage() {
 
   return (
     <div className="flex min-w-0 flex-col gap-6 px-1 sm:px-0">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold">Combos</h1>
-          <p className="text-sm text-text-muted mt-1">
-            Create model combos with fallback support
+      {/* Header — Anthropic-handoff lede pattern */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 max-w-2xl">
+          <h1 className="text-[28px] mb-1">Combos</h1>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Chain providers together. Uniro routes by weight; if one fails or hits its quota, the next takes over automatically.
           </p>
         </div>
-        <Button icon="add" onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
-          Create Combo
-        </Button>
+        <div className="flex items-center gap-3 shrink-0">
+          {combos.length > 0 && (
+            <span className="chip">{combos.length} {combos.length === 1 ? "combo" : "combos"}</span>
+          )}
+          <Button icon="add" onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
+            New combo
+          </Button>
+        </div>
       </div>
 
       {/* Combos List */}
@@ -198,23 +203,34 @@ function ComboCard({ combo, copied, onCopy, onEdit, onDelete, roundRobinEnabled,
     <Card padding="sm" className="group">
       <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
-          <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-primary text-[18px]">layers</span>
+          <div
+            className="size-9 rounded-[9px] flex items-center justify-center shrink-0"
+            style={{ background: "var(--color-brand-50)" }}
+          >
+            <span className="material-symbols-outlined text-primary text-[20px]">layers</span>
           </div>
           <div className="min-w-0 flex-1">
-            <code className="block truncate font-mono text-sm font-medium">{combo.name}</code>
-            <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1">
+            <div className="flex items-center gap-2 mb-1">
+              <code className="truncate mono text-sm font-semibold">{combo.name}</code>
+              {combo.models.length > 0 && (
+                <span className="chip ok text-[10px]">
+                  <span className="dot-pulse" style={{ width: 5, height: 5 }} aria-hidden="true" />
+                  active
+                </span>
+              )}
+            </div>
+            <div className="flex min-w-0 flex-wrap items-center gap-1">
               {combo.models.length === 0 ? (
-                <span className="text-xs text-text-muted italic">No models</span>
+                <span className="text-xs text-muted-foreground italic">No models</span>
               ) : (
                 combo.models.slice(0, 3).map((model, index) => (
-                  <code key={index} className="max-w-full truncate rounded bg-black/5 px-1.5 py-0.5 font-mono text-[10px] text-text-muted dark:bg-white/5 sm:max-w-[220px]">
+                  <code key={index} className="max-w-full truncate rounded bg-secondary px-1.5 py-0.5 mono text-[10px] text-muted-foreground sm:max-w-[220px]">
                     {model}
                   </code>
                 ))
               )}
               {combo.models.length > 3 && (
-                <span className="text-[10px] text-text-muted">+{combo.models.length - 3} more</span>
+                <span className="text-[10px] text-muted-foreground">+{combo.models.length - 3} more</span>
               )}
             </div>
           </div>

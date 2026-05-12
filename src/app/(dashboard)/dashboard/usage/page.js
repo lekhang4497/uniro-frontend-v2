@@ -43,8 +43,14 @@ function UsageContent() {
 
   return (
     <div className="flex min-w-0 flex-col gap-6 px-1 sm:px-0">
-      {/* Tabs + period selector on same row */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      {/* Page lede + filter bar — Anthropic-handoff pattern */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-[28px] mb-1">Usage</h1>
+          <p className="text-sm text-muted-foreground">Requests, tokens, latency, and cost across providers and tools.</p>
+        </div>
+      </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SegmentedControl
           options={[
             { value: "overview", label: "Overview" },
