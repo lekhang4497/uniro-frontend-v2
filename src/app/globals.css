@@ -275,6 +275,7 @@ select { color-scheme: light; }
 
   /* Font */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
+  --font-serif: var(--font-serif, 'Source Serif 4'), 'Tiempos Headline', Charter, 'Georgia', 'Times New Roman', Times, serif;
 }
 
 /* ============================================================
@@ -297,6 +298,23 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Anthropic/Claude-style headline serif. Applied to top-level page
+   headings (h1) and the brand name. Component-internal h2/h3 inside
+   cards keeps sans-serif (they're labels, not display type). */
+h1,
+.font-serif,
+.brand-mark,
+.page-title {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.page-title {
+  font-size: clamp(2rem, 1.6rem + 1.2vw, 2.75rem);
+  line-height: 1.1;
 }
 
 /* Selection — Uniro orange tint */

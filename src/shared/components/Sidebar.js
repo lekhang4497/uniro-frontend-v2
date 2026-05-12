@@ -129,17 +129,15 @@ export default function Sidebar({ onClose }) {
           <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
         </div>
 
-        {/* Logo */}
+        {/* Logo — Anthropic-style understated serif wordmark */}
         <div className="px-6 py-4 flex flex-col gap-2">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="flex items-center justify-center size-9 rounded-[10px] bg-gradient-to-br from-brand-500 to-brand-700 shadow-[var(--shadow-warm)]">
-              <UniroMark size={20} className="text-white" />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-lg font-semibold tracking-tight text-text-main">
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
+            <UniroMark size={22} className="text-primary" />
+            <div className="flex items-baseline gap-1.5">
+              <h1 className="brand-mark text-2xl text-foreground">
                 {APP_CONFIG.name}
               </h1>
-              <span className="text-xs text-text-muted">v{APP_CONFIG.version}</span>
+              <span className="text-[11px] text-muted-foreground">v{APP_CONFIG.version}</span>
             </div>
           </Link>
           {updateInfo && (
