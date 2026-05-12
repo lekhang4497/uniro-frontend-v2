@@ -93,9 +93,19 @@ export default function DashboardLayout({ children }) {
       {/* Main content — uses the design-handoff canvas dot grid */}
       <main className="canvas-bg flex flex-col flex-1 h-full min-w-0 relative transition-colors duration-300 isolate overflow-hidden">
         <Header key={pathname} onMenuClick={() => setSidebarOpen(true)} />
-        <div className={`flex-1 overflow-y-auto custom-scrollbar ${pathname === "/dashboard/basic-chat" ? "" : "p-6 lg:p-10"} ${pathname === "/dashboard/basic-chat" ? "flex flex-col overflow-hidden" : ""}`}>
-          <div className={`${pathname === "/dashboard/basic-chat" ? "flex-1 w-full h-full flex flex-col" : "max-w-7xl mx-auto"}`}>{children}</div>
-        </div>
+        {(() => {
+          // Full-bleed routes: the chat UI, the router builder, and the legacy
+          // basic-chat — all want the entire viewport with no outer padding.
+          const fullBleed =
+            pathname === "/dashboard/basic-chat" ||
+            pathname === "/dashboard/chat" ||
+            pathname === "/dashboard/router-builder";
+          return (
+            <div className={`flex-1 overflow-y-auto custom-scrollbar ${fullBleed ? "flex flex-col overflow-hidden" : "p-6 lg:p-10"}`}>
+              <div className={fullBleed ? "flex-1 w-full h-full flex flex-col" : "max-w-7xl mx-auto"}>{children}</div>
+            </div>
+          );
+        })()}
       </main>
     </div>
   );

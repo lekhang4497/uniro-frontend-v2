@@ -27,7 +27,6 @@ export default function Modal({
   size = "md",
   closeOnOverlay = true,
   showCloseButton = true,
-  showTrafficLights = true,
   className,
 }) {
   return (
@@ -42,16 +41,9 @@ export default function Modal({
         onInteractOutside={closeOnOverlay ? undefined : (e) => e.preventDefault()}
         onPointerDownOutside={closeOnOverlay ? undefined : (e) => e.preventDefault()}
       >
-        {(title || showTrafficLights) && (
-          <DialogHeader className="flex flex-row items-center gap-2 p-3 border-b border-border space-y-0">
-            {showTrafficLights && (
-              <div className="flex items-center gap-2 ml-1">
-                <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-                <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-                <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
-              </div>
-            )}
-            {title && <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>}
+        {title && (
+          <DialogHeader className="flex flex-row items-center gap-2 p-4 border-b border-border space-y-0">
+            <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
           </DialogHeader>
         )}
 

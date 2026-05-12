@@ -17,10 +17,12 @@ const NAV_GROUPS = [
   {
     label: "Endpoint",
     items: [
-      { href: "/dashboard/endpoint",  label: "Endpoint",  icon: "hub" },
-      { href: "/dashboard/providers", label: "Providers", icon: "extension" },
-      { href: "/dashboard/combos",    label: "Combos",    icon: "layers" },
-      { href: "/dashboard/cli-tools", label: "CLI Tools", icon: "terminal" },
+      { href: "/dashboard/endpoint",       label: "Endpoint",       icon: "hub" },
+      { href: "/dashboard/providers",      label: "Providers",      icon: "extension" },
+      { href: "/dashboard/combos",         label: "Combos",         icon: "layers" },
+      { href: "/dashboard/router-builder", label: "Router builder", icon: "schema" },
+      { href: "/dashboard/cli-tools",      label: "CLI Tools",      icon: "terminal" },
+      { href: "/dashboard/chat",           label: "Chat",           icon: "forum" },
     ],
   },
   {
@@ -136,25 +138,10 @@ export default function Sidebar({ onClose }) {
   return (
     <>
       <aside className="flex w-72 flex-col border-r border-border-subtle bg-vibrancy backdrop-blur-xl transition-colors duration-300 min-h-full">
-        {/* Traffic lights */}
-        <div className="flex items-center gap-2 px-6 pt-5 pb-2">
-          <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-          <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-          <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
-        </div>
-
-        {/* Brand — gradient tile + serif wordmark + tagline */}
-        <div className="px-4 py-3 border-b border-border flex items-center gap-2.5">
+        {/* Brand — bare Uniro mark + serif wordmark + tagline */}
+        <div className="px-4 py-4 border-b border-border flex items-center gap-2.5">
           <Link href="/dashboard" className="flex items-center gap-2.5 flex-1 min-w-0 group">
-            <span
-              className="grid place-items-center shrink-0 w-8 h-8 rounded-[9px] text-white"
-              style={{
-                background: "linear-gradient(135deg, var(--primary) 0%, var(--color-brand-700) 100%)",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)",
-              }}
-            >
-              <UniroMark size={18} className="text-white" />
-            </span>
+            <UniroMark size={28} className="text-primary shrink-0" />
             <div className="flex flex-col leading-none min-w-0">
               <span className="brand-mark text-[17px] font-bold tracking-[-0.02em] text-foreground truncate">
                 {APP_CONFIG.name}
