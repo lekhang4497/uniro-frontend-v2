@@ -4,7 +4,7 @@
   "description": "Uniro web dashboard",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack --port 20128",
+    "dev": "next dev --webpack --port 20129",
     "build": "NODE_ENV=production next build --webpack",
     "start": "NODE_ENV=production next start",
     "dev:bun": "bun --bun next dev --webpack --port 20128",
@@ -38,6 +38,8 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.105.4",
     "@xyflow/react": "^12.10.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",

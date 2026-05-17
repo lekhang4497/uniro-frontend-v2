@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { getSettings } from "@/lib/localDb";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
+import { updateSupabaseSession } from "@/lib/supabase/middleware";
+import { isConnectedMode } from "@/lib/supabase/config";
 
 const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "uniro-default-secret-change-me"
@@ -106,10 +108,26 @@ export async function proxy(request) {
       // On error, keep defaults (require login, block tunnel)
     }
 
-    // If login not required, allow through
-    if (!requireLogin) return NextResponse.next();
+    // Connected mode: refresh Supabase session cookies and accept its user as
+    // a valid identity. Falls through to JWT path if no Supabase user.
+    if (isConnectedMode()) {
+      const { response, user } = await updateSupabaseSession(request);
+      if (user) return response;
+      // No Supabase session — try local JWT below; if that also fails, send to
+      // /cloud/login because connected mode disables the password-only login.
+      if (!requireLogin) return response;
+      const localToken = request.cookies.get("auth_token")?.value;
+      if (localToken) {
+        try {
+          await jwtVerify(localToken, SECRET);
+          return response;
+        } catch {}
+      }
+      return NextResponse.redirect(new URL("/cloud/login", request.url));
+    }
 
-    // Verify JWT token
+    // Self-hosted mode (legacy path).
+    if (!requireLogin) return NextResponse.next();
     const token = request.cookies.get("auth_token")?.value;
     if (token) {
       try {
@@ -121,6 +139,22 @@ export async function proxy(request) {
     }
 
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Admin routes: require a Supabase session (connected mode only). The
+  // is_admin() check itself happens in the /admin/layout.js server component
+  // because middleware can't issue a DB call cheaply.
+  if (pathname.startsWith("/admin")) {
+    if (!isConnectedMode()) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    const { response, user } = await updateSupabaseSession(request);
+    if (!user) {
+      const url = new URL("/cloud/login", request.url);
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    return response;
   }
 
   // Redirect / to /dashboard if logged in, or /dashboard if it's the root

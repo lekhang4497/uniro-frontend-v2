@@ -4,6 +4,7 @@ export const config = {
   matcher: [
     "/",
     "/dashboard/:path*",
+    "/admin/:path*",
     "/api/shutdown",
     "/api/settings/:path*",
     "/api/keys",
