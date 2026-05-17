@@ -1,0 +1,28 @@
+"use client";
+
+import type { ReactNode } from "react";
+import ThemeToggle from "../ThemeToggle";
+
+export interface AuthLayoutProps {
+  children: ReactNode;
+}
+
+export default function AuthLayout({ children }: AuthLayoutProps) {
+  return (
+    <div className="min-h-screen flex flex-col relative bg-[var(--bg-primary)] transition-colors duration-500 overflow-x-hidden selection:bg-[var(--accent-blue)]/20 selection:text-[var(--accent-blue)]">
+      {/* Background effects */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--accent-blue)]/5 rounded-full blur-[100px] pointer-events-none z-0" />
+      <div className="fixed bottom-0 right-0 w-[600px] h-[600px] bg-[var(--accent-orange)]/10 rounded-full blur-[120px] pointer-events-none z-0 translate-y-1/3 translate-x-1/3" />
+
+      {/* Theme toggle */}
+      <div className="absolute top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
+
+      {/* Content */}
+      <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 z-10 w-full h-full">
+        {children}
+      </main>
+    </div>
+  );
+}
