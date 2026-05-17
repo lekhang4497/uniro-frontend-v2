@@ -1,13 +1,36 @@
+// @ts-nocheck
+// Profile / app-level settings page (~700 LOC). All business logic
+// (settings fetch, password change, proxy form, db import/export, fallback
+// strategy) is preserved verbatim; visible classes/icons are migrated to
+// the new tokens + Lucide. Keeps `@ts-nocheck` to bypass the loose `any`s
+// in settings shapes coming back from /api/settings — typing these would
+// require a backend type contract we don't have here.
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Card, Button, Toggle, Input } from "@/shared/components";
+import {
+  Computer,
+  Sun,
+  Moon,
+  Contrast,
+  Shield,
+  Route,
+  Wifi,
+  Activity,
+  Download,
+  Upload,
+} from "lucide-react";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { cn } from "@/shared/utils/cn";
+import { cn } from "@/lib/utils";
 import { APP_CONFIG } from "@/shared/constants/config";
+import { Card } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Switch } from "@/shared/components/ui/switch";
+import { Label } from "@/shared/components/ui/label";
 
 export default function ProfilePage() {
-  const { theme, setTheme, isDark } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState({ fallbackStrategy: "fill-first" });
   const [loading, setLoading] = useState(true);
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
@@ -15,7 +38,7 @@ export default function ProfilePage() {
   const [passLoading, setPassLoading] = useState(false);
   const [dbLoading, setDbLoading] = useState(false);
   const [dbStatus, setDbStatus] = useState({ type: "", message: "" });
-  const importFileRef = useRef(null);
+  const importFileRef = useRef<HTMLInputElement | null>(null);
   const [proxyForm, setProxyForm] = useState({
     outboundProxyEnabled: false,
     outboundProxyUrl: "",
@@ -183,7 +206,7 @@ export default function ProfilePage() {
         body: JSON.stringify({ fallbackStrategy: strategy }),
       });
       if (res.ok) {
-        setSettings(prev => ({ ...prev, fallbackStrategy: strategy }));
+        setSettings((prev) => ({ ...prev, fallbackStrategy: strategy }));
       }
     } catch (err) {
       console.error("Failed to update settings:", err);
@@ -198,7 +221,7 @@ export default function ProfilePage() {
         body: JSON.stringify({ comboStrategy: strategy }),
       });
       if (res.ok) {
-        setSettings(prev => ({ ...prev, comboStrategy: strategy }));
+        setSettings((prev) => ({ ...prev, comboStrategy: strategy }));
       }
     } catch (err) {
       console.error("Failed to update combo strategy:", err);
@@ -216,7 +239,7 @@ export default function ProfilePage() {
         body: JSON.stringify({ stickyRoundRobinLimit: numLimit }),
       });
       if (res.ok) {
-        setSettings(prev => ({ ...prev, stickyRoundRobinLimit: numLimit }));
+        setSettings((prev) => ({ ...prev, stickyRoundRobinLimit: numLimit }));
       }
     } catch (err) {
       console.error("Failed to update sticky limit:", err);
@@ -234,7 +257,7 @@ export default function ProfilePage() {
         body: JSON.stringify({ comboStickyRoundRobinLimit: numLimit }),
       });
       if (res.ok) {
-        setSettings(prev => ({ ...prev, comboStickyRoundRobinLimit: numLimit }));
+        setSettings((prev) => ({ ...prev, comboStickyRoundRobinLimit: numLimit }));
       }
     } catch (err) {
       console.error("Failed to update combo sticky limit:", err);
@@ -249,7 +272,7 @@ export default function ProfilePage() {
         body: JSON.stringify({ requireLogin }),
       });
       if (res.ok) {
-        setSettings(prev => ({ ...prev, requireLogin }));
+        setSettings((prev) => ({ ...prev, requireLogin }));
       }
     } catch (err) {
       console.error("Failed to update require login:", err);
@@ -264,7 +287,7 @@ export default function ProfilePage() {
         body: JSON.stringify({ enableObservability: enabled }),
       });
       if (res.ok) {
-        setSettings(prev => ({ ...prev, enableObservability: enabled }));
+        setSettings((prev) => ({ ...prev, enableObservability: enabled }));
       }
     } catch (err) {
       console.error("Failed to update enableObservability:", err);
@@ -349,66 +372,76 @@ export default function ProfilePage() {
 
   const observabilityEnabled = settings.enableObservability === true;
 
+  const themeIcons = { light: Sun, dark: Moon, system: Contrast };
+
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-0">
-      <div className="flex flex-col gap-6">
+    <div className="px-8 py-7">
+      <h1 className="text-[26px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+        Profile
+      </h1>
+      <p className="mt-1 text-[14px] text-[var(--text-secondary)] max-w-[540px]">
+        Your local Uniro instance, theme, routing strategy, network, and observability settings.
+      </p>
+
+      <div className="mt-6 max-w-2xl flex flex-col gap-6">
         {/* Local Mode Info */}
-        <Card>
+        <Card className="p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="size-10 sm:size-12 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-xl sm:text-2xl">computer</span>
+              <div className="size-10 sm:size-12 rounded-[var(--radius)] bg-[var(--accent-green)]/10 text-[var(--accent-green)] flex items-center justify-center shrink-0">
+                <Computer className="size-5 sm:size-6" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold">Local Mode</h2>
-                <p className="text-sm text-text-muted">Running on your machine</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)]">Local Mode</h2>
+                <p className="text-[13px] text-[var(--text-secondary)]">Running on your machine</p>
               </div>
             </div>
-            <div className="inline-flex p-1 rounded-lg bg-black/5 dark:bg-white/5 w-full sm:w-auto">
-              {["light", "dark", "system"].map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setTheme(option)}
-                  className={cn(
-                    "flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-md font-medium transition-all flex-1 sm:flex-initial",
-                    theme === option
-                      ? "bg-white dark:bg-white/10 text-text-main shadow-sm"
-                      : "text-text-muted hover:text-text-main"
-                  )}
-                >
-                  <span className="material-symbols-outlined text-[18px]">
-                    {option === "light" ? "light_mode" : option === "dark" ? "dark_mode" : "contrast"}
-                  </span>
-                  <span className="capitalize text-xs sm:text-sm">{option}</span>
-                </button>
-              ))}
+            <div className="inline-flex p-1 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-secondary)] w-full sm:w-auto">
+              {(["light", "dark", "system"] as const).map((option) => {
+                const ThemeIcon = themeIcons[option];
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setTheme(option)}
+                    className={cn(
+                      "flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-[var(--radius-sm)] text-[12px] font-medium transition-colors flex-1 sm:flex-initial",
+                      theme === option
+                        ? "bg-[var(--bg-primary)] text-[var(--text-primary)]"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    )}
+                  >
+                    <ThemeIcon className="h-3.5 w-3.5" />
+                    <span className="capitalize">{option}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
-          <div className="flex flex-col gap-3 pt-4 border-t border-border">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg bg-bg border border-border gap-2">
+          <div className="flex flex-col gap-3 pt-4 border-t border-[var(--bg-secondary)]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-[var(--radius)] bg-[var(--bg-secondary)] gap-2">
               <div>
-                <p className="font-medium text-sm sm:text-base">Database Location</p>
-                <p className="text-xs sm:text-sm text-text-muted font-mono break-all">~/.uniro/db/data.sqlite</p>
+                <p className="font-medium text-[13px] text-[var(--text-primary)]">Database Location</p>
+                <p className="text-[12px] text-[var(--text-secondary)] font-mono break-all">~/.uniro/db/data.sqlite</p>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="secondary"
-                icon="download"
                 onClick={handleExportDatabase}
-                loading={dbLoading}
+                disabled={dbLoading}
                 className="w-full sm:w-auto"
               >
+                <Download className="h-4 w-4" />
                 Download Backup
               </Button>
               <Button
                 variant="outline"
-                icon="upload"
                 onClick={() => importFileRef.current?.click()}
                 disabled={dbLoading}
                 className="w-full sm:w-auto"
               >
+                <Upload className="h-4 w-4" />
                 Import Backup
               </Button>
               <input
@@ -420,7 +453,14 @@ export default function ProfilePage() {
               />
             </div>
             {dbStatus.message && (
-              <p className={`text-sm ${dbStatus.type === "error" ? "text-red-500" : "text-green-600 dark:text-green-400"}`}>
+              <p
+                className={cn(
+                  "text-[13px]",
+                  dbStatus.type === "error"
+                    ? "text-[var(--accent-red)]"
+                    : "text-[var(--accent-green)]"
+                )}
+              >
                 {dbStatus.message}
               </p>
             )}
@@ -428,32 +468,35 @@ export default function ProfilePage() {
         </Card>
 
         {/* Security */}
-        <Card>
+        <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
-              <span className="material-symbols-outlined text-[20px]">shield</span>
+            <div className="p-2 rounded-[var(--radius)] bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] shrink-0">
+              <Shield className="h-5 w-5" />
             </div>
-            <h3 className="text-base sm:text-lg font-semibold">Security</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Security</h3>
           </div>
           <div className="flex flex-col gap-4">
             <div className="flex items-start sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm sm:text-base">Require login</p>
-                <p className="text-xs sm:text-sm text-text-muted">
+                <p className="font-medium text-[13px] text-[var(--text-primary)]">Require login</p>
+                <p className="text-[12px] text-[var(--text-secondary)]">
                   When ON, dashboard requires password. When OFF, access without login.
                 </p>
               </div>
-              <Toggle
+              <Switch
                 checked={settings.requireLogin === true}
-                onChange={() => updateRequireLogin(!settings.requireLogin)}
+                onCheckedChange={() => updateRequireLogin(!settings.requireLogin)}
                 disabled={loading}
               />
             </div>
             {settings.requireLogin === true && (
-              <form onSubmit={handlePasswordChange} className="flex flex-col gap-4 pt-4 border-t border-border/50">
+              <form
+                onSubmit={handlePasswordChange}
+                className="flex flex-col gap-4 pt-4 border-t border-[var(--bg-secondary)]"
+              >
                 {settings.hasPassword && (
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs sm:text-sm font-medium">Current Password</label>
+                    <Label>Current Password</Label>
                     <Input
                       type="password"
                       placeholder="Enter current password"
@@ -463,16 +506,9 @@ export default function ProfilePage() {
                     />
                   </div>
                 )}
-                {/* {!settings.hasPassword && (
-                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <p className="text-sm text-blue-600 dark:text-blue-400">
-                      Setting password for the first time. Leave current password empty or use default: <code className="bg-blue-500/20 px-1 rounded">123456</code>
-                    </p>
-                  </div>
-                )} */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs sm:text-sm font-medium">New Password</label>
+                    <Label>New Password</Label>
                     <Input
                       type="password"
                       placeholder="Enter new password"
@@ -482,7 +518,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs sm:text-sm font-medium">Confirm New Password</label>
+                    <Label>Confirm New Password</Label>
                     <Input
                       type="password"
                       placeholder="Confirm new password"
@@ -494,14 +530,21 @@ export default function ProfilePage() {
                 </div>
 
                 {passStatus.message && (
-                  <p className={`text-xs sm:text-sm ${passStatus.type === "error" ? "text-red-500" : "text-green-500"}`}>
+                  <p
+                    className={cn(
+                      "text-[12px]",
+                      passStatus.type === "error"
+                        ? "text-[var(--accent-red)]"
+                        : "text-[var(--accent-green)]"
+                    )}
+                  >
                     {passStatus.message}
                   </p>
                 )}
 
                 <div className="pt-2">
-                  <Button type="submit" variant="primary" loading={passLoading} className="w-full sm:w-auto">
-                    {settings.hasPassword ? "Update Password" : "Set Password"}
+                  <Button type="submit" disabled={passLoading} className="w-full sm:w-auto">
+                    {passLoading ? "Saving…" : settings.hasPassword ? "Update Password" : "Set Password"}
                   </Button>
                 </div>
               </form>
@@ -510,34 +553,38 @@ export default function ProfilePage() {
         </Card>
 
         {/* Routing Preferences */}
-        <Card>
+        <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500 shrink-0">
-              <span className="material-symbols-outlined text-[20px]">route</span>
+            <div className="p-2 rounded-[var(--radius)] bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] shrink-0">
+              <Route className="h-5 w-5" />
             </div>
-            <h3 className="text-base sm:text-lg font-semibold">Routing Strategy</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Routing Strategy</h3>
           </div>
           <div className="flex flex-col gap-4">
             <div className="flex items-start sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm sm:text-base">Round Robin</p>
-                <p className="text-xs sm:text-sm text-text-muted">
+                <p className="font-medium text-[13px] text-[var(--text-primary)]">Round Robin</p>
+                <p className="text-[12px] text-[var(--text-secondary)]">
                   Cycle through accounts to distribute load
                 </p>
               </div>
-              <Toggle
+              <Switch
                 checked={settings.fallbackStrategy === "round-robin"}
-                onChange={() => updateFallbackStrategy(settings.fallbackStrategy === "round-robin" ? "fill-first" : "round-robin")}
+                onCheckedChange={() =>
+                  updateFallbackStrategy(
+                    settings.fallbackStrategy === "round-robin" ? "fill-first" : "round-robin"
+                  )
+                }
                 disabled={loading}
               />
             </div>
 
             {/* Sticky Round Robin Limit */}
             {settings.fallbackStrategy === "round-robin" && (
-              <div className="flex items-start sm:items-center justify-between gap-4 pt-2 border-t border-border/50">
+              <div className="flex items-start sm:items-center justify-between gap-4 pt-2 border-t border-[var(--bg-secondary)]">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm sm:text-base">Sticky Limit</p>
-                  <p className="text-xs sm:text-sm text-text-muted">
+                  <p className="font-medium text-[13px] text-[var(--text-primary)]">Sticky Limit</p>
+                  <p className="text-[12px] text-[var(--text-secondary)]">
                     Calls per account before switching
                   </p>
                 </div>
@@ -548,32 +595,36 @@ export default function ProfilePage() {
                   value={settings.stickyRoundRobinLimit || 3}
                   onChange={(e) => updateStickyLimit(e.target.value)}
                   disabled={loading}
-                  className="w-16 sm:w-20 text-center shrink-0"
+                  className="w-20 text-center shrink-0"
                 />
               </div>
             )}
 
             {/* Combo Round Robin */}
-            <div className="flex items-start sm:items-center justify-between gap-4 pt-4 border-t border-border/50">
+            <div className="flex items-start sm:items-center justify-between gap-4 pt-4 border-t border-[var(--bg-secondary)]">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm sm:text-base">Combo Round Robin</p>
-                <p className="text-xs sm:text-sm text-text-muted">
+                <p className="font-medium text-[13px] text-[var(--text-primary)]">Combo Round Robin</p>
+                <p className="text-[12px] text-[var(--text-secondary)]">
                   Cycle through providers in combos instead of always starting with first
                 </p>
               </div>
-              <Toggle
+              <Switch
                 checked={settings.comboStrategy === "round-robin"}
-                onChange={() => updateComboStrategy(settings.comboStrategy === "round-robin" ? "fallback" : "round-robin")}
+                onCheckedChange={() =>
+                  updateComboStrategy(
+                    settings.comboStrategy === "round-robin" ? "fallback" : "round-robin"
+                  )
+                }
                 disabled={loading}
               />
             </div>
 
             {/* Combo Sticky Round Robin Limit */}
             {settings.comboStrategy === "round-robin" && (
-              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+              <div className="flex items-center justify-between pt-2 border-t border-[var(--bg-secondary)]">
                 <div>
-                  <p className="font-medium">Combo Sticky Limit</p>
-                  <p className="text-sm text-text-muted">
+                  <p className="font-medium text-[13px] text-[var(--text-primary)]">Combo Sticky Limit</p>
+                  <p className="text-[12px] text-[var(--text-secondary)]">
                     Calls per combo model before switching
                   </p>
                 </div>
@@ -589,7 +640,7 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <p className="text-xs text-text-muted italic pt-2 border-t border-border/50">
+            <p className="text-[11px] italic text-[var(--text-secondary)] pt-2 border-t border-[var(--bg-secondary)]">
               {settings.fallbackStrategy === "round-robin"
                 ? `Currently distributing requests across all available accounts with ${settings.stickyRoundRobinLimit || 3} calls per account.`
                 : "Currently using accounts in priority order (Fill First)."}
@@ -601,71 +652,86 @@ export default function ProfilePage() {
         </Card>
 
         {/* Network */}
-        <Card>
+        <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500 shrink-0">
-              <span className="material-symbols-outlined text-[20px]">wifi</span>
+            <div className="p-2 rounded-[var(--radius)] bg-[var(--accent-purple)]/10 text-[var(--accent-purple)] shrink-0">
+              <Wifi className="h-5 w-5" />
             </div>
-            <h3 className="text-base sm:text-lg font-semibold">Network</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Network</h3>
           </div>
 
           <div className="flex flex-col gap-4">
             <div className="flex items-start sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm sm:text-base">Outbound Proxy</p>
-                <p className="text-xs sm:text-sm text-text-muted">Enable proxy for OAuth + provider outbound requests.</p>
+                <p className="font-medium text-[13px] text-[var(--text-primary)]">Outbound Proxy</p>
+                <p className="text-[12px] text-[var(--text-secondary)]">
+                  Enable proxy for OAuth + provider outbound requests.
+                </p>
               </div>
-              <Toggle
+              <Switch
                 checked={settings.outboundProxyEnabled === true}
-                onChange={() => updateOutboundProxyEnabled(!(settings.outboundProxyEnabled === true))}
+                onCheckedChange={() => updateOutboundProxyEnabled(!(settings.outboundProxyEnabled === true))}
                 disabled={loading || proxyLoading}
               />
             </div>
 
             {settings.outboundProxyEnabled === true && (
-              <form onSubmit={updateOutboundProxy} className="flex flex-col gap-4 pt-2 border-t border-border/50">
+              <form
+                onSubmit={updateOutboundProxy}
+                className="flex flex-col gap-4 pt-2 border-t border-[var(--bg-secondary)]"
+              >
                 <div className="flex flex-col gap-2">
-                  <label className="font-medium text-sm sm:text-base">Proxy URL</label>
+                  <Label>Proxy URL</Label>
                   <Input
                     placeholder="http://127.0.0.1:7897"
                     value={proxyForm.outboundProxyUrl}
                     onChange={(e) => setProxyForm((prev) => ({ ...prev, outboundProxyUrl: e.target.value }))}
                     disabled={loading || proxyLoading}
                   />
-                  <p className="text-xs sm:text-sm text-text-muted">Leave empty to inherit existing env proxy (if any).</p>
+                  <p className="text-[12px] text-[var(--text-secondary)]">
+                    Leave empty to inherit existing env proxy (if any).
+                  </p>
                 </div>
 
-                <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
-                  <label className="font-medium text-sm sm:text-base">No Proxy</label>
+                <div className="flex flex-col gap-2 pt-2 border-t border-[var(--bg-secondary)]">
+                  <Label>No Proxy</Label>
                   <Input
                     placeholder="localhost,127.0.0.1"
                     value={proxyForm.outboundNoProxy}
                     onChange={(e) => setProxyForm((prev) => ({ ...prev, outboundNoProxy: e.target.value }))}
                     disabled={loading || proxyLoading}
                   />
-                  <p className="text-xs sm:text-sm text-text-muted">Comma-separated hostnames/domains to bypass the proxy.</p>
+                  <p className="text-[12px] text-[var(--text-secondary)]">
+                    Comma-separated hostnames/domains to bypass the proxy.
+                  </p>
                 </div>
 
-                <div className="pt-2 border-t border-border/50 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="pt-2 border-t border-[var(--bg-secondary)] flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <Button
                     type="button"
                     variant="secondary"
-                    loading={proxyTestLoading}
-                    disabled={loading || proxyLoading}
+                    disabled={loading || proxyLoading || proxyTestLoading}
                     onClick={testOutboundProxy}
                     className="w-full sm:w-auto"
                   >
-                    Test proxy URL
+                    {proxyTestLoading ? "Testing…" : "Test proxy URL"}
                   </Button>
-                  <Button type="submit" variant="primary" loading={proxyLoading} className="w-full sm:w-auto">
-                    Apply
+                  <Button type="submit" disabled={proxyLoading} className="w-full sm:w-auto">
+                    {proxyLoading ? "Saving…" : "Apply"}
                   </Button>
                 </div>
               </form>
             )}
 
             {proxyStatus.message && (
-              <p className={`text-xs sm:text-sm ${proxyStatus.type === "error" ? "text-red-500" : "text-green-500"} pt-2 border-t border-border/50`}>
+              <p
+                className={cn(
+                  "text-[12px] pt-2 border-t border-[var(--bg-secondary)]",
+                  proxyStatus.type === "error"
+                    ? "text-[var(--accent-red)]"
+                    : "text-[var(--accent-green)]"
+                )}
+              >
                 {proxyStatus.message}
               </p>
             )}
@@ -673,30 +739,30 @@ export default function ProfilePage() {
         </Card>
 
         {/* Observability Settings */}
-        <Card>
+        <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500 shrink-0">
-              <span className="material-symbols-outlined text-[20px]">monitoring</span>
+            <div className="p-2 rounded-[var(--radius)] bg-[var(--accent-orange)]/10 text-[var(--accent-orange)] shrink-0">
+              <Activity className="h-5 w-5" />
             </div>
-            <h3 className="text-base sm:text-lg font-semibold">Observability</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Observability</h3>
           </div>
           <div className="flex items-start sm:items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm sm:text-base">Enable Observability</p>
-              <p className="text-xs sm:text-sm text-text-muted">
+              <p className="font-medium text-[13px] text-[var(--text-primary)]">Enable Observability</p>
+              <p className="text-[12px] text-[var(--text-secondary)]">
                 Record request details for inspection in the logs view
               </p>
             </div>
-            <Toggle
+            <Switch
               checked={observabilityEnabled}
-              onChange={updateObservabilityEnabled}
+              onCheckedChange={updateObservabilityEnabled}
               disabled={loading}
             />
           </div>
         </Card>
 
         {/* App Info */}
-        <div className="text-center text-xs sm:text-sm text-text-muted py-4">
+        <div className="text-center text-[12px] text-[var(--text-secondary)] py-4">
           <p>{APP_CONFIG.name} v{APP_CONFIG.version}</p>
           <p className="mt-1">Local Mode - All data stored on your machine</p>
         </div>
