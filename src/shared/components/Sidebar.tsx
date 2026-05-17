@@ -145,8 +145,8 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
 
         {/* Update banner */}
         {updateInfo && (
-          <div className="mx-3 mt-3 flex flex-col gap-1.5 rounded-[8px] border border-[var(--accent-yellow)]/40 bg-[color-mix(in_srgb,var(--accent-yellow)_10%,transparent)] p-2.5">
-            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--accent-yellow)]">
+          <div className="mx-3 mt-3 flex flex-col gap-1.5 rounded-[8px] border border-[var(--accent-orange)]/40 bg-[color-mix(in_srgb,var(--accent-orange)_10%,transparent)] p-2.5">
+            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--accent-orange)]">
               <ArrowUpCircle className="h-3.5 w-3.5" />
               New version available: v{updateInfo.latestVersion}
             </span>
@@ -154,7 +154,7 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
               <button
                 type="button"
                 onClick={() => setShowUpdateModal(true)}
-                className="cursor-pointer rounded bg-[var(--accent-yellow)] px-2 py-1 text-[11px] font-semibold text-[var(--text-inverted)] transition-opacity hover:opacity-90"
+                className="cursor-pointer rounded bg-[var(--accent-orange)] px-2 py-1 text-[11px] font-semibold text-[var(--text-inverted)] transition-opacity hover:opacity-90"
               >
                 Update now
               </button>
@@ -164,7 +164,7 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
                 title="Copy install command"
                 className="min-w-0 flex-1 cursor-pointer text-left transition-opacity hover:opacity-80"
               >
-                <code className="block truncate font-mono text-[10px] text-[var(--accent-yellow)]/80">
+                <code className="block truncate font-mono text-[10px] text-[var(--accent-orange)]/80">
                   {copied ? "Copied" : INSTALL_CMD}
                 </code>
               </button>
