@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   PowerOff,
   Power,
+  PanelLeft,
 } from "lucide-react";
 import { APP_CONFIG, UPDATER_CONFIG } from "@/shared/constants/config";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
@@ -125,38 +126,41 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
 
   return (
     <>
-      <aside className="flex h-screen w-[260px] flex-col border-r border-[var(--border)] bg-[var(--bg-secondary)]">
-        {/* Brand — Uniro mark + wordmark + tagline */}
-        <Link
-          href="/dashboard"
-          onClick={onClose}
-          className="flex items-center gap-[10px] border-b border-[var(--border)] px-4 py-4 hover:bg-[var(--bg-tertiary)]/40 transition-colors"
-        >
-          <UniroMark size={26} className="shrink-0 text-[var(--text-primary)]" title="Uniro" />
-          <div className="flex min-w-0 flex-col leading-none">
-            <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
-              {APP_CONFIG.name}
-            </span>
-            <span className="mt-1 text-[10.5px] text-[var(--text-tertiary)]">
-              your AI endpoint
-            </span>
-          </div>
-        </Link>
+      <aside className="flex h-screen w-[260px] flex-col border-r border-[var(--border)] bg-[var(--bg-primary)]">
+        {/* Brand row — mark only (ChatGPT-style) + sidebar toggle */}
+        <div className="flex items-center justify-between px-3 pt-3 pb-2">
+          <Link
+            href="/dashboard"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-tertiary)]"
+            aria-label="Uniro home"
+          >
+            <UniroMark size={22} title="Uniro" />
+          </Link>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+            aria-label="Close sidebar"
+          >
+            <PanelLeft className="h-[18px] w-[18px]" />
+          </button>
+        </div>
 
         {/* Update banner */}
         {updateInfo && (
-          <div className="mx-3 mt-3 flex flex-col gap-1.5 rounded-[8px] border border-[var(--accent-orange)]/40 bg-[color-mix(in_srgb,var(--accent-orange)_10%,transparent)] p-2.5">
-            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--accent-orange)]">
+          <div className="mx-3 mt-1 flex flex-col gap-1.5 rounded-[var(--radius)] border border-[var(--accent-orange)]/30 bg-[color-mix(in_srgb,var(--accent-orange)_8%,transparent)] p-2">
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--accent-orange)]">
               <ArrowUpCircle className="h-3.5 w-3.5" />
-              New version available: v{updateInfo.latestVersion}
+              v{updateInfo.latestVersion} available
             </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setShowUpdateModal(true)}
-                className="cursor-pointer rounded bg-[var(--accent-orange)] px-2 py-1 text-[11px] font-semibold text-[var(--text-inverted)] transition-opacity hover:opacity-90"
+                className="cursor-pointer rounded-[6px] bg-[var(--accent-orange)] px-2 py-1 text-[11px] font-medium text-[var(--text-inverted)] transition-opacity hover:opacity-90"
               >
-                Update now
+                Update
               </button>
               <button
                 type="button"
@@ -173,15 +177,15 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
         )}
 
         {/* Navigation */}
-        <nav className="custom-scrollbar flex-1 overflow-y-auto px-[10px] py-3">
+        <nav className="custom-scrollbar flex-1 overflow-y-auto px-2 py-1">
           {NAV_GROUPS.filter(
             (g) => !g.visibleWhen || g.visibleWhen({ isAdmin, pathname })
-          ).map((group) => {
+          ).map((group, groupIdx) => {
             const visibleItems = group.items.filter(isItemVisible);
             if (visibleItems.length === 0) return null;
             return (
-              <div key={group.label} className="mb-3 flex flex-col gap-[2px]">
-                <div className="px-2 pb-[6px] pt-[10px] text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)]">
+              <div key={group.label} className={cn("flex flex-col", groupIdx === 0 ? "mb-2" : "mt-3 mb-2")}>
+                <div className="px-2 pb-1 pt-2 text-[11px] font-medium text-[var(--text-tertiary)]">
                   {group.label}
                 </div>
                 {visibleItems.map((item) => {
@@ -193,24 +197,21 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
                       href={item.href}
                       onClick={onClose}
                       className={cn(
-                        "group relative flex items-center gap-[10px] rounded-[6px] px-2 py-[7px] text-[13px] transition-colors",
+                        "group relative flex h-9 items-center gap-3 rounded-[var(--radius)] px-2 text-[14px] transition-colors",
                         active
-                          ? "bg-[var(--bg-tertiary)] font-medium text-[var(--text-primary)]"
-                          : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]/50 hover:text-[var(--text-primary)]"
+                          ? "bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
+                          : "text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
                       )}
                     >
                       <Icon
-                        className={cn(
-                          "h-4 w-4 shrink-0",
-                          active ? "text-[var(--accent-blue)]" : "text-[var(--text-tertiary)]"
-                        )}
+                        className="h-[18px] w-[18px] shrink-0 text-[var(--text-primary)]"
+                        strokeWidth={1.75}
                       />
                       <span className="flex-1 truncate text-left">{item.label}</span>
                       {item.dot === "ok" && (
                         <span
                           aria-hidden="true"
                           className="h-1.5 w-1.5 rounded-full bg-[var(--accent-green)]"
-                          style={{ boxShadow: "0 0 6px var(--accent-green)" }}
                         />
                       )}
                     </Link>
@@ -221,30 +222,24 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
           })}
         </nav>
 
-        {/* Footer — server status card + shutdown */}
-        <div className="space-y-3 border-t border-[var(--border)] bg-[var(--bg-primary)] px-4 py-3">
-          <div>
-            <div className="mb-1.5 flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className="h-1.5 w-1.5 rounded-full bg-[var(--accent-green)]"
-                style={{ boxShadow: "0 0 6px var(--accent-green)" }}
-              />
-              <span className="text-[11px] font-semibold text-[var(--accent-green)]">
-                Endpoint online
-              </span>
-              <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">
-                v{APP_CONFIG.version}
-              </span>
-            </div>
-            <div className="truncate font-mono text-[10.5px] text-[var(--text-secondary)]">
+        {/* Footer — server status + shutdown */}
+        <div className="border-t border-[var(--border)] px-3 py-2">
+          <div className="flex items-center gap-2 px-1 py-1">
+            <span
+              aria-hidden="true"
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent-green)]"
+            />
+            <span className="truncate font-mono text-[11px] text-[var(--text-secondary)]">
               localhost:20128/v1
-            </div>
+            </span>
+            <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">
+              v{APP_CONFIG.version}
+            </span>
           </div>
           <button
             type="button"
             onClick={() => setShowShutdownModal(true)}
-            className="inline-flex h-7 w-full items-center justify-center gap-1.5 rounded-[6px] text-[11px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--accent-red)_10%,transparent)] hover:text-[var(--accent-red)]"
+            className="mt-1 inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-[var(--radius)] text-[12px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-red)]"
           >
             <Power className="h-3.5 w-3.5" />
             Shutdown
