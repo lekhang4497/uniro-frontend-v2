@@ -44,11 +44,13 @@ next-env.d.ts
 
 .bin/*
 data/
+.data/
 logs/*
 source/*
 .cursor/*
 docs/*
 !docs/ARCHITECTURE.md
+!docs/superpowers/
 test/*
 bin/*
 open-sse/test/*
@@ -71,3 +73,4 @@ ecosystem.config.*
 scripts/agSniffer/*
 gitbooks/*
 gitbook/README.md
+.superpowers/
