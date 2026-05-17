@@ -9,41 +9,42 @@ import Features from "./components/Features";
 import GetStarted from "./components/GetStarted";
 import Footer from "./components/Footer";
 
-// Marketing landing page. Uses a deliberately divergent dark-themed brand
-// palette (#141413 / #d97757) rather than the dashboard token system —
-// these are the brand marketing colors and stay hard-coded.
+// Centered marketing layout for the landing page. Uses the shared ChatGPT
+// design tokens (--bg-primary / --text-primary / --accent-blue) like the
+// rest of the app — no divergent brand palette.
 export default function LandingPage() {
   const router = useRouter();
   return (
-    <div className="relative font-sans text-white overflow-x-hidden antialiased selection:bg-[#d97757] selection:text-white">
+    <div className="relative font-sans text-[var(--text-primary)] overflow-x-hidden antialiased selection:bg-[var(--accent-blue)] selection:text-[var(--text-inverted)]">
       {/* Animated Background */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[#141413]">
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[var(--bg-primary)]">
         {/* Grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.06]"
+          className="absolute inset-0 opacity-[0.5]"
           style={{
-            backgroundImage: `linear-gradient(to right, #d97757 1px, transparent 1px), linear-gradient(to bottom, #d97757 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(to right, var(--bg-secondary) 1px, transparent 1px), linear-gradient(to bottom, var(--bg-secondary) 1px, transparent 1px)`,
             backgroundSize: "50px 50px",
           }}
         />
 
         {/* Animated gradient orbs */}
-        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-[#d97757]/12 rounded-full blur-[130px] animate-blob" />
+        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-[var(--accent-blue)]/12 rounded-full blur-[130px] animate-blob" />
         <div
-          className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[130px] animate-blob"
+          className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-[var(--accent-blue)]/8 rounded-full blur-[130px] animate-blob"
           style={{ animationDelay: "2s", animationDuration: "22s" }}
         />
         <div
-          className="absolute bottom-0 left-1/2 w-[650px] h-[650px] bg-blue-500/8 rounded-full blur-[130px] animate-blob"
+          className="absolute bottom-0 left-1/2 w-[650px] h-[650px] bg-[var(--accent-blue)]/6 rounded-full blur-[130px] animate-blob"
           style={{ animationDelay: "4s", animationDuration: "25s" }}
         />
 
-        {/* Vignette effect */}
+        {/* Soft vignette so the orbs fade into the page bg */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(circle at center, transparent 0%, rgba(24, 20, 17, 0.4) 100%)",
+              "radial-gradient(circle at center, transparent 0%, var(--bg-primary) 100%)",
+            opacity: 0.6,
           }}
         />
       </div>
@@ -66,19 +67,19 @@ export default function LandingPage() {
 
           {/* CTA Section */}
           <section className="relative py-32 px-6 overflow-hidden">
-            <div className="absolute inset-0 bg-linear-to-t from-[#d97757]/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-t from-[var(--accent-blue)]/6 to-transparent pointer-events-none" />
             <div className="relative z-10 mx-auto max-w-4xl text-center">
-              <h2 className="mb-6 text-4xl md:text-5xl font-black">
+              <h2 className="mb-6 text-4xl md:text-5xl font-black text-[var(--text-primary)]">
                 Ready to Simplify Your AI Infrastructure?
               </h2>
-              <p className="mx-auto mb-10 max-w-2xl text-xl text-gray-400">
+              <p className="mx-auto mb-10 max-w-2xl text-xl text-[var(--text-secondary)]">
                 Join developers who are streamlining their AI integrations with
                 Uniro. Open source and free to start.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="h-14 w-full sm:w-auto px-10 rounded-lg bg-[#d97757] text-[#141413] text-lg font-bold transition-all hover:bg-[#e0650a] shadow-[0_0_20px_rgba(217,119,87,0.5)]"
+                  className="h-14 w-full sm:w-auto px-10 rounded-lg bg-[var(--accent-blue)] text-[var(--text-inverted)] text-lg font-bold transition-all hover:brightness-110"
                 >
                   Start Free
                 </button>
@@ -86,7 +87,7 @@ export default function LandingPage() {
                   onClick={() =>
                     window.open("https://github.com/your-org/uniro#readme", "_blank")
                   }
-                  className="h-14 w-full sm:w-auto px-10 rounded-lg border border-[#2a2926] text-white text-lg font-bold transition-all hover:bg-[#1f1e1c]"
+                  className="h-14 w-full sm:w-auto px-10 rounded-lg border border-[var(--bg-secondary)] text-[var(--text-primary)] text-lg font-bold transition-all hover:bg-[var(--bg-tertiary)]"
                 >
                   Read Documentation
                 </button>

@@ -5,8 +5,8 @@ export default function manifest() {
     description: 'One endpoint for all your AI providers. Manage keys, monitor usage, and scale effortlessly.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#141413',
-    theme_color: '#141413',
+    background_color: '#0D0D0D',
+    theme_color: '#0D0D0D',
     orientation: 'portrait-primary',
     icons: [
       {

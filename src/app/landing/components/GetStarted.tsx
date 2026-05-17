@@ -10,51 +10,57 @@ export default function GetStarted() {
   };
 
   return (
-    <section className="py-24 px-6 bg-[#120f0d]">
+    <section className="py-24 px-6 bg-[var(--bg-tertiary)]">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-16 items-start">
           {/* Left: Steps */}
           <div className="flex-1">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-[var(--text-primary)]">
               Get Started in 30 Seconds
             </h2>
-            <p className="text-gray-400 text-lg mb-8">
+            <p className="text-[var(--text-secondary)] text-lg mb-8">
               Install Uniro, configure your providers via web dashboard, and start
               routing AI requests.
             </p>
 
             <div className="flex flex-col gap-6">
               <div className="flex gap-4">
-                <div className="flex-none w-8 h-8 rounded-full bg-[#d97757]/20 text-[#d97757] flex items-center justify-center font-bold">
+                <div className="flex-none w-8 h-8 rounded-full bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] flex items-center justify-center font-bold">
                   1
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg">Install Uniro</h4>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h4 className="font-bold text-lg text-[var(--text-primary)]">
+                    Install Uniro
+                  </h4>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">
                     Run npx command to start the server instantly
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="flex-none w-8 h-8 rounded-full bg-[#d97757]/20 text-[#d97757] flex items-center justify-center font-bold">
+                <div className="flex-none w-8 h-8 rounded-full bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] flex items-center justify-center font-bold">
                   2
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg">Open Dashboard</h4>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h4 className="font-bold text-lg text-[var(--text-primary)]">
+                    Open Dashboard
+                  </h4>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">
                     Configure providers and API keys via web interface
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="flex-none w-8 h-8 rounded-full bg-[#d97757]/20 text-[#d97757] flex items-center justify-center font-bold">
+                <div className="flex-none w-8 h-8 rounded-full bg-[var(--accent-blue)]/15 text-[var(--accent-blue)] flex items-center justify-center font-bold">
                   3
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg">Route Requests</h4>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <h4 className="font-bold text-lg text-[var(--text-primary)]">
+                    Route Requests
+                  </h4>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">
                     Point your CLI tools to http://localhost:20128
                   </p>
                 </div>
@@ -64,13 +70,10 @@ export default function GetStarted() {
 
           {/* Right: Code block */}
           <div className="flex-1 w-full">
-            <div className="rounded-xl overflow-hidden bg-[#1e1e1e] border border-[#2a2926] shadow-2xl">
+            <div className="rounded-xl overflow-hidden bg-[#1e1e1e] border border-[var(--bg-secondary)]">
               {/* Terminal header */}
-              <div className="flex items-center gap-2 px-4 py-3 bg-[#252526] border-b border-gray-700">
-                <div className="w-3 h-3 rounded-full bg-red-500" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                <div className="w-3 h-3 rounded-full bg-green-500" />
-                <div className="ml-2 text-xs text-gray-500 font-mono">
+              <div className="flex items-center gap-2 px-4 py-3 bg-[#252526] border-b border-[#3a3a3a]">
+                <div className="ml-1 text-xs text-gray-400 font-mono">
                   terminal
                 </div>
               </div>
@@ -89,12 +92,12 @@ export default function GetStarted() {
                 </div>
 
                 <div className="text-gray-400 mb-6">
-                  <span className="text-[#d97757]">&gt;</span> Starting Uniro...
+                  <span className="text-[#0285FF]">&gt;</span> Starting Uniro...
                   <br />
-                  <span className="text-[#d97757]">&gt;</span> Server running on{" "}
+                  <span className="text-[#0285FF]">&gt;</span> Server running on{" "}
                   <span className="text-blue-400">http://localhost:20128</span>
                   <br />
-                  <span className="text-[#d97757]">&gt;</span> Dashboard:{" "}
+                  <span className="text-[#0285FF]">&gt;</span> Dashboard:{" "}
                   <span className="text-blue-400">
                     http://localhost:20128/dashboard
                   </span>

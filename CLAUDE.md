@@ -6,7 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**Uniro** (`uniro-app`) — a self-hosted LLM router dashboard. Next.js 16 (App Router) + React 19, JavaScript only (no TypeScript; uses `jsconfig.json`). Exposes an **OpenAI-compatible API** at `:20128/v1` so CLI tools (Claude Code, Codex, Cursor, Cline, OpenClaw...) can use it as a drop-in endpoint while it does multi-provider routing, format translation, token refresh, quota tracking, and "RTK" token compression.
+**Uniro** (`uniro-app`) — a self-hosted LLM router dashboard. Next.js 16
+(App Router) + React 19, **TypeScript** (uses `tsconfig.json`, strict mode).
+All UI code under `src/app/**`, `src/shared/components/**`, and the rest of
+the React tree is `.ts`/`.tsx`. Backend-facing modules (DB driver chain,
+MITM, OAuth services, SSE handlers, app stores) are still plain `.js` —
+they have no JSX and TS conversion is out of scope. Exposes an
+**OpenAI-compatible API** at `:20128/v1` so CLI tools (Claude Code, Codex,
+Cursor, Cline, OpenClaw...) can use it as a drop-in endpoint while it does
+multi-provider routing, format translation, token refresh, quota tracking,
+and "RTK" token compression.
 
 This is the published npm package `uniro`. The dashboard, API gateway, MITM cert proxy, and Cloudflare Worker companion all live in this single repo.
 
