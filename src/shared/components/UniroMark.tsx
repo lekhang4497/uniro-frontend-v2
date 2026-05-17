@@ -1,7 +1,14 @@
 // Uniro brand mark. Eight organic flowing paths around a center axis;
 // renders in currentColor so it inherits the wrapper's text color
 // (used on the gradient brand tile, footer, login screen, etc.).
-export function UniroMark({ size = 24, className, title }) {
+
+type UniroMarkProps = {
+  size?: number;
+  className?: string;
+  title?: string;
+};
+
+export function UniroMark({ size = 24, className, title }: UniroMarkProps) {
   return (
     <svg
       width={size}
@@ -53,9 +60,18 @@ export function UniroMark({ size = 24, className, title }) {
   );
 }
 
-export function UniroWordmark({ size = 24, className, title = "Uniro" }) {
+type UniroWordmarkProps = {
+  size?: number;
+  className?: string;
+  title?: string;
+};
+
+export function UniroWordmark({ size = 24, className, title = "Uniro" }: UniroWordmarkProps) {
   return (
-    <span className={className} style={{ display: "inline-flex", alignItems: "center", gap: "0.5em" }}>
+    <span
+      className={className}
+      style={{ display: "inline-flex", alignItems: "center", gap: "0.5em" }}
+    >
       <UniroMark size={size} title={title} />
       <span style={{ fontWeight: 600, letterSpacing: "-0.01em", fontSize: `calc(${size}px * 0.72)` }}>
         Uniro
