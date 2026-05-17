@@ -62,7 +62,7 @@ export function ModelEditor({
         onChange={(e) => onUpdate({ extra_config: e.target.value })}
         rows={4}
         placeholder={"top_p: 0.9\npresence_penalty: 0.1"}
-        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[12px] font-mono resize-y"
+        className="w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-3 py-2 text-[12px] font-mono resize-y"
       />
     </>
   );

@@ -6,8 +6,13 @@
 import { Handle, Position } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 
+// Base style for every node card. Uses the reskinned ChatGPT-style tokens.
+// Selected state adds a blue ring offset against the canvas background.
 export const CARD_BASE =
-  "rounded-xl border bg-card min-w-[160px] max-w-[200px] transition-colors shadow-sm";
+  "rounded-[var(--radius-md)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] min-w-[160px] max-w-[200px] transition-colors shadow-[var(--shadow-popover)]";
+
+export const CARD_SELECTED =
+  "ring-2 ring-[var(--accent-blue)] ring-offset-2 ring-offset-[var(--bg-tertiary)]";
 
 export function NodeBadge({
   children,

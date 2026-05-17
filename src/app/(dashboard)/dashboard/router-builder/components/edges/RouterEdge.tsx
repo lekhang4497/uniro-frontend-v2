@@ -48,14 +48,17 @@ export function DeletableEdge({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       />
-      {/* Visible edge path */}
+      {/* Visible edge path — reskinned to use --text-tertiary as the base
+          stroke. Per-edge overrides in `style` still win (e.g. coloured
+          signal→projection or route→model dashes from page.tsx). */}
       <BaseEdge
         id={id}
         path={edgePath}
         markerEnd={markerEnd}
         style={{
+          stroke: "var(--text-tertiary)",
           ...style,
-          strokeWidth: selected || isHovered ? 3 : 1.5,
+          strokeWidth: selected || isHovered ? 3 : (style.strokeWidth ?? 1.5),
         }}
       />
       <EdgeLabelRenderer>
@@ -73,8 +76,8 @@ export function DeletableEdge({
             onClick={onDelete}
             className={cn(
               "h-5 w-5 rounded-full flex items-center justify-center transition-all",
-              "bg-background border border-border shadow-sm",
-              "hover:bg-destructive hover:border-destructive hover:text-destructive-foreground",
+              "bg-[var(--bg-primary)] border border-[var(--bg-secondary)] shadow-[var(--shadow-popover)] text-[var(--text-secondary)]",
+              "hover:bg-[var(--accent-red)] hover:border-[var(--accent-red)] hover:text-[var(--text-inverted)]",
               selected || isHovered ? "opacity-100" : "opacity-0"
             )}
             title="Delete connection"

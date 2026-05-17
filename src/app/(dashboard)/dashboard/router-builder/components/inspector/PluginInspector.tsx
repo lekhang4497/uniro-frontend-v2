@@ -24,16 +24,18 @@ export function PluginEditor({
           options={PLUGINS.map((p: any) => ({ value: p.type, label: p.label }))}
         />
       </Field>
-      <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
+      <div className="flex items-center gap-3 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] p-3">
         <input
           type="checkbox"
           checked={plugin.enabled !== false}
           onChange={(e) => onUpdate({ enabled: e.target.checked })}
-          className="h-4 w-4"
+          className="h-4 w-4 accent-[var(--accent-blue)]"
         />
         <div>
-          <div className="text-[13px] font-medium">Enabled</div>
-          <div className="text-[11px] text-muted-foreground">Disable to bypass this plugin</div>
+          <div className="text-[13px] font-medium text-[var(--text-primary)]">Enabled</div>
+          <div className="text-[11px] text-[var(--text-secondary)]">
+            Disable to bypass this plugin
+          </div>
         </div>
       </div>
       <SectionLabel>Plugin config (YAML)</SectionLabel>
@@ -48,7 +50,7 @@ export function PluginEditor({
         }}
         rows={4}
         placeholder="{}"
-        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[12px] font-mono resize-y"
+        className="w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-3 py-2 text-[12px] font-mono resize-y"
       />
     </>
   );

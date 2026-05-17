@@ -40,13 +40,15 @@ export function PropertiesPanel({
   onRemove: (uid: string) => void;
 }) {
   return (
-    <aside className="hidden lg:flex w-[340px] shrink-0 flex-col border-l border-border bg-card">
-      <div className="px-4 py-3 border-b border-border flex items-center gap-2 shrink-0">
-        <div className="text-sm font-semibold flex-1 capitalize">{node.kind}</div>
+    <aside className="hidden lg:flex w-[340px] shrink-0 flex-col border-l border-[var(--bg-secondary)] bg-[var(--bg-primary)]">
+      <div className="px-4 py-3 border-b border-[var(--bg-secondary)] flex items-center gap-2 shrink-0">
+        <div className="text-sm font-semibold flex-1 capitalize text-[var(--text-primary)]">
+          {node.kind}
+        </div>
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-[var(--radius)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
         >
           <X className="h-4 w-4" />
         </button>
@@ -91,7 +93,7 @@ export function PropertiesPanel({
         <button
           type="button"
           onClick={() => onRemove(node.value.uid)}
-          className="inline-flex items-center justify-center gap-1.5 h-9 rounded-lg text-[12.5px] text-destructive hover:bg-destructive/10 transition-colors border border-transparent hover:border-destructive/30 mt-2"
+          className="inline-flex items-center justify-center gap-1.5 h-9 rounded-[var(--radius)] text-[12.5px] text-[var(--accent-red)] hover:bg-[var(--accent-red)]/10 transition-colors border border-transparent hover:border-[var(--accent-red)]/30 mt-2"
         >
           <Trash2 className="h-3.5 w-3.5" />
           Delete node

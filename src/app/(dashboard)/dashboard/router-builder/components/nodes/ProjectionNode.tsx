@@ -6,7 +6,7 @@ import { Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PROJECTION_TYPE_BY_KEY } from "../../catalog";
 import { ICONS } from "../../lib/constants";
-import { CARD_BASE, NodeBadge, NodeHandle } from "./shared";
+import { CARD_BASE, CARD_SELECTED, NodeBadge, NodeHandle } from "./shared";
 
 export function ProjectionNodeRenderer({
   data,
@@ -19,12 +19,7 @@ export function ProjectionNodeRenderer({
   const spec: any = (PROJECTION_TYPE_BY_KEY as any)[proj.type];
   const Icon = ICONS[spec?.icon] || Boxes;
   return (
-    <div
-      className={cn(
-        CARD_BASE,
-        selected ? "border-violet-400 ring-2 ring-violet-400/20" : "border-border"
-      )}
-    >
+    <div className={cn(CARD_BASE, selected && CARD_SELECTED)}>
       <NodeHandle type="target" side="target" color="#8b5cf6" />
       <div className="px-3 py-2.5 flex items-start gap-2.5">
         <div className="size-8 rounded-lg grid place-items-center shrink-0 bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-300">

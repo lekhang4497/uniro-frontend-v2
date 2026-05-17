@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-[10.5px] uppercase tracking-[0.08em] text-subtle font-semibold border-t border-border pt-3 mt-1">
+    <div className="text-[10.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold border-t border-[var(--bg-secondary)] pt-3 mt-1">
       {children}
     </div>
   );
@@ -26,12 +26,12 @@ export function Field({
 }) {
   return (
     <label className="flex flex-col gap-1.5 min-w-0">
-      <span className="text-[10.5px] uppercase tracking-[0.08em] text-subtle font-semibold flex items-center gap-1">
+      <span className="text-[10.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold flex items-center gap-1">
         {label}
-        {required && <span className="text-destructive">*</span>}
+        {required && <span className="text-[var(--accent-red)]">*</span>}
       </span>
       {children}
-      {hint && <span className="text-[10.5px] text-muted-foreground">{hint}</span>}
+      {hint && <span className="text-[10.5px] text-[var(--text-secondary)]">{hint}</span>}
     </label>
   );
 }
@@ -63,7 +63,7 @@ export function TextInput({
       placeholder={placeholder}
       step={step}
       className={cn(
-        "w-full h-9 rounded-lg border border-border bg-background px-3 text-sm",
+        "w-full h-9 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-3 text-sm",
         mono && "font-mono"
       )}
     />
@@ -84,7 +84,7 @@ export function SelectInput({
     <select
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full h-9 rounded-lg border border-border bg-background px-2.5 text-sm"
+      className="w-full h-9 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2.5 text-sm"
     >
       {opts.map((o: any) => (
         <option key={o.value} value={o.value}>
@@ -107,16 +107,18 @@ export function BoolField({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex items-start gap-3 rounded-lg border border-border bg-card p-3 cursor-pointer">
+    <label className="flex items-start gap-3 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] p-3 cursor-pointer">
       <input
         type="checkbox"
         checked={!!value}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 mt-0.5"
+        className="h-4 w-4 mt-0.5 accent-[var(--accent-blue)]"
       />
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] font-medium">{label}</div>
-        {hint && <div className="text-[11.5px] text-muted-foreground mt-0.5">{hint}</div>}
+        <div className="text-[13px] font-medium text-[var(--text-primary)]">{label}</div>
+        {hint && (
+          <div className="text-[11.5px] text-[var(--text-secondary)] mt-0.5">{hint}</div>
+        )}
       </div>
     </label>
   );
@@ -180,7 +182,7 @@ export function ConfigField({
             onChange={(e) => onChange(e.target.value)}
             rows={5}
             placeholder={field.placeholder}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[12px] font-mono resize-y"
+            className="w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-3 py-2 text-[12px] font-mono resize-y"
           />
         </Field>
       );

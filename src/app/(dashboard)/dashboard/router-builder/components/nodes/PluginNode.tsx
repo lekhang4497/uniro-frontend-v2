@@ -5,7 +5,7 @@
 import { ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PLUGIN_BY_TYPE } from "../../catalog";
-import { CARD_BASE, NodeBadge, NodeHandle } from "./shared";
+import { CARD_BASE, CARD_SELECTED, NodeBadge, NodeHandle } from "./shared";
 
 export function PluginNodeRenderer({
   data,
@@ -17,12 +17,7 @@ export function PluginNodeRenderer({
   const plugin = data.node;
   const spec: any = (PLUGIN_BY_TYPE as any)[plugin.type];
   return (
-    <div
-      className={cn(
-        CARD_BASE,
-        selected ? "border-rose-400 ring-2 ring-rose-400/20" : "border-border"
-      )}
-    >
+    <div className={cn(CARD_BASE, selected && CARD_SELECTED)}>
       <NodeHandle type="target" side="target" color="#f43f5e" />
       <div className="px-3 py-2.5 flex items-start gap-2.5">
         <div className="size-8 rounded-lg grid place-items-center shrink-0 bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-300">

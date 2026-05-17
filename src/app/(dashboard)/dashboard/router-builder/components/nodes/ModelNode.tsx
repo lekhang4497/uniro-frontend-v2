@@ -4,7 +4,7 @@
 
 import { Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CARD_BASE, NodeBadge, NodeHandle } from "./shared";
+import { CARD_BASE, CARD_SELECTED, NodeBadge, NodeHandle } from "./shared";
 
 export function ModelNodeRenderer({
   data,
@@ -15,12 +15,7 @@ export function ModelNodeRenderer({
 }) {
   const model = data.node;
   return (
-    <div
-      className={cn(
-        CARD_BASE,
-        selected ? "border-emerald-400 ring-2 ring-emerald-400/20" : "border-border"
-      )}
-    >
+    <div className={cn(CARD_BASE, selected && CARD_SELECTED)}>
       <NodeHandle type="target" side="target" color="#34d399" />
       <div className="px-3 py-2.5 flex items-start gap-2.5">
         <div className="size-8 rounded-lg grid place-items-center shrink-0 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-300">

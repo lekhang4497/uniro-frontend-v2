@@ -35,14 +35,16 @@ export function SettingsDrawer({
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="flex-1 bg-black/30" onClick={onClose} />
-      <aside className="w-full max-w-md bg-card border-l border-border flex flex-col overflow-hidden">
-        <div className="px-4 h-14 shrink-0 flex items-center gap-2 border-b border-border">
-          <Settings2 className="h-4 w-4 text-muted-foreground" />
-          <div className="text-sm font-semibold flex-1">Router settings</div>
+      <aside className="w-full max-w-md bg-[var(--bg-primary)] border-l border-[var(--bg-secondary)] flex flex-col overflow-hidden">
+        <div className="px-4 h-14 shrink-0 flex items-center gap-2 border-b border-[var(--bg-secondary)]">
+          <Settings2 className="h-4 w-4 text-[var(--text-secondary)]" />
+          <div className="text-sm font-semibold flex-1 text-[var(--text-primary)]">
+            Router settings
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -57,7 +59,7 @@ export function SettingsDrawer({
               value={state.description}
               onChange={(e) => onPatch({ description: e.target.value })}
               rows={3}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm resize-y"
+              className="w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-3 py-2 text-sm resize-y"
             />
           </Field>
           <FormRow>

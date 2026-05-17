@@ -41,8 +41,8 @@ export function TemplatesMenu({
         Templates
       </Button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 w-[320px] rounded-lg border border-border bg-card shadow-lg p-1">
-          <div className="px-2.5 py-1.5 text-[10.5px] uppercase tracking-[0.08em] text-subtle font-semibold">
+        <div className="absolute right-0 top-full mt-1 z-30 w-[320px] rounded-[var(--radius-md)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] shadow-[var(--shadow-popover)] p-1">
+          <div className="px-2.5 py-1.5 text-[10.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold">
             Start from a template
           </div>
           {templates.map((t: any) => (
@@ -53,10 +53,12 @@ export function TemplatesMenu({
                 setOpen(false);
                 onPick(t);
               }}
-              className="w-full text-left rounded-md px-2.5 py-2 hover:bg-secondary transition-colors"
+              className="w-full text-left rounded-[var(--radius)] px-2.5 py-2 hover:bg-[var(--bg-secondary)] transition-colors"
             >
-              <div className="text-[12.5px] font-medium">{t.name}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-3">
+              <div className="text-[12.5px] font-medium text-[var(--text-primary)]">
+                {t.name}
+              </div>
+              <div className="text-[11px] text-[var(--text-secondary)] mt-0.5 line-clamp-3">
                 {t.description}
               </div>
             </button>
@@ -90,8 +92,8 @@ export function ToolBtn({
       className={cn(
         "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors",
         active
-          ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+          ? "bg-[var(--accent-blue)] text-[var(--text-inverted)]"
+          : "text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]",
         disabled && "opacity-40 cursor-not-allowed hover:bg-transparent"
       )}
     >

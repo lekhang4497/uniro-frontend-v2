@@ -4,7 +4,7 @@
 
 import { Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CARD_BASE, NodeBadge, NodeHandle } from "./shared";
+import { CARD_BASE, CARD_SELECTED, NodeBadge, NodeHandle } from "./shared";
 
 export function RouteNodeRenderer({
   data,
@@ -16,12 +16,7 @@ export function RouteNodeRenderer({
   const route = data.node;
   const isAlways = route.when?.kind === "always";
   return (
-    <div
-      className={cn(
-        CARD_BASE,
-        selected ? "border-amber-400 ring-2 ring-amber-400/20" : "border-border"
-      )}
-    >
+    <div className={cn(CARD_BASE, selected && CARD_SELECTED)}>
       <NodeHandle type="target" side="target" color="#fbbf24" />
       <div className="px-3 py-2.5">
         <div className="flex items-start gap-2.5 mb-1.5">

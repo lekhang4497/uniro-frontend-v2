@@ -123,16 +123,16 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
   }
 
   return (
-    <div className="flex flex-col gap-3 p-4 border-l border-border bg-bg-muted/40 w-80">
-      <div className="flex items-center gap-2 text-sm font-medium">
+    <div className="flex flex-col gap-3 p-4 border-l border-[var(--bg-secondary)] bg-[var(--bg-primary)] w-80">
+      <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
         <Cloud className="size-4" />
         Cloud Routers
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-xs text-text-muted">Name</label>
+        <label className="text-xs text-[var(--text-tertiary)]">Name</label>
         <input
-          className="px-2 py-1.5 rounded border border-border bg-bg text-sm"
+          className="px-2 py-1.5 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-sm"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="My router"
@@ -141,9 +141,9 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
 
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-text-muted">Engine</label>
+          <label className="text-xs text-[var(--text-tertiary)]">Engine</label>
           <select
-            className="px-2 py-1.5 rounded border border-border bg-bg text-sm"
+            className="px-2 py-1.5 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-sm"
             value={engine}
             onChange={(e) => setEngine(e.target.value)}
           >
@@ -152,9 +152,9 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-text-muted">Fallback model</label>
+          <label className="text-xs text-[var(--text-tertiary)]">Fallback model</label>
           <input
-            className="px-2 py-1.5 rounded border border-border bg-bg text-sm"
+            className="px-2 py-1.5 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-sm"
             value={fallbackModel}
             onChange={(e) => setFallbackModel(e.target.value)}
             placeholder="gpt-4o-mini"
@@ -167,14 +167,12 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
         {activeId ? "Save changes" : "Save as new"}
       </Button>
 
-      {error && (
-        <p className="text-xs text-red-500 break-words">{error}</p>
-      )}
+      {error && <p className="text-xs text-[var(--accent-red)] break-words">{error}</p>}
 
       <div className="flex items-center justify-between mt-2">
-        <span className="text-xs text-text-muted">Your routers</span>
+        <span className="text-xs text-[var(--text-tertiary)]">Your routers</span>
         <button
-          className="text-xs text-text-muted hover:text-text"
+          className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
           onClick={refresh}
           disabled={loading}
         >
@@ -183,32 +181,34 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
       </div>
 
       <div className="flex flex-col gap-1 max-h-80 overflow-y-auto">
-        {loading && <div className="text-xs text-text-muted">Loading…</div>}
+        {loading && <div className="text-xs text-[var(--text-tertiary)]">Loading…</div>}
         {!loading && routers.length === 0 && (
-          <div className="text-xs text-text-muted">No routers saved yet.</div>
+          <div className="text-xs text-[var(--text-tertiary)]">No routers saved yet.</div>
         )}
         {routers.map((r) => (
           <div
             key={r.id}
-            className={`group flex items-center justify-between gap-2 px-2 py-1.5 rounded text-sm hover:bg-bg-muted cursor-pointer ${
-              activeId === r.id ? "bg-bg-muted" : ""
+            className={`group flex items-center justify-between gap-2 px-2 py-1.5 rounded-[var(--radius)] text-sm hover:bg-[var(--bg-tertiary)] cursor-pointer ${
+              activeId === r.id ? "bg-[var(--bg-tertiary)]" : ""
             }`}
           >
             <button
-              className="flex-1 text-left truncate"
+              className="flex-1 text-left truncate text-[var(--text-primary)]"
               onClick={() => handleLoad(r.id)}
               title={r.description || r.name}
             >
-              {r.is_default && <Star className="inline size-3 mr-1 text-amber-500" />}
+              {r.is_default && (
+                <Star className="inline size-3 mr-1 text-[var(--accent-orange)]" />
+              )}
               {r.name}
-              <span className="ml-1 text-xs text-text-muted">v{r.version}</span>
+              <span className="ml-1 text-xs text-[var(--text-tertiary)]">v{r.version}</span>
             </button>
             <div className="opacity-0 group-hover:opacity-100 flex gap-1">
               {!r.is_default && (
                 <button
                   onClick={() => handleMakeDefault(r.id)}
                   title="Set as default"
-                  className="text-text-muted hover:text-amber-500"
+                  className="text-[var(--text-tertiary)] hover:text-[var(--accent-orange)]"
                 >
                   <Star className="size-3" />
                 </button>
@@ -216,7 +216,7 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
               <button
                 onClick={() => handleDelete(r.id)}
                 title="Delete"
-                className="text-text-muted hover:text-red-500"
+                className="text-[var(--text-tertiary)] hover:text-[var(--accent-red)]"
               >
                 <Trash2 className="size-3" />
               </button>

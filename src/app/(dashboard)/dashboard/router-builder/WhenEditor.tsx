@@ -51,18 +51,18 @@ export function WhenEditor({ value, onChange, signalIds = [], projIds = [], dept
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-background/50 p-2.5",
-        depth === 0 && "bg-background"
+        "rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-tertiary)] p-2.5",
+        depth === 0 && "bg-[var(--bg-primary)]"
       )}
     >
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-[10.5px] uppercase tracking-[0.08em] text-subtle font-semibold">
+        <span className="text-[10.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold">
           {depth === 0 ? "when" : "clause"}
         </span>
         <select
           value={v.kind}
           onChange={(e) => setKind(e.target.value)}
-          className="h-7 rounded-md border border-border bg-card px-2 text-[12px]"
+          className="h-7 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-[12px]"
         >
           {WHEN_KINDS.map((k) => (
             <option key={k} value={k}>
@@ -75,7 +75,7 @@ export function WhenEditor({ value, onChange, signalIds = [], projIds = [], dept
           <button
             type="button"
             onClick={onRemove}
-            className="text-[11px] text-muted-foreground hover:text-destructive px-1.5 py-0.5"
+            className="text-[11px] text-[var(--text-tertiary)] hover:text-[var(--accent-red)] px-1.5 py-0.5"
             title="Remove clause"
           >
             Remove
@@ -84,7 +84,7 @@ export function WhenEditor({ value, onChange, signalIds = [], projIds = [], dept
       </div>
 
       {v.kind === "always" && (
-        <div className="text-[12px] text-muted-foreground italic px-1">
+        <div className="text-[12px] text-[var(--text-tertiary)] italic px-1">
           Matches every request (use only on the catch-all default route).
         </div>
       )}
@@ -109,7 +109,7 @@ export function WhenEditor({ value, onChange, signalIds = [], projIds = [], dept
       )}
 
       {v.kind === "not" && (
-        <div className="pl-3 border-l-2 border-border">
+        <div className="pl-3 border-l-2 border-[var(--bg-secondary)]">
           <WhenEditor
             value={v.child}
             signalIds={signalIds}
@@ -145,7 +145,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
         <select
           value={value.value === false ? "false" : "true"}
           onChange={(e) => onChange({ value: e.target.value === "true" })}
-          className="h-8 w-full rounded-md border border-border bg-card px-2 text-sm"
+          className="h-8 w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-sm"
         >
           <option value="true">true</option>
           <option value="false">false</option>
@@ -167,7 +167,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
             })
           }
           placeholder="a, b, c"
-          className="h-8 w-full rounded-md border border-border bg-card px-2 text-sm"
+          className="h-8 w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-sm"
         />
       );
     }
@@ -179,7 +179,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
           onChange={(e) =>
             onChange({ value: e.target.value === "" ? "" : Number(e.target.value) })
           }
-          className="h-8 w-full rounded-md border border-border bg-card px-2 text-sm"
+          className="h-8 w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-sm"
         />
       );
     }
@@ -189,7 +189,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
         value={value.value ?? ""}
         onChange={(e) => onChange({ value: e.target.value })}
         placeholder={op === "matches" ? "^URGENT" : isProjRef ? "low" : "vi"}
-        className="h-8 w-full rounded-md border border-border bg-card px-2 text-sm"
+        className="h-8 w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-sm"
       />
     );
   };
@@ -198,7 +198,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
     <div className="space-y-2">
       {/* Source selector: signal vs projection */}
       <div className="flex items-center gap-1.5 text-[11px]">
-        <span className="text-muted-foreground">ref</span>
+        <span className="text-[var(--text-tertiary)]">ref</span>
         <select
           value={isProjRef ? "proj" : "signal"}
           onChange={(e) => {
@@ -210,7 +210,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
               value: "",
             });
           }}
-          className="h-7 rounded-md border border-border bg-card px-2 text-xs"
+          className="h-7 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-xs"
         >
           <option value="signal">signal ({signalIds.length})</option>
           <option value="proj" disabled={projIds.length === 0}>
@@ -225,7 +225,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
           <select
             value={value.projId || ""}
             onChange={(e) => onChange({ projId: e.target.value, value: "" })}
-            className="h-8 w-full rounded-md border border-border bg-card px-2 text-sm"
+            className="h-8 w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-sm"
           >
             <option value="">— projection —</option>
             {projIds.map((id) => (
@@ -238,14 +238,14 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
             value={value.projId || ""}
             onChange={(e) => onChange({ projId: e.target.value, value: "" })}
             placeholder="projection name"
-            className="h-8 w-full rounded-md border border-border bg-card px-2 text-sm font-mono"
+            className="h-8 w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-sm font-mono"
           />
         )
       ) : signalIds.length > 0 ? (
         <select
           value={value.signalId || ""}
           onChange={(e) => onChange({ signalId: e.target.value, value: "" })}
-          className="h-8 w-full rounded-md border border-border bg-card px-2 text-sm"
+          className="h-8 w-full rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-sm"
         >
           <option value="">— signal —</option>
           {signalIds.map((id) => (
@@ -267,7 +267,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
         <select
           value={op}
           onChange={(e) => onChange({ op: e.target.value, value: "" })}
-          className="h-8 rounded-md border border-border bg-card px-2 text-sm"
+          className="h-8 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] text-[var(--text-primary)] px-2 text-sm"
         >
           {LEAF_OPERATORS.map((o) => (
             <option key={o.key} value={o.key}>{o.label}</option>
@@ -277,7 +277,7 @@ function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
       </div>
 
       {opSpec?.help && (
-        <div className="text-[10.5px] text-muted-foreground">{opSpec.help}</div>
+        <div className="text-[10.5px] text-[var(--text-tertiary)]">{opSpec.help}</div>
       )}
     </div>
   );
@@ -307,7 +307,7 @@ function GroupEditor({ value, signalIds, projIds, depth, onChange }: GroupEditor
   };
 
   return (
-    <div className="pl-3 border-l-2 border-border space-y-2">
+    <div className="pl-3 border-l-2 border-[var(--bg-secondary)] space-y-2">
       {(value.children || []).map((c: any, i: number) => (
         <WhenEditor
           key={i}
@@ -322,7 +322,7 @@ function GroupEditor({ value, signalIds, projIds, depth, onChange }: GroupEditor
       <button
         type="button"
         onClick={addChild}
-        className="text-[11.5px] text-primary hover:underline px-1"
+        className="text-[11.5px] text-[var(--accent-blue)] hover:underline px-1"
       >
         + add clause
       </button>

@@ -6,7 +6,7 @@ import { Boxes } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SIGNAL_TYPE_BY_KEY } from "../../catalog";
 import { ICONS } from "../../lib/constants";
-import { CARD_BASE, NodeBadge, NodeHandle } from "./shared";
+import { CARD_BASE, CARD_SELECTED, NodeBadge, NodeHandle } from "./shared";
 
 export function SignalNodeRenderer({
   data,
@@ -19,12 +19,7 @@ export function SignalNodeRenderer({
   const spec: any = (SIGNAL_TYPE_BY_KEY as any)[sig.type];
   const Icon = ICONS[spec?.icon] || Boxes;
   return (
-    <div
-      className={cn(
-        CARD_BASE,
-        selected ? "border-blue-400 ring-2 ring-blue-400/20" : "border-border"
-      )}
-    >
+    <div className={cn(CARD_BASE, selected && CARD_SELECTED)}>
       <NodeHandle type="target" side="target" color="#60a5fa" />
       <div className="px-3 py-2.5 flex items-start gap-2.5">
         <div className="size-8 rounded-lg grid place-items-center shrink-0 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-300">

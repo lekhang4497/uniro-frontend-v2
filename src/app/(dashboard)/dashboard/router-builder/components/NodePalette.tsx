@@ -22,12 +22,14 @@ export function Palette() {
   };
 
   return (
-    <aside className="hidden md:flex w-[240px] shrink-0 border-r border-border bg-card flex-col overflow-y-auto custom-scrollbar">
-      <div className="px-4 py-3 border-b border-border shrink-0">
-        <div className="text-[11px] uppercase tracking-[0.08em] text-subtle font-semibold">
+    <aside className="hidden md:flex w-[240px] shrink-0 border-r border-[var(--bg-secondary)] bg-[var(--bg-primary)] flex-col overflow-y-auto custom-scrollbar">
+      <div className="px-4 py-3 border-b border-[var(--bg-secondary)] shrink-0">
+        <div className="text-[11px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold">
           Palette
         </div>
-        <div className="text-[11px] text-muted-foreground mt-0.5">Drag onto canvas</div>
+        <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+          Drag onto canvas
+        </div>
       </div>
       <div className="flex-1 p-2 space-y-3">
         {/* Signal Extraction */}
@@ -37,7 +39,7 @@ export function Palette() {
             if (!items.length) return null;
             return (
               <div key={cat.key}>
-                <div className="px-2 py-1 text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground font-semibold">
+                <div className="px-2 py-1 text-[9.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold">
                   {cat.label}
                 </div>
                 {items.map((s: any) => {
@@ -64,7 +66,7 @@ export function Palette() {
             if (!items.length) return null;
             return (
               <div key={cat.key}>
-                <div className="px-2 py-1 text-[9.5px] uppercase tracking-[0.08em] text-muted-foreground font-semibold">
+                <div className="px-2 py-1 text-[9.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold">
                   {cat.label}
                 </div>
                 {items.map((p: any) => (
@@ -128,11 +130,11 @@ export function PaletteSection({
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="border border-border rounded-md overflow-hidden">
+    <div className="border border-[var(--bg-secondary)] rounded-[var(--radius)] overflow-hidden">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] uppercase tracking-[0.08em] text-subtle font-semibold hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold hover:bg-[var(--bg-tertiary)] transition-colors"
       >
         <span>{title}</span>
         <ChevronDown
@@ -159,13 +161,17 @@ export function PaletteItem({
     <div
       draggable
       onDragStart={onDragStart}
-      className="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-grab active:cursor-grabbing hover:bg-secondary mb-px"
+      className="flex items-center gap-2 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] p-2 cursor-grab active:cursor-grabbing hover:bg-[var(--bg-tertiary)] mb-1 transition-colors"
       title={description}
     >
-      <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
+      <Icon className="h-3.5 w-3.5 text-[var(--accent-blue)] shrink-0" />
       <div className="min-w-0 flex-1">
-        <div className="text-[11.5px] font-medium truncate">{label}</div>
-        <div className="text-[10px] text-muted-foreground truncate">{description}</div>
+        <div className="text-[11.5px] font-medium truncate text-[var(--text-primary)]">
+          {label}
+        </div>
+        <div className="text-[10px] text-[var(--text-secondary)] truncate">
+          {description}
+        </div>
       </div>
     </div>
   );

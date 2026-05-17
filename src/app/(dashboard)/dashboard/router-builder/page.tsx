@@ -36,7 +36,6 @@ import {
   Settings2,
   Upload,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { isConnectedMode } from "@/lib/supabase/config";
 
@@ -788,11 +787,11 @@ function Builder() {
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {/* Header */}
-      <header className="flex h-14 items-center gap-3 px-4 border-b border-border bg-card shrink-0">
+      <header className="flex h-14 items-center gap-3 px-4 border-b border-[var(--bg-secondary)] bg-[var(--bg-primary)] shrink-0">
         <Link
           href="/dashboard"
           aria-label="Back"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
         </Link>
@@ -802,17 +801,17 @@ function Builder() {
             value={state.name}
             onChange={(e) => setState((s: any) => ({ ...s, name: e.target.value }))}
             placeholder="router-name"
-            className="bg-transparent outline-none text-[16px] font-semibold tracking-tight min-w-0 max-w-[280px] truncate focus:bg-secondary rounded px-1.5 -mx-1.5"
+            className="bg-transparent outline-none text-[16px] font-semibold tracking-tight text-[var(--text-primary)] min-w-0 max-w-[280px] truncate focus:bg-[var(--bg-secondary)] rounded px-1.5 -mx-1.5"
           />
-          <Settings2 className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+          <Settings2 className="h-3.5 w-3.5 text-[var(--text-tertiary)] shrink-0" />
         </div>
-        <span className="inline-flex items-center rounded-md border border-border bg-secondary px-1.5 py-0.5 text-[10.5px] tracking-[0.06em] uppercase text-muted-foreground">
+        <span className="inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--bg-secondary)] bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[10.5px] tracking-[0.06em] uppercase text-[var(--text-secondary)]">
           Draft
         </span>
         {lint.errors.length > 0 && (
           <span
             title={lint.errors.join("\n")}
-            className="inline-flex items-center gap-1 rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10.5px] text-destructive cursor-help"
+            className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-[var(--accent-red)]/10 px-1.5 py-0.5 text-[10.5px] text-[var(--accent-red)] cursor-help"
           >
             <FileWarning className="h-3 w-3" />
             {lint.errors.length} error{lint.errors.length === 1 ? "" : "s"}
@@ -821,7 +820,7 @@ function Builder() {
         {lint.errors.length === 0 && lint.warnings.length > 0 && (
           <span
             title={lint.warnings.join("\n")}
-            className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10.5px] text-amber-600 dark:text-amber-400 cursor-help"
+            className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-[var(--accent-orange)]/10 px-1.5 py-0.5 text-[10.5px] text-[var(--accent-orange)] cursor-help"
           >
             <AlertTriangle className="h-3 w-3" />
             {lint.warnings.length} warning{lint.warnings.length === 1 ? "" : "s"}
@@ -835,44 +834,35 @@ function Builder() {
           onChange={onImportFile}
           className="hidden"
         />
-        <button
-          type="button"
+        <Button
+          variant={showYaml ? "secondary" : "ghost"}
+          size="sm"
           onClick={() => setShowYaml((v) => !v)}
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-lg px-2.5 h-8 text-[12.5px] transition-colors",
-            showYaml
-              ? "bg-secondary text-foreground"
-              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-          )}
           title="Toggle YAML preview"
         >
-          <Code2 className="h-3.5 w-3.5" />
-          <span>YAML</span>
-        </button>
+          <Code2 className="h-3.5 w-3.5 mr-1.5" />
+          YAML
+        </Button>
         {connectedMode && (
-          <button
-            type="button"
+          <Button
+            variant={showCloud ? "secondary" : "ghost"}
+            size="sm"
             onClick={() => setShowCloud((v) => !v)}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg px-2.5 h-8 text-[12.5px] transition-colors",
-              showCloud
-                ? "bg-secondary text-foreground"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-            )}
             title="Save / load routers from your Uniro account"
           >
-            <Cloud className="h-3.5 w-3.5" />
-            <span>Cloud</span>
-          </button>
+            <Cloud className="h-3.5 w-3.5 mr-1.5" />
+            Cloud
+          </Button>
         )}
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setShowSettings(true)}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
           aria-label="Router settings"
+          className="h-8 w-8"
         >
           <Settings className="h-4 w-4" />
-        </button>
+        </Button>
         <TemplatesMenu templates={TEMPLATES} onPick={onPickTemplate} />
         <Button variant="ghost" size="sm" onClick={onImportClick}>
           <Upload className="h-3.5 w-3.5 mr-1.5" />
@@ -896,7 +886,7 @@ function Builder() {
       </header>
 
       {importError && (
-        <div className="border-b border-destructive/30 bg-destructive/5 text-destructive px-4 py-2 text-[12.5px]">
+        <div className="border-b border-[var(--accent-red)]/30 bg-[var(--accent-red)]/5 text-[var(--accent-red)] px-4 py-2 text-[12.5px]">
           Import failed: {importError}
         </div>
       )}
