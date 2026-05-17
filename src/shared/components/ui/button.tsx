@@ -11,6 +11,7 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-[var(--accent-blue)] text-[var(--text-inverted)] hover:brightness-95",
+        // `primary` is an alias for `default`; kept for legacy callers.
         primary:
           "bg-[var(--accent-blue)] text-[var(--text-inverted)] hover:brightness-95",
         destructive:
