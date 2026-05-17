@@ -2,6 +2,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     /* === ChatGPT Apps SDK — Light === */
     --bg-primary: #FFFFFF;
     --bg-secondary: #E8E8E8;
@@ -60,6 +61,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --bg-primary: #212121;
     --bg-secondary: #303030;
     --bg-tertiary: #414141;
