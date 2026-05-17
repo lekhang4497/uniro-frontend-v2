@@ -1,16 +1,48 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  LayoutGrid,
+  ChevronDown,
+  Check,
+  Hourglass,
+  Ban,
+  CheckCircle2,
+  RotateCw,
+  Loader2,
+  Edit2,
+  Trash2,
+  AlertCircle,
+  CloudOff,
+} from "lucide-react";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import QuotaTable from "./QuotaTable";
 import Toggle from "@/shared/components/Toggle";
-import { parseQuotaData, calculatePercentage } from "./utils";
+import { parseQuotaData, calculatePercentage, type NormalizedQuota } from "./utils";
 import Card from "@/shared/components/Card";
 import { EditConnectionModal } from "@/shared/components";
+import type { ConnectionUpdates } from "@/shared/components/EditConnectionModal";
 import { USAGE_SUPPORTED_PROVIDERS, USAGE_APIKEY_PROVIDERS } from "@/shared/constants/providers";
 
+type Connection = {
+  id: string;
+  provider: string;
+  authType?: string;
+  isActive?: boolean;
+  name?: string;
+  email?: string;
+  [key: string]: unknown;
+};
+
+type QuotaEntry = {
+  quotas: NormalizedQuota[];
+  plan?: string | null;
+  message?: string | null;
+  raw?: unknown;
+};
+
 // Connection is eligible for the quota page when it uses OAuth or is an apikey provider whitelisted for quota
-const isUsageEligible = (conn) =>
+const isUsageEligible = (conn: Connection) =>
   USAGE_SUPPORTED_PROVIDERS.includes(conn.provider) &&
   (conn.authType === "oauth" || USAGE_APIKEY_PROVIDERS.includes(conn.provider));
 
@@ -19,40 +51,40 @@ const DEPLETED_QUOTA_THRESHOLD = 5; // percent
 const AUTO_REFRESH_STORAGE_KEY = "quotaAutoRefresh";
 
 export default function ProviderLimits() {
-  const [connections, setConnections] = useState([]);
-  const [quotaData, setQuotaData] = useState({});
-  const [loading, setLoading] = useState({});
-  const [errors, setErrors] = useState({});
-  const [autoRefresh, setAutoRefresh] = useState(() => {
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [quotaData, setQuotaData] = useState<Record<string, QuotaEntry>>({});
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const stored = window.localStorage.getItem(AUTO_REFRESH_STORAGE_KEY);
     return stored === null ? true : stored === "true";
   });
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [, setLastUpdated] = useState<Date | null>(null);
   const [refreshingAll, setRefreshingAll] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [connectionsLoading, setConnectionsLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState(null);
-  const [togglingId, setTogglingId] = useState(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedConnection, setSelectedConnection] = useState(null);
-  const [proxyPools, setProxyPools] = useState([]);
+  const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
+  const [proxyPools, setProxyPools] = useState<any[]>([]);
   const [providerFilter, setProviderFilter] = useState("all");
   const [expiringFirst, setExpiringFirst] = useState(false);
   const [providerMenuOpen, setProviderMenuOpen] = useState(false);
   const [bulkToggling, setBulkToggling] = useState(false);
 
-  const intervalRef = useRef(null);
-  const countdownRef = useRef(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Fetch all provider connections
-  const fetchConnections = useCallback(async () => {
+  const fetchConnections = useCallback(async (): Promise<Connection[]> => {
     try {
       const response = await fetch("/api/providers/client");
       if (!response.ok) throw new Error("Failed to fetch connections");
 
       const data = await response.json();
-      const connectionList = data.connections || [];
+      const connectionList: Connection[] = data.connections || [];
       setConnections(connectionList);
       return connectionList;
     } catch (error) {
@@ -63,7 +95,7 @@ export default function ProviderLimits() {
   }, []);
 
   // Fetch quota for a specific connection
-  const fetchQuota = useCallback(async (connectionId, provider) => {
+  const fetchQuota = useCallback(async (connectionId: string, provider: string) => {
     setLoading((prev) => ({ ...prev, [connectionId]: true }));
     setErrors((prev) => ({ ...prev, [connectionId]: null }));
 
@@ -79,7 +111,6 @@ export default function ProviderLimits() {
 
         // Handle different error types gracefully
         if (response.status === 404) {
-          // Connection not found - skip silently
           console.warn(
             `[ProviderLimits] Connection not found for ${provider}, skipping`,
           );
@@ -87,7 +118,6 @@ export default function ProviderLimits() {
         }
 
         if (response.status === 401) {
-          // Auth error - show message instead of throwing
           console.warn(
             `[ProviderLimits] Auth error for ${provider}:`,
             errorMsg,
@@ -108,7 +138,6 @@ export default function ProviderLimits() {
       const data = await response.json();
       console.log(`[ProviderLimits] Got quota for ${provider}:`, data);
 
-      // Parse quota data using provider-specific parser
       const parsedQuotas = parseQuotaData(provider, data);
 
       setQuotaData((prev) => ({
@@ -127,7 +156,7 @@ export default function ProviderLimits() {
       );
       setErrors((prev) => ({
         ...prev,
-        [connectionId]: error.message || "Failed to fetch quota",
+        [connectionId]: (error as Error).message || "Failed to fetch quota",
       }));
     } finally {
       setLoading((prev) => ({ ...prev, [connectionId]: false }));
@@ -136,14 +165,14 @@ export default function ProviderLimits() {
 
   // Refresh quota for a specific provider
   const refreshProvider = useCallback(
-    async (connectionId, provider) => {
+    async (connectionId: string, provider: string) => {
       await fetchQuota(connectionId, provider);
       setLastUpdated(new Date());
     },
     [fetchQuota],
   );
 
-  const handleDeleteConnection = useCallback(async (id) => {
+  const handleDeleteConnection = useCallback(async (id: string) => {
     if (!confirm("Delete this connection?")) return;
     setDeletingId(id);
     try {
@@ -173,7 +202,7 @@ export default function ProviderLimits() {
     }
   }, []);
 
-  const handleToggleConnectionActive = useCallback(async (id, isActive) => {
+  const handleToggleConnectionActive = useCallback(async (id: string, isActive: boolean) => {
     setTogglingId(id);
     try {
       const res = await fetch(`/api/providers/${id}`, {
@@ -194,7 +223,7 @@ export default function ProviderLimits() {
   }, []);
 
   const handleUpdateConnection = useCallback(
-    async (formData) => {
+    async (formData: ConnectionUpdates) => {
       if (!selectedConnection?.id) return;
       const connectionId = selectedConnection.id;
       const provider = selectedConnection.provider;
@@ -244,7 +273,6 @@ export default function ProviderLimits() {
     try {
       const conns = await fetchConnections();
 
-      // Filter eligible connections (OAuth + whitelisted apikey)
       const eligibleConnections = conns.filter(isUsageEligible);
 
       await Promise.all(
@@ -259,7 +287,7 @@ export default function ProviderLimits() {
     }
   }, [refreshingAll, fetchConnections, fetchQuota]);
 
-  // Initial load: fetch connections first so cards render immediately, then fetch quotas
+  // Initial load
   useEffect(() => {
     const initializeData = async () => {
       setConnectionsLoading(true);
@@ -268,8 +296,7 @@ export default function ProviderLimits() {
 
       const eligibleConnections = conns.filter(isUsageEligible);
 
-      // Mark all as loading before fetching
-      const loadingState = {};
+      const loadingState: Record<string, boolean> = {};
       eligibleConnections.forEach((conn) => {
         loadingState[conn.id] = true;
       });
@@ -304,12 +331,10 @@ export default function ProviderLimits() {
       return;
     }
 
-    // Main refresh interval
     intervalRef.current = setInterval(() => {
       refreshAll();
     }, REFRESH_INTERVAL_MS);
 
-    // Countdown interval
     countdownRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) return 60;
@@ -323,7 +348,7 @@ export default function ProviderLimits() {
     };
   }, [autoRefresh, refreshAll]);
 
-  // Pause auto-refresh when tab is hidden (Page Visibility API)
+  // Pause auto-refresh when tab is hidden
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -336,7 +361,6 @@ export default function ProviderLimits() {
           countdownRef.current = null;
         }
       } else if (autoRefresh) {
-        // Resume auto-refresh when tab becomes visible
         intervalRef.current = setInterval(refreshAll, REFRESH_INTERVAL_MS);
         countdownRef.current = setInterval(() => {
           setCountdown((prev) => (prev <= 1 ? 60 : prev - 1));
@@ -350,22 +374,21 @@ export default function ProviderLimits() {
     };
   }, [autoRefresh, refreshAll]);
 
-  // Filter eligible connections (OAuth + whitelisted apikey)
   const filteredConnections = connections.filter(isUsageEligible);
 
   const providerFilteredConnections = filteredConnections.filter(
     (conn) => providerFilter === "all" || conn.provider === providerFilter,
   );
 
-  const getEarliestResetTime = (conn) => {
+  const getEarliestResetTime = (conn: Connection) => {
     const resetTimes = (quotaData[conn.id]?.quotas || [])
-      .map((quota) => quota.resetAt ? new Date(quota.resetAt).getTime() : Number.POSITIVE_INFINITY)
+      .map((quota) =>
+        quota.resetAt ? new Date(quota.resetAt).getTime() : Number.POSITIVE_INFINITY,
+      )
       .filter((time) => Number.isFinite(time));
     return resetTimes.length > 0 ? Math.min(...resetTimes) : Number.POSITIVE_INFINITY;
   };
 
-  // Sort providers by USAGE_SUPPORTED_PROVIDERS order, then alphabetically.
-  // Optionally surface accounts with quotas expiring soonest first.
   const sortedConnections = [...providerFilteredConnections].sort((a, b) => {
     if (expiringFirst) {
       const expiryDiff = getEarliestResetTime(a) - getEarliestResetTime(b);
@@ -377,8 +400,7 @@ export default function ProviderLimits() {
     return a.provider.localeCompare(b.provider);
   });
 
-  // Connection is depleted when any quota entry hit the threshold
-  const isConnectionDepleted = (conn) => {
+  const isConnectionDepleted = (conn: Connection) => {
     const quotas = quotaData[conn.id]?.quotas;
     if (!quotas?.length) return false;
     return quotas.some((q) => {
@@ -388,7 +410,7 @@ export default function ProviderLimits() {
   };
 
   const bulkSetActive = useCallback(
-    async (targetIds, isActive) => {
+    async (targetIds: string[], isActive: boolean) => {
       if (!targetIds.length || bulkToggling) return;
       setBulkToggling(true);
       try {
@@ -427,41 +449,23 @@ export default function ProviderLimits() {
     bulkSetActive(ids, true);
   };
 
-  const providerOptions = Array.from(new Set(filteredConnections.map((conn) => conn.provider))).sort();
-  const selectedProviderLabel = providerFilter === "all" ? "All providers" : providerFilter;
-
-  // Calculate summary stats
-  const totalProviders = sortedConnections.length;
-  const activeWithLimits = Object.values(quotaData).filter(
-    (data) => data?.quotas?.length > 0,
-  ).length;
-
-  // Count low quotas (remaining < 30%)
-  const lowQuotasCount = Object.values(quotaData).reduce((count, data) => {
-    if (!data?.quotas) return count;
-
-    const hasLowQuota = data.quotas.some((quota) => {
-      const percentage = calculatePercentage(quota.used, quota.total);
-      return percentage < 30 && quota.total > 0;
-    });
-
-    return count + (hasLowQuota ? 1 : 0);
-  }, 0);
+  const providerOptions = Array.from(
+    new Set(filteredConnections.map((conn) => conn.provider)),
+  ).sort();
+  const selectedProviderLabel =
+    providerFilter === "all" ? "All providers" : providerFilter;
 
   // Empty state
   if (!connectionsLoading && sortedConnections.length === 0) {
     return (
       <Card padding="lg">
         <div className="text-center py-12">
-          <span className="material-symbols-outlined text-[64px] text-text-muted opacity-20">
-            cloud_off
-          </span>
-          <h3 className="mt-4 text-lg font-semibold text-text-primary">
+          <CloudOff size={64} className="mx-auto text-[var(--text-secondary)] opacity-20" />
+          <h3 className="mt-4 text-lg font-semibold text-[var(--text-primary)]">
             No Providers Connected
           </h3>
-          <p className="mt-2 text-sm text-text-muted max-w-md mx-auto">
-            Connect to providers with OAuth to track your API quota limits and
-            usage.
+          <p className="mt-2 text-sm text-[var(--text-secondary)] max-w-md mx-auto">
+            Connect to providers with OAuth to track your API quota limits and usage.
           </p>
         </div>
       </Card>
@@ -473,9 +477,7 @@ export default function ProviderLimits() {
       {/* Header Controls */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-          <h2 className="text-xl font-semibold text-text-primary">
-            Provider Limits
-          </h2>
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">Provider Limits</h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -483,14 +485,14 @@ export default function ProviderLimits() {
             <button
               type="button"
               onClick={() => setProviderMenuOpen((prev) => !prev)}
-              className="flex h-8 items-center justify-between gap-1 rounded-lg border border-black/10 bg-black/[0.02] px-2 text-xs text-text-primary transition-colors hover:bg-black/5 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/10"
+              className="flex h-8 items-center justify-between gap-1 rounded-[var(--radius-md)] border border-[var(--bg-secondary)] bg-[var(--bg-secondary)]/40 px-2 text-xs text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-secondary)]"
               aria-haspopup="menu"
               aria-expanded={providerMenuOpen}
               title="Filter quota providers"
             >
               <span className="flex min-w-0 items-center gap-1.5">
                 {providerFilter === "all" ? (
-                  <span className="material-symbols-outlined text-[14px] text-text-muted">apps</span>
+                  <LayoutGrid size={14} className="text-[var(--text-secondary)]" />
                 ) : (
                   <ProviderIcon
                     src={`/providers/${providerFilter}.png`}
@@ -500,9 +502,11 @@ export default function ProviderLimits() {
                     fallbackText={providerFilter.slice(0, 2).toUpperCase()}
                   />
                 )}
-                <span className="truncate capitalize hidden lg:inline">{selectedProviderLabel}</span>
+                <span className="truncate capitalize hidden lg:inline">
+                  {selectedProviderLabel}
+                </span>
               </span>
-              <span className="material-symbols-outlined text-[14px] text-text-muted">expand_more</span>
+              <ChevronDown size={14} className="text-[var(--text-secondary)]" />
             </button>
 
             {providerMenuOpen && (
@@ -513,24 +517,30 @@ export default function ProviderLimits() {
                   aria-label="Close provider filter"
                   onClick={() => setProviderMenuOpen(false)}
                 />
-                <div className="absolute left-0 z-40 mt-2 w-64 overflow-hidden rounded-2xl border border-black/10 bg-surface/95 p-1.5 shadow-xl shadow-black/10 backdrop-blur dark:border-white/10 dark:bg-surface/95 sm:w-72">
+                <div className="absolute left-0 z-40 mt-2 w-64 overflow-hidden rounded-2xl border border-[var(--bg-secondary)] bg-[var(--bg-primary)]/95 p-1.5 shadow-xl shadow-black/10 backdrop-blur sm:w-72">
                   <button
                     type="button"
-                    onClick={() => { setProviderFilter("all"); setProviderMenuOpen(false); }}
-                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${providerFilter === "all" ? "bg-primary/10 text-primary" : "text-text-primary hover:bg-black/5 dark:hover:bg-white/10"}`}
+                    onClick={() => {
+                      setProviderFilter("all");
+                      setProviderMenuOpen(false);
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${providerFilter === "all" ? "bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]" : "text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"}`}
                   >
-                    <span className="material-symbols-outlined text-[22px]">apps</span>
+                    <LayoutGrid size={22} />
                     <span className="font-medium">All providers</span>
-                    {providerFilter === "all" && <span className="material-symbols-outlined ml-auto text-[20px]">check</span>}
+                    {providerFilter === "all" && <Check size={20} className="ml-auto" />}
                   </button>
-                  <div className="my-1 h-px bg-black/10 dark:bg-white/10" />
+                  <div className="my-1 h-px bg-[var(--bg-secondary)]" />
                   <div className="max-h-72 overflow-y-auto pr-1">
                     {providerOptions.map((provider) => (
                       <button
                         key={provider}
                         type="button"
-                        onClick={() => { setProviderFilter(provider); setProviderMenuOpen(false); }}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${providerFilter === provider ? "bg-primary/10 text-primary" : "text-text-primary hover:bg-black/5 dark:hover:bg-white/10"}`}
+                        onClick={() => {
+                          setProviderFilter(provider);
+                          setProviderMenuOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${providerFilter === provider ? "bg-[var(--accent-blue)]/10 text-[var(--accent-blue)]" : "text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"}`}
                       >
                         <ProviderIcon
                           src={`/providers/${provider}.png`}
@@ -540,7 +550,9 @@ export default function ProviderLimits() {
                           fallbackText={provider.slice(0, 2).toUpperCase()}
                         />
                         <span className="font-medium capitalize">{provider}</span>
-                        {providerFilter === provider && <span className="material-symbols-outlined ml-auto text-[20px]">check</span>}
+                        {providerFilter === provider && (
+                          <Check size={20} className="ml-auto" />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -551,10 +563,10 @@ export default function ProviderLimits() {
           <button
             type="button"
             onClick={() => setExpiringFirst((prev) => !prev)}
-            className={`flex h-8 shrink-0 items-center gap-1 rounded-lg border px-2 text-xs transition-colors ${expiringFirst ? "border-amber-500/40 bg-amber-500/10 text-amber-500" : "border-black/10 text-text-primary hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"}`}
+            className={`flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-md)] border px-2 text-xs transition-colors ${expiringFirst ? "border-[var(--accent-orange)]/40 bg-[var(--accent-orange)]/10 text-[var(--accent-orange)]" : "border-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"}`}
             title="Sort accounts by earliest quota reset time"
           >
-            <span className="material-symbols-outlined text-[14px]">hourglass_top</span>
+            <Hourglass size={14} />
             <span className="hidden sm:inline">Expiring first</span>
           </button>
 
@@ -563,10 +575,10 @@ export default function ProviderLimits() {
             type="button"
             onClick={handleDisableDepleted}
             disabled={bulkToggling}
-            className="flex h-8 shrink-0 items-center gap-1 rounded-lg border border-red-500/30 px-2 text-xs text-red-500 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+            className="flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-md)] border border-[var(--accent-red)]/30 px-2 text-xs text-[var(--accent-red)] transition-colors hover:bg-[var(--accent-red)]/10 disabled:opacity-50"
             title="Disable connections with depleted quota (within current filter)"
           >
-            <span className="material-symbols-outlined text-[14px]">block</span>
+            <Ban size={14} />
             <span className="hidden sm:inline">Turn off Empty</span>
           </button>
 
@@ -575,29 +587,29 @@ export default function ProviderLimits() {
             type="button"
             onClick={handleEnableAvailable}
             disabled={bulkToggling}
-            className="flex h-8 shrink-0 items-center gap-1 rounded-lg border border-emerald-500/30 px-2 text-xs text-emerald-500 transition-colors hover:bg-emerald-500/10 disabled:opacity-50"
+            className="flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-md)] border border-[var(--accent-green)]/30 px-2 text-xs text-[var(--accent-green)] transition-colors hover:bg-[var(--accent-green)]/10 disabled:opacity-50"
             title="Enable connections that still have quota (within current filter)"
           >
-            <span className="material-symbols-outlined text-[14px]">check_circle</span>
+            <CheckCircle2 size={14} />
             <span className="hidden sm:inline">Turn on Available</span>
           </button>
 
           {/* Auto-refresh toggle */}
           <button
             onClick={() => setAutoRefresh((prev) => !prev)}
-            className="flex h-8 shrink-0 items-center gap-1 rounded-lg border border-black/10 px-2 text-xs transition-colors hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
+            className="flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-md)] border border-[var(--bg-secondary)] px-2 text-xs transition-colors hover:bg-[var(--bg-secondary)]"
             title={autoRefresh ? "Disable auto-refresh" : "Enable auto-refresh"}
           >
             <span
-              className={`material-symbols-outlined text-[14px] ${
-                autoRefresh ? "text-primary" : "text-text-muted"
-              }`}
+              className={`text-[10px] ${autoRefresh ? "text-[var(--accent-blue)]" : "text-[var(--text-secondary)]"}`}
             >
-              {autoRefresh ? "toggle_on" : "toggle_off"}
+              {autoRefresh ? "ON" : "OFF"}
             </span>
-            <span className="hidden text-text-primary sm:inline">Auto-refresh</span>
+            <span className="hidden text-[var(--text-primary)] sm:inline">Auto-refresh</span>
             {autoRefresh && (
-              <span className="text-[10px] text-text-muted tabular-nums">({countdown}s)</span>
+              <span className="text-[10px] text-[var(--text-secondary)] tabular-nums">
+                ({countdown}s)
+              </span>
             )}
           </button>
 
@@ -606,10 +618,10 @@ export default function ProviderLimits() {
             type="button"
             onClick={refreshAll}
             disabled={refreshingAll}
-            className="flex h-8 shrink-0 items-center gap-1 rounded-lg border border-black/10 px-2 text-xs text-text-primary transition-colors hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5 disabled:opacity-50"
+            className="flex h-8 shrink-0 items-center gap-1 rounded-[var(--radius-md)] border border-[var(--bg-secondary)] px-2 text-xs text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-secondary)] disabled:opacity-50"
             title="Refresh all"
           >
-            <span className={`material-symbols-outlined text-[14px] ${refreshingAll ? "animate-spin" : ""}`}>refresh</span>
+            <RotateCw size={14} className={refreshingAll ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
@@ -621,7 +633,6 @@ export default function ProviderLimits() {
           const isLoading = loading[conn.id];
           const error = errors[conn.id];
 
-          // Use table layout for all providers
           const isInactive = conn.isActive === false;
           const rowBusy = deletingId === conn.id || togglingId === conn.id;
 
@@ -631,7 +642,7 @@ export default function ProviderLimits() {
               padding="none"
               className={`min-w-0 ${isInactive ? "opacity-60" : ""}`}
             >
-              <div className="px-3 py-2 border-b border-black/10 dark:border-white/10">
+              <div className="px-3 py-2 border-b border-[var(--bg-secondary)]">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="w-8 h-8 shrink-0 rounded-md flex items-center justify-center overflow-hidden">
@@ -640,20 +651,23 @@ export default function ProviderLimits() {
                         alt={conn.provider}
                         size={32}
                         className="object-contain"
-                        fallbackText={
-                          conn.provider?.slice(0, 2).toUpperCase() || "PR"
-                        }
+                        fallbackText={conn.provider?.slice(0, 2).toUpperCase() || "PR"}
                       />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-sm font-semibold text-text-primary capitalize truncate">
+                      <h3 className="text-sm font-semibold text-[var(--text-primary)] capitalize truncate">
                         {conn.provider}
                       </h3>
                       {(() => {
-                        const isEmail = (v) => typeof v === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-                        const label = isEmail(conn.email) ? conn.email : (isEmail(conn.name) ? conn.name : conn.name);
+                        const isEmail = (v: unknown) =>
+                          typeof v === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+                        const label = isEmail(conn.email)
+                          ? conn.email
+                          : isEmail(conn.name)
+                          ? conn.name
+                          : conn.name;
                         return label ? (
-                          <p className="text-xs text-text-muted truncate">{label}</p>
+                          <p className="text-xs text-[var(--text-secondary)] truncate">{label}</p>
                         ) : null;
                       })()}
                     </div>
@@ -664,14 +678,13 @@ export default function ProviderLimits() {
                       type="button"
                       onClick={() => refreshProvider(conn.id, conn.provider)}
                       disabled={isLoading || rowBusy}
-                      className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+                      className="p-1.5 rounded-[var(--radius-md)] hover:bg-[var(--bg-secondary)] transition-colors disabled:opacity-50"
                       title="Refresh quota"
                     >
-                      <span
-                        className={`material-symbols-outlined text-[18px] text-text-muted ${isLoading ? "animate-spin" : ""}`}
-                      >
-                        refresh
-                      </span>
+                      <RotateCw
+                        size={18}
+                        className={`text-[var(--text-secondary)] ${isLoading ? "animate-spin" : ""}`}
+                      />
                     </button>
                     <button
                       type="button"
@@ -680,39 +693,32 @@ export default function ProviderLimits() {
                         setShowEditModal(true);
                       }}
                       disabled={rowBusy}
-                      className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-primary transition-colors disabled:opacity-50"
+                      className="p-1.5 rounded-[var(--radius-md)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition-colors disabled:opacity-50"
                       title="Edit connection"
                     >
-                      <span className="material-symbols-outlined text-[18px]">
-                        edit
-                      </span>
+                      <Edit2 size={18} />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteConnection(conn.id)}
                       disabled={rowBusy}
-                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-500 transition-colors disabled:opacity-50"
+                      className="p-1.5 rounded-[var(--radius-md)] hover:bg-[var(--accent-red)]/10 text-[var(--accent-red)] transition-colors disabled:opacity-50"
                       title="Delete connection"
                     >
-                      <span
-                        className={`material-symbols-outlined text-[18px] ${deletingId === conn.id ? "animate-pulse" : ""}`}
-                      >
-                        delete
-                      </span>
+                      <Trash2
+                        size={18}
+                        className={deletingId === conn.id ? "animate-pulse" : ""}
+                      />
                     </button>
                     <div
                       className="inline-flex items-center pl-0.5"
-                      title={
-                        (conn.isActive ?? true)
-                          ? "Disable connection"
-                          : "Enable connection"
-                      }
+                      title={(conn.isActive ?? true) ? "Disable connection" : "Enable connection"}
                     >
                       <Toggle
                         size="sm"
                         checked={conn.isActive ?? true}
                         disabled={rowBusy}
-                        onChange={(nextActive) =>
+                        onChange={(nextActive: boolean) =>
                           handleToggleConnectionActive(conn.id, nextActive)
                         }
                       />
@@ -723,21 +729,17 @@ export default function ProviderLimits() {
 
               <div className="px-2 py-1.5">
                 {isLoading ? (
-                  <div className="text-center py-5 text-text-muted">
-                    <span className="material-symbols-outlined text-[28px] animate-spin">
-                      progress_activity
-                    </span>
+                  <div className="text-center py-5 text-[var(--text-secondary)]">
+                    <Loader2 size={28} className="mx-auto animate-spin" />
                   </div>
                 ) : error ? (
                   <div className="text-center py-5">
-                    <span className="material-symbols-outlined text-[28px] text-red-500">
-                      error
-                    </span>
-                    <p className="mt-1.5 text-xs text-text-muted">{error}</p>
+                    <AlertCircle size={28} className="mx-auto text-[var(--accent-red)]" />
+                    <p className="mt-1.5 text-xs text-[var(--text-secondary)]">{error}</p>
                   </div>
                 ) : quota?.message ? (
                   <div className="text-center py-5">
-                    <p className="text-xs text-text-muted">{quota.message}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{quota.message}</p>
                   </div>
                 ) : (
                   <QuotaTable quotas={quota?.quotas} compact />

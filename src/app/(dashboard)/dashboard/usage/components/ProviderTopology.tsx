@@ -1,13 +1,8 @@
 "use client";
 
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
-import PropTypes from "prop-types";
-import {
-  ReactFlow,
-  Handle,
-  Position,
-  Controls,
-} from "@xyflow/react";
+import { ReactFlow, Handle, Position, Controls } from "@xyflow/react";
+import type { Node, Edge, ReactFlowInstance } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 
@@ -15,24 +10,39 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 const FE_ACTIVE_TIMEOUT_MS = 60000;
 const FE_ACTIVE_TICK_MS = 1000;
 
-function getProviderConfig(providerId) {
-  return AI_PROVIDERS[providerId] || { color: "#6b7280", name: providerId };
+type ProviderConfig = { color: string; name: string; textIcon?: string };
+
+function getProviderConfig(providerId: string): ProviderConfig {
+  return (
+    ((AI_PROVIDERS as Record<string, ProviderConfig>)[providerId]) || {
+      color: "#6b7280",
+      name: providerId,
+    }
+  );
 }
 
 // Use local provider images from /public/providers/
-function getProviderImageUrl(providerId) {
+function getProviderImageUrl(providerId: string): string {
   return `/providers/${providerId}.png`;
 }
 
-// Custom provider node - rectangle with image + name
-function ProviderNode({ data }) {
+type ProviderNodeData = {
+  label: string;
+  color: string;
+  imageUrl: string;
+  textIcon: string;
+  active: boolean;
+};
+
+// Custom provider node — Anthropic-handoff: subtle border, accent on active
+function ProviderNode({ data }: { data: ProviderNodeData }) {
   const { label, color, imageUrl, textIcon, active } = data;
   const [imgError, setImgError] = useState(false);
   return (
     <div
-      className="flex items-center gap-2.5 px-4 py-2.5 rounded-lg border-2 transition-all duration-300 bg-bg"
+      className="flex items-center gap-2.5 px-4 py-2.5 rounded-[var(--radius-md)] border transition-all duration-300 bg-[var(--bg-primary)]"
       style={{
-        borderColor: active ? color : "var(--color-border)",
+        borderColor: active ? color : "var(--bg-secondary)",
         boxShadow: active ? `0 0 16px ${color}40` : "none",
         minWidth: "150px",
       }}
@@ -48,16 +58,24 @@ function ProviderNode({ data }) {
         style={{ backgroundColor: `${color}15` }}
       >
         {!imgError ? (
-          <img src={imageUrl} alt={label} className="w-6 h-6 rounded-sm object-contain" onError={() => setImgError(true)} />
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={label}
+            className="w-6 h-6 rounded-sm object-contain"
+            onError={() => setImgError(true)}
+          />
         ) : (
-          <span className="text-sm font-bold" style={{ color }}>{textIcon}</span>
+          <span className="text-sm font-bold" style={{ color }}>
+            {textIcon}
+          </span>
         )}
       </div>
 
       {/* Provider name */}
       <span
         className="text-base font-medium truncate"
-        style={{ color: active ? color : "var(--color-text)" }}
+        style={{ color: active ? color : "var(--text-primary)" }}
       >
         {label}
       </span>
@@ -65,31 +83,36 @@ function ProviderNode({ data }) {
       {/* Active indicator */}
       {active && (
         <span className="relative flex h-2 w-2 shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: color }} />
-          <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: color }} />
+          <span
+            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+            style={{ backgroundColor: color }}
+          />
+          <span
+            className="relative inline-flex rounded-full h-2 w-2"
+            style={{ backgroundColor: color }}
+          />
         </span>
       )}
     </div>
   );
 }
 
-ProviderNode.propTypes = {
-  data: PropTypes.object.isRequired,
-};
+type RouterNodeData = { activeCount: number };
 
-// Center Uniro node
-function RouterNode({ data }) {
+// Center Uniro node — accent-blue ring when active
+function RouterNode({ data }: { data: RouterNodeData }) {
   return (
-    <div className="flex items-center justify-center px-5 py-3 rounded-xl border-2 border-primary bg-primary/5 shadow-md min-w-[130px]">
+    <div className="flex items-center justify-center px-5 py-3 rounded-[var(--radius-md)] border-2 border-[var(--accent-blue)] bg-[var(--accent-blue)]/5 shadow-sm min-w-[130px]">
       <Handle type="source" position={Position.Top} id="top" className="!bg-transparent !border-0 !w-0 !h-0" />
       <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-transparent !border-0 !w-0 !h-0" />
       <Handle type="source" position={Position.Left} id="left" className="!bg-transparent !border-0 !w-0 !h-0" />
       <Handle type="source" position={Position.Right} id="right" className="!bg-transparent !border-0 !w-0 !h-0" />
 
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/favicon.svg" alt="Uniro" className="w-6 h-6 mr-2" />
-      <span className="text-sm font-bold text-primary">Uniro</span>
+      <span className="text-sm font-bold text-[var(--accent-blue)]">Uniro</span>
       {data.activeCount > 0 && (
-        <span className="ml-2 px-1.5 py-0.5 rounded-full bg-primary text-white text-xs font-bold">
+        <span className="ml-2 px-1.5 py-0.5 rounded-full bg-[var(--accent-blue)] text-[var(--text-inverted)] text-xs font-bold">
           {data.activeCount}
         </span>
       )}
@@ -97,14 +120,21 @@ function RouterNode({ data }) {
   );
 }
 
-RouterNode.propTypes = {
-  data: PropTypes.object.isRequired,
+const nodeTypes = { provider: ProviderNode, router: RouterNode } as const;
+
+type ProviderEntry = {
+  id?: string;
+  provider: string;
+  name?: string;
 };
 
-const nodeTypes = { provider: ProviderNode, router: RouterNode };
-
 // Place N nodes evenly along an ellipse around the router center.
-function buildLayout(providers, activeSet, lastSet, errorSet) {
+function buildLayout(
+  providers: ProviderEntry[],
+  activeSet: Set<string>,
+  lastSet: Set<string>,
+  errorSet: Set<string>,
+): { nodes: Node[]; edges: Edge[] } {
   const nodeW = 180;
   const nodeH = 30;
   const routerW = 120;
@@ -113,19 +143,26 @@ function buildLayout(providers, activeSet, lastSet, errorSet) {
 
   const count = providers.length;
 
-  // Compute rx so arc spacing between nodes >= nodeW + nodeGap
   const minRx = ((nodeW + nodeGap) * count) / (2 * Math.PI);
   const rx = Math.max(320, minRx);
-  const ry = Math.max(200, rx * 0.55); // ellipse ratio ~0.55
+  const ry = Math.max(200, rx * 0.55);
   if (count === 0) {
     return {
-      nodes: [{ id: "router", type: "router", position: { x: 0, y: 0 }, data: { activeCount: 0 }, draggable: false }],
+      nodes: [
+        {
+          id: "router",
+          type: "router",
+          position: { x: 0, y: 0 },
+          data: { activeCount: 0 },
+          draggable: false,
+        },
+      ],
       edges: [],
     };
   }
 
-  const nodes = [];
-  const edges = [];
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
 
   nodes.push({
     id: "router",
@@ -135,11 +172,11 @@ function buildLayout(providers, activeSet, lastSet, errorSet) {
     draggable: false,
   });
 
-  const edgeStyle = (active, last, error, color) => {
-    if (error) return { stroke: "#ef4444", strokeWidth: 2.5, opacity: 0.9 };
-    if (active) return { stroke: "#22c55e", strokeWidth: 2.5, opacity: 0.9 };
-    if (last) return { stroke: "#f59e0b", strokeWidth: 2, opacity: 0.7 };
-    return { stroke: "var(--color-border)", strokeWidth: 1, opacity: 0.3 };
+  const edgeStyle = (active: boolean, last: boolean, error: boolean) => {
+    if (error) return { stroke: "var(--accent-red)", strokeWidth: 2.5, opacity: 0.9 };
+    if (active) return { stroke: "var(--accent-green)", strokeWidth: 2.5, opacity: 0.9 };
+    if (last) return { stroke: "var(--accent-orange)", strokeWidth: 2, opacity: 0.7 };
+    return { stroke: "var(--bg-secondary)", strokeWidth: 1, opacity: 0.4 };
   };
 
   providers.forEach((p, i) => {
@@ -148,7 +185,7 @@ function buildLayout(providers, activeSet, lastSet, errorSet) {
     const last = !active && lastSet.has(p.provider?.toLowerCase());
     const error = !active && errorSet.has(p.provider?.toLowerCase());
     const nodeId = `provider-${p.provider}`;
-    const data = {
+    const data: ProviderNodeData = {
       label: (config.name !== p.provider ? config.name : null) || p.name || p.provider,
       color: config.color || "#6b7280",
       imageUrl: getProviderImageUrl(p.provider),
@@ -161,16 +198,23 @@ function buildLayout(providers, activeSet, lastSet, errorSet) {
     const cx = rx * Math.cos(angle);
     const cy = ry * Math.sin(angle);
 
-    // Pick router handle closest to the node direction
-    let sourceHandle, targetHandle;
-    if (Math.abs(angle + Math.PI / 2) < Math.PI / 4 || Math.abs(angle - 3 * Math.PI / 2) < Math.PI / 4) {
-      sourceHandle = "top"; targetHandle = "bottom";
+    let sourceHandle: string;
+    let targetHandle: string;
+    if (
+      Math.abs(angle + Math.PI / 2) < Math.PI / 4 ||
+      Math.abs(angle - 3 * Math.PI / 2) < Math.PI / 4
+    ) {
+      sourceHandle = "top";
+      targetHandle = "bottom";
     } else if (Math.abs(angle - Math.PI / 2) < Math.PI / 4) {
-      sourceHandle = "bottom"; targetHandle = "top";
+      sourceHandle = "bottom";
+      targetHandle = "top";
     } else if (cx > 0) {
-      sourceHandle = "right"; targetHandle = "left";
+      sourceHandle = "right";
+      targetHandle = "left";
     } else {
-      sourceHandle = "left"; targetHandle = "right";
+      sourceHandle = "left";
+      targetHandle = "right";
     }
 
     nodes.push({
@@ -188,28 +232,48 @@ function buildLayout(providers, activeSet, lastSet, errorSet) {
       target: nodeId,
       targetHandle,
       animated: active,
-      style: edgeStyle(active, last, error, config.color),
+      style: edgeStyle(active, last, error),
     });
   });
 
   return { nodes, edges };
 }
 
-export default function ProviderTopology({ providers = [], activeRequests = [], lastProvider = "", errorProvider = "" }) {
+export interface ProviderTopologyProps {
+  providers?: ProviderEntry[];
+  activeRequests?: Array<{ provider?: string; model?: string; account?: string }>;
+  lastProvider?: string;
+  errorProvider?: string;
+}
+
+export default function ProviderTopology({
+  providers = [],
+  activeRequests = [],
+  lastProvider = "",
+  errorProvider = "",
+}: ProviderTopologyProps) {
   // Serialize to stable string keys so useMemo only re-runs when values actually change
   const activeKey = useMemo(
-    () => activeRequests.map((r) => r.provider?.toLowerCase()).filter(Boolean).sort().join(","),
-    [activeRequests]
+    () =>
+      activeRequests
+        .map((r) => r.provider?.toLowerCase())
+        .filter(Boolean)
+        .sort()
+        .join(","),
+    [activeRequests],
   );
   const lastKey = lastProvider?.toLowerCase() || "";
   const errorKey = errorProvider?.toLowerCase() || "";
 
-  const rawActiveSet = useMemo(() => new Set(activeKey ? activeKey.split(",") : []), [activeKey]);
+  const rawActiveSet = useMemo(
+    () => new Set(activeKey ? activeKey.split(",") : []),
+    [activeKey],
+  );
   const lastSet = useMemo(() => new Set(lastKey ? [lastKey] : []), [lastKey]);
   const errorSet = useMemo(() => new Set(errorKey ? [errorKey] : []), [errorKey]);
 
   // Track firstSeen per active provider; drop provider if running too long (BE stuck)
-  const firstSeenRef = useRef({});
+  const firstSeenRef = useRef<Record<string, number>>({});
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -231,29 +295,33 @@ export default function ProviderTopology({ providers = [], activeRequests = [], 
 
   const activeSet = useMemo(() => {
     const now = Date.now();
-    const filtered = new Set();
+    const filtered = new Set<string>();
     for (const p of rawActiveSet) {
       const ts = firstSeenRef.current[p];
       if (!ts || now - ts < FE_ACTIVE_TIMEOUT_MS) filtered.add(p);
     }
     return filtered;
-  }, [rawActiveSet, tick]);
+  }, [rawActiveSet, tick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { nodes, edges } = useMemo(
     () => buildLayout(providers, activeSet, lastSet, errorSet),
-    [providers, activeSet, lastKey, errorKey]
+    [providers, activeSet, lastSet, errorSet],
   );
 
   // Stable key — only remount when provider list changes
   const providersKey = useMemo(
-    () => providers.map((p) => p.provider).sort().join(","),
-    [providers]
+    () =>
+      providers
+        .map((p) => p.provider)
+        .sort()
+        .join(","),
+    [providers],
   );
 
-  const rfInstance = useRef(null);
-  const containerRef = useRef(null);
-  const fitOpts = { padding: 0.2, duration: 200 };
-  const onInit = useCallback((instance) => {
+  const rfInstance = useRef<ReactFlowInstance | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const fitOpts = { padding: 0.2, duration: 200 } as const;
+  const onInit = useCallback((instance: ReactFlowInstance) => {
     rfInstance.current = instance;
     setTimeout(() => instance.fitView(fitOpts), 50);
   }, []);
@@ -272,15 +340,18 @@ export default function ProviderTopology({ providers = [], activeRequests = [], 
   // Re-fit when node count/layout changes
   useEffect(() => {
     if (rfInstance.current) {
-      const id = setTimeout(() => rfInstance.current.fitView(fitOpts), 50);
+      const id = setTimeout(() => rfInstance.current?.fitView(fitOpts), 50);
       return () => clearTimeout(id);
     }
   }, [nodes.length]);
 
   return (
-    <div ref={containerRef} className="h-[320px] w-full min-w-0 rounded-lg border border-border bg-bg-subtle/30 sm:h-[480px]">
+    <div
+      ref={containerRef}
+      className="h-[320px] w-full min-w-0 rounded-[var(--radius-md)] border border-[var(--bg-secondary)] bg-[var(--bg-secondary)]/30 sm:h-[480px]"
+    >
       {providers.length === 0 ? (
-        <div className="h-full flex items-center justify-center text-text-muted text-sm">
+        <div className="h-full flex items-center justify-center text-[var(--text-secondary)] text-sm">
           No providers connected
         </div>
       ) : (
@@ -310,18 +381,3 @@ export default function ProviderTopology({ providers = [], activeRequests = [], 
     </div>
   );
 }
-
-ProviderTopology.propTypes = {
-  providers: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string,
-    provider: PropTypes.string,
-    name: PropTypes.string,
-  })),
-  activeRequests: PropTypes.arrayOf(PropTypes.shape({
-    provider: PropTypes.string,
-    model: PropTypes.string,
-    account: PropTypes.string,
-  })),
-  lastProvider: PropTypes.string,
-  errorProvider: PropTypes.string,
-};

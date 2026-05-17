@@ -1,18 +1,31 @@
 "use client";
 
 import { useState } from "react";
+import { AlertCircle, Info, BarChart3, RotateCw } from "lucide-react";
 import Card from "@/shared/components/Card";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import Badge from "@/shared/components/Badge";
+import type { BadgeVariant } from "@/shared/components/Badge";
 import QuotaProgressBar from "./QuotaProgressBar";
-import { calculatePercentage } from "./utils";
+import { calculatePercentage, type NormalizedQuota } from "./utils";
 
-const planVariants = {
+const planVariants: Record<string, BadgeVariant> = {
   free: "default",
   pro: "primary",
   ultra: "success",
   enterprise: "info",
 };
+
+export interface ProviderLimitCardProps {
+  provider: string;
+  name?: string;
+  plan?: string;
+  quotas?: NormalizedQuota[];
+  message?: string | null;
+  loading?: boolean;
+  error?: string | null;
+  onRefresh?: () => void | Promise<void>;
+}
 
 export default function ProviderLimitCard({
   provider,
@@ -23,7 +36,7 @@ export default function ProviderLimitCard({
   loading = false,
   error = null,
   onRefresh,
-}) {
+}: ProviderLimitCardProps) {
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -39,7 +52,7 @@ export default function ProviderLimitCard({
 
   // Get provider info from config
   const getProviderColor = () => {
-    const colors = {
+    const colors: Record<string, string> = {
       github: "#000000",
       antigravity: "#4285F4",
       codex: "#10A37F",
@@ -50,7 +63,6 @@ export default function ProviderLimitCard({
   };
 
   const providerColor = getProviderColor();
-  const planVariant = planVariants[plan?.toLowerCase()] || "default";
 
   return (
     <Card padding="md" className="flex flex-col gap-4">
@@ -59,28 +71,23 @@ export default function ProviderLimitCard({
         <div className="flex items-center gap-3">
           {/* Provider Logo */}
           <div
-            className="size-10 rounded-lg flex items-center justify-center p-1.5"
+            className="size-10 rounded-[var(--radius-md)] flex items-center justify-center p-1.5"
             style={{ backgroundColor: `${providerColor}15` }}
           >
             <ProviderIcon
               src={`/providers/${provider}.png`}
               alt={provider || "Provider"}
               size={40}
-              className="object-contain rounded-lg"
+              className="object-contain rounded-[var(--radius-md)]"
               fallbackText={provider?.slice(0, 2).toUpperCase() || "PR"}
               fallbackColor={providerColor}
             />
           </div>
 
           <div>
-            <h3 className="font-semibold text-text-primary">
-              {name || provider}
-            </h3>
+            <h3 className="font-semibold text-[var(--text-primary)]">{name || provider}</h3>
             {plan && (
-              <Badge
-                variant={planVariants[plan?.toLowerCase()] || "default"}
-                size="xs"
-              >
+              <Badge variant={planVariants[plan?.toLowerCase()] || "default"} size="sm">
                 {plan}
               </Badge>
             )}
@@ -91,16 +98,15 @@ export default function ProviderLimitCard({
         <button
           onClick={handleRefresh}
           disabled={refreshing || loading}
-          className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-[var(--radius-md)] hover:bg-[var(--bg-secondary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Refresh quota"
         >
-          <span
-            className={`material-symbols-outlined text-[20px] text-text-muted ${
+          <RotateCw
+            size={20}
+            className={`text-[var(--text-secondary)] ${
               refreshing || loading ? "animate-spin" : ""
             }`}
-          >
-            refresh
-          </span>
+          />
         </button>
       </div>
 
@@ -108,38 +114,32 @@ export default function ProviderLimitCard({
       {loading && (
         <div className="space-y-4">
           <div className="space-y-2">
-            <div className="h-4 bg-black/5 dark:bg-white/5 rounded animate-pulse" />
-            <div className="h-2 bg-black/5 dark:bg-white/5 rounded animate-pulse" />
+            <div className="h-4 bg-[var(--bg-secondary)] rounded animate-pulse" />
+            <div className="h-2 bg-[var(--bg-secondary)] rounded animate-pulse" />
           </div>
           <div className="space-y-2">
-            <div className="h-4 bg-black/5 dark:bg-white/5 rounded animate-pulse" />
-            <div className="h-2 bg-black/5 dark:bg-white/5 rounded animate-pulse" />
+            <div className="h-4 bg-[var(--bg-secondary)] rounded animate-pulse" />
+            <div className="h-2 bg-[var(--bg-secondary)] rounded animate-pulse" />
           </div>
         </div>
       )}
 
       {/* Error State */}
       {!loading && error && (
-        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+        <div className="p-4 rounded-[var(--radius-md)] bg-[var(--accent-red)]/10 border border-[var(--accent-red)]/20">
           <div className="flex items-start gap-2">
-            <span className="material-symbols-outlined text-red-500 text-[20px]">
-              error
-            </span>
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <AlertCircle size={20} className="text-[var(--accent-red)] shrink-0" />
+            <p className="text-sm text-[var(--accent-red)]">{error}</p>
           </div>
         </div>
       )}
 
       {/* Info Message (for providers without API) */}
       {!loading && !error && message && (
-        <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+        <div className="p-4 rounded-[var(--radius-md)] bg-[var(--accent-blue)]/10 border border-[var(--accent-blue)]/20">
           <div className="flex items-start gap-2">
-            <span className="material-symbols-outlined text-blue-500 text-[20px]">
-              info
-            </span>
-            <p className="text-sm text-blue-600 dark:text-blue-400">
-              {message}
-            </p>
+            <Info size={20} className="text-[var(--accent-blue)] shrink-0" />
+            <p className="text-sm text-[var(--accent-blue)]">{message}</p>
           </div>
         </div>
       )}
@@ -148,7 +148,6 @@ export default function ProviderLimitCard({
       {!loading && !error && !message && quotas?.length > 0 && (
         <div className="space-y-4">
           {quotas.map((quota, index) => {
-            // For Antigravity, use remainingPercentage if available, otherwise calculate
             const percentage =
               quota.remainingPercentage !== undefined
                 ? Math.round(((quota.total - quota.used) / quota.total) * 100)
@@ -172,10 +171,8 @@ export default function ProviderLimitCard({
 
       {/* Empty State */}
       {!loading && !error && !message && quotas?.length === 0 && (
-        <div className="text-center py-8 text-text-muted">
-          <span className="material-symbols-outlined text-[48px] opacity-20">
-            data_usage
-          </span>
+        <div className="text-center py-8 text-[var(--text-secondary)]">
+          <BarChart3 size={48} className="mx-auto opacity-20" />
           <p className="text-sm mt-2">No quota data available</p>
         </div>
       )}

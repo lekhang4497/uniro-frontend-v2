@@ -1,20 +1,20 @@
 "use client";
 
-import { formatResetTime, calculatePercentage } from "./utils";
+import { formatResetTime, calculatePercentage, type NormalizedQuota } from "./utils";
 
 /**
  * Format reset time display (Today, 12:00 PM)
  */
-function formatResetTimeDisplay(resetTime) {
+function formatResetTimeDisplay(resetTime: string | Date | null | undefined): string | null {
   if (!resetTime) return null;
-  
+
   try {
     const date = new Date(resetTime);
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     let dayStr = "";
     if (date >= today && date < tomorrow) {
       dayStr = "Today";
@@ -23,13 +23,13 @@ function formatResetTimeDisplay(resetTime) {
     } else {
       dayStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
     }
-    
-    const timeStr = date.toLocaleTimeString("en-US", { 
-      hour: "numeric", 
+
+    const timeStr = date.toLocaleTimeString("en-US", {
+      hour: "numeric",
       minute: "2-digit",
-      hour12: true 
+      hour12: true,
     });
-    
+
     return `${dayStr}, ${timeStr}`;
   } catch {
     return null;
@@ -39,38 +39,42 @@ function formatResetTimeDisplay(resetTime) {
 /**
  * Get color classes based on remaining percentage
  */
-function getColorClasses(remainingPercentage) {
+function getColorClasses(remainingPercentage: number) {
   if (remainingPercentage > 70) {
     return {
-      text: "text-green-600 dark:text-green-400",
-      bg: "bg-green-500",
-      bgLight: "bg-green-500/10",
-      emoji: "🟢"
+      text: "text-[var(--accent-green)]",
+      bg: "bg-[var(--accent-green)]",
+      bgLight: "bg-[var(--accent-green)]/10",
+      emoji: "🟢",
     };
   }
-  
+
   if (remainingPercentage >= 30) {
     return {
-      text: "text-yellow-600 dark:text-yellow-400",
-      bg: "bg-yellow-500",
-      bgLight: "bg-yellow-500/10",
-      emoji: "🟡"
+      text: "text-[var(--accent-orange)]",
+      bg: "bg-[var(--accent-orange)]",
+      bgLight: "bg-[var(--accent-orange)]/10",
+      emoji: "🟡",
     };
   }
-  
-  // 0-29% including 0% (out of quota) - show red
+
   return {
-    text: "text-red-600 dark:text-red-400",
-    bg: "bg-red-500",
-    bgLight: "bg-red-500/10",
-    emoji: "🔴"
+    text: "text-[var(--accent-red)]",
+    bg: "bg-[var(--accent-red)]",
+    bgLight: "bg-[var(--accent-red)]/10",
+    emoji: "🔴",
   };
+}
+
+export interface QuotaTableProps {
+  quotas?: NormalizedQuota[];
+  compact?: boolean;
 }
 
 /**
  * Quota Table Component - Table-based display for quota data
  */
-export default function QuotaTable({ quotas = [], compact = false }) {
+export default function QuotaTable({ quotas = [], compact = false }: QuotaTableProps) {
   if (!quotas || quotas.length === 0) {
     return null;
   }
@@ -85,24 +89,25 @@ export default function QuotaTable({ quotas = [], compact = false }) {
       <table className="w-full table-fixed text-left">
         <tbody>
           {quotas.map((quota, index) => {
-            const remaining = quota.remainingPercentage !== undefined
-              ? Math.round(quota.remainingPercentage)
-              : calculatePercentage(quota.used, quota.total);
-            
+            const remaining =
+              quota.remainingPercentage !== undefined
+                ? Math.round(quota.remainingPercentage)
+                : calculatePercentage(quota.used, quota.total);
+
             const colors = getColorClasses(remaining);
             const countdown = formatResetTime(quota.resetAt);
             const resetDisplay = formatResetTimeDisplay(quota.resetAt);
 
             return (
-              <tr 
+              <tr
                 key={index}
-                className="border-b border-black/5 dark:border-white/5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                className="border-b border-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
               >
                 {/* Model Name with Status Emoji */}
                 <td className={`${cellPad} w-[30%]`}>
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="text-[10px] shrink-0">{colors.emoji}</span>
-                    <span className={`${nameText} font-medium text-text-primary truncate`}>
+                    <span className={`${nameText} font-medium text-[var(--text-primary)] truncate`}>
                       {quota.name}
                     </span>
                   </div>
@@ -111,24 +116,27 @@ export default function QuotaTable({ quotas = [], compact = false }) {
                 {/* Limit (Progress + Numbers) */}
                 <td className={`${cellPad} w-[45%]`}>
                   <div className={compact ? "space-y-1" : "space-y-1.5"}>
-                    {/* Progress bar - always show with border for visibility */}
-                    <div className={`${compact ? "h-1" : "h-1.5"} rounded-full overflow-hidden border ${colors.bgLight} ${
-                      remaining === 0 ? 'border-black/10 dark:border-white/10' : 'border-transparent'
-                    }`}>
+                    {/* Progress bar */}
+                    <div
+                      className={`${compact ? "h-1" : "h-1.5"} rounded-full overflow-hidden border ${colors.bgLight} ${
+                        remaining === 0 ? "border-[var(--bg-secondary)]" : "border-transparent"
+                      }`}
+                    >
                       <div
                         className={`h-full transition-all duration-300 ${colors.bg}`}
                         style={{ width: `${Math.min(remaining, 100)}%` }}
                       />
                     </div>
-                    
+
                     {/* Numbers */}
-                    <div className={`flex items-center justify-between ${compact ? "text-[10px]" : "text-xs"}`}>
-                      <span className="text-text-muted">
-                        {quota.used.toLocaleString()} / {quota.total > 0 ? quota.total.toLocaleString() : "∞"}
+                    <div
+                      className={`flex items-center justify-between ${compact ? "text-[10px]" : "text-xs"}`}
+                    >
+                      <span className="text-[var(--text-secondary)]">
+                        {quota.used.toLocaleString()} /{" "}
+                        {quota.total > 0 ? quota.total.toLocaleString() : "∞"}
                       </span>
-                      <span className={`font-medium ${colors.text}`}>
-                        {remaining}%
-                      </span>
+                      <span className={`font-medium ${colors.text}`}>{remaining}%</span>
                     </div>
                   </div>
                 </td>
@@ -138,7 +146,7 @@ export default function QuotaTable({ quotas = [], compact = false }) {
                   {countdown !== "-" || resetDisplay ? (
                     compact ? (
                       <div
-                        className={`${resetPrimary} text-text-primary font-medium truncate`}
+                        className={`${resetPrimary} text-[var(--text-primary)] font-medium truncate`}
                         title={resetDisplay || ""}
                       >
                         {countdown !== "-" ? `in ${countdown}` : resetDisplay}
@@ -146,19 +154,19 @@ export default function QuotaTable({ quotas = [], compact = false }) {
                     ) : (
                       <div className="space-y-0.5">
                         {countdown !== "-" && (
-                          <div className={`${resetPrimary} text-text-primary font-medium`}>
+                          <div className={`${resetPrimary} text-[var(--text-primary)] font-medium`}>
                             in {countdown}
                           </div>
                         )}
                         {resetDisplay && (
-                          <div className={`${resetSecondary} text-text-muted`}>
+                          <div className={`${resetSecondary} text-[var(--text-secondary)]`}>
                             {resetDisplay}
                           </div>
                         )}
                       </div>
                     )
                   ) : (
-                    <div className={`${resetPrimary} text-text-muted italic`}>N/A</div>
+                    <div className={`${resetPrimary} text-[var(--text-tertiary)] italic`}>N/A</div>
                   )}
                 </td>
               </tr>

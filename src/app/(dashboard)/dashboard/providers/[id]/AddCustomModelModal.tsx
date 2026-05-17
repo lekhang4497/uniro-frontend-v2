@@ -1,22 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import { CheckCircle2, XCircle, FlaskConical } from "lucide-react";
 import { Button, Modal } from "@/shared/components";
 
-export default function AddCustomModelModal({ isOpen, providerAlias, providerDisplayAlias, onSave, onClose }) {
+export default function AddCustomModelModal({
+  isOpen,
+  providerAlias,
+  onSave,
+  onClose,
+}: {
+  isOpen: boolean;
+  providerAlias: string;
+  providerDisplayAlias?: string;
+  onSave: (modelId: string) => Promise<void> | void;
+  onClose: () => void;
+}) {
   const [modelId, setModelId] = useState("");
-  const [testStatus, setTestStatus] = useState(null); // null | "testing" | "ok" | "error"
+  const [testStatus, setTestStatus] = useState<null | "testing" | "ok" | "error">(null);
   const [testError, setTestError] = useState("");
   const [saving, setSaving] = useState(false);
 
   // Reset state when modal opens
   useEffect(() => {
-    if (isOpen) { setModelId(""); setTestStatus(null); setTestError(""); }
+    if (isOpen) {
+      setModelId("");
+      setTestStatus(null);
+      setTestError("");
+    }
   }, [isOpen]);
 
   // Strip provider's own alias prefix (e.g. "cc/model" -> "model" for cc provider)
-  const stripAlias = (id) => {
+  const stripAlias = (id: string): string => {
     const prefix = `${providerAlias}/`;
     return id.startsWith(prefix) ? id.slice(prefix.length) : id;
   };
@@ -37,7 +52,7 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
       setTestError(data.error || "");
     } catch (err) {
       setTestStatus("error");
-      setTestError(err.message);
+      setTestError((err as Error).message);
     }
   };
 
@@ -52,7 +67,7 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") handleTest();
   };
 
@@ -65,15 +80,19 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
             <input
               type="text"
               value={modelId}
-              onChange={(e) => { setModelId(e.target.value); setTestStatus(null); setTestError(""); }}
+              onChange={(e) => {
+                setModelId(e.target.value);
+                setTestStatus(null);
+                setTestError("");
+              }}
               onKeyDown={handleKeyDown}
               placeholder="e.g. claude-opus-4-5"
-              className="flex-1 px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="flex-1 px-3 py-2 text-sm border border-[var(--bg-secondary)] rounded-lg bg-[var(--bg-primary)] focus:outline-none focus:border-[var(--accent-blue)]"
               autoFocus
             />
             <Button
               variant="secondary"
-              icon="science"
+              icon={FlaskConical}
               loading={testStatus === "testing"}
               onClick={handleTest}
               disabled={!modelId.trim() || testStatus === "testing"}
@@ -81,27 +100,32 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
               {testStatus === "testing" ? "Testing..." : "Test"}
             </Button>
           </div>
-          <p className="text-xs text-text-muted mt-1">
-            Sent to provider as: <code className="font-mono bg-sidebar px-1 rounded">{stripAlias(modelId.trim()) || "model-id"}</code>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
+            Sent to provider as:{" "}
+            <code className="font-mono bg-[var(--bg-secondary)] px-1 rounded">
+              {stripAlias(modelId.trim()) || "model-id"}
+            </code>
           </p>
         </div>
 
         {/* Test result */}
         {testStatus === "ok" && (
-          <div className="flex items-center gap-2 text-sm text-green-600">
-            <span className="material-symbols-outlined text-base">check_circle</span>
+          <div className="flex items-center gap-2 text-sm text-[var(--accent-green)]">
+            <CheckCircle2 size={16} />
             Model is reachable
           </div>
         )}
         {testStatus === "error" && (
-          <div className="flex items-start gap-2 text-sm text-red-500">
-            <span className="material-symbols-outlined text-base shrink-0">cancel</span>
+          <div className="flex items-start gap-2 text-sm text-[var(--accent-red)]">
+            <XCircle size={16} className="shrink-0" />
             <span>{testError || "Model not reachable"}</span>
           </div>
         )}
 
         <div className="flex gap-2 pt-1">
-          <Button onClick={onClose} variant="ghost" fullWidth size="sm">Cancel</Button>
+          <Button onClick={onClose} variant="ghost" fullWidth size="sm">
+            Cancel
+          </Button>
           <Button
             onClick={handleSave}
             fullWidth
@@ -115,11 +139,3 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
     </Modal>
   );
 }
-
-AddCustomModelModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  providerAlias: PropTypes.string.isRequired,
-  providerDisplayAlias: PropTypes.string.isRequired,
-  onSave: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
-};

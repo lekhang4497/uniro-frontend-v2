@@ -1,43 +1,75 @@
 "use client";
 
 import { useState } from "react";
-import PropTypes from "prop-types";
+import {
+  CheckCircle2,
+  XCircle,
+  Bot,
+  Check,
+  Copy as CopyIcon,
+  Loader2,
+  FlaskConical,
+  Trash2,
+  Plus,
+  Download,
+} from "lucide-react";
 import { Button } from "@/shared/components";
-function CompatibleModelRow({ modelId, fullModel, copied, onCopy, onDeleteAlias, onTest, testStatus, isTesting }) {
-  const borderColor = testStatus === "ok"
-    ? "border-green-500/40"
-    : testStatus === "error"
-    ? "border-red-500/40"
-    : "border-border";
 
-  const iconColor = testStatus === "ok"
-    ? "#22c55e"
-    : testStatus === "error"
-    ? "#ef4444"
-    : undefined;
+type Connection = { id: string; isActive?: boolean };
+
+function CompatibleModelRow({
+  modelId,
+  fullModel,
+  copied,
+  onCopy,
+  onDeleteAlias,
+  onTest,
+  testStatus,
+  isTesting,
+}: {
+  modelId: string;
+  fullModel: string;
+  copied?: string | null;
+  onCopy: (text: string, key: string) => void;
+  onDeleteAlias: () => void;
+  onTest?: () => void;
+  testStatus?: "ok" | "error";
+  isTesting?: boolean;
+}) {
+  const borderColor =
+    testStatus === "ok"
+      ? "border-[var(--accent-green)]/40"
+      : testStatus === "error"
+      ? "border-[var(--accent-red)]/40"
+      : "border-[var(--bg-secondary)]";
+
+  const StatusIcon = testStatus === "ok" ? CheckCircle2 : testStatus === "error" ? XCircle : Bot;
+  const iconColor =
+    testStatus === "ok"
+      ? "var(--accent-green)"
+      : testStatus === "error"
+      ? "var(--accent-red)"
+      : "var(--text-secondary)";
 
   return (
-    <div className={`flex items-center gap-3 p-3 rounded-lg border ${borderColor} hover:bg-sidebar/50`}>
-      <span
-        className="material-symbols-outlined text-base text-text-muted"
-        style={iconColor ? { color: iconColor } : undefined}
-      >
-        {testStatus === "ok" ? "check_circle" : testStatus === "error" ? "cancel" : "smart_toy"}
-      </span>
+    <div
+      className={`flex items-center gap-3 p-3 rounded-lg border ${borderColor} hover:bg-[var(--bg-secondary)]/40`}
+    >
+      <StatusIcon size={16} style={{ color: iconColor }} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{modelId}</p>
         <div className="flex items-center gap-1 mt-1">
-          <code className="text-xs text-text-muted font-mono bg-sidebar px-1.5 py-0.5 rounded">{fullModel}</code>
+          <code className="text-xs text-[var(--text-secondary)] font-mono bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded">
+            {fullModel}
+          </code>
           <div className="relative group/btn">
             <button
               onClick={() => onCopy(fullModel, `model-${modelId}`)}
-              className="p-0.5 hover:bg-sidebar rounded text-text-muted hover:text-primary"
+              className="p-0.5 hover:bg-[var(--bg-secondary)] rounded text-[var(--text-secondary)] hover:text-[var(--accent-blue)]"
             >
-              <span className="material-symbols-outlined text-sm">
-                {copied === `model-${modelId}` ? "check" : "content_copy"}
-              </span>
+              {copied === `model-${modelId}` ? <Check size={14} /> : <CopyIcon size={14} />}
             </button>
-            <span className="pointer-events-none absolute top-5 left-1/2 -translate-x-1/2 text-[10px] text-text-muted whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity">
+            <span className="pointer-events-none absolute top-5 left-1/2 -translate-x-1/2 text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity">
               {copied === `model-${modelId}` ? "Copied!" : "Copy"}
             </span>
           </div>
@@ -46,13 +78,11 @@ function CompatibleModelRow({ modelId, fullModel, copied, onCopy, onDeleteAlias,
               <button
                 onClick={onTest}
                 disabled={isTesting}
-                className="p-0.5 hover:bg-sidebar rounded text-text-muted hover:text-primary transition-colors"
+                className="p-0.5 hover:bg-[var(--bg-secondary)] rounded text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition-colors"
               >
-                <span className="material-symbols-outlined text-sm" style={isTesting ? { animation: "spin 1s linear infinite" } : undefined}>
-                  {isTesting ? "progress_activity" : "science"}
-                </span>
+                {isTesting ? <Loader2 size={14} className="animate-spin" /> : <FlaskConical size={14} />}
               </button>
-              <span className="pointer-events-none absolute top-5 left-1/2 -translate-x-1/2 text-[10px] text-text-muted whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity">
+              <span className="pointer-events-none absolute top-5 left-1/2 -translate-x-1/2 text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover/btn:opacity-100 transition-opacity">
                 {isTesting ? "Testing..." : "Test"}
               </span>
             </div>
@@ -61,23 +91,43 @@ function CompatibleModelRow({ modelId, fullModel, copied, onCopy, onDeleteAlias,
       </div>
       <button
         onClick={onDeleteAlias}
-        className="p-1 hover:bg-red-50 rounded text-red-500"
+        className="p-1 hover:bg-[var(--accent-red)]/10 rounded text-[var(--accent-red)]"
         title="Remove model"
       >
-        <span className="material-symbols-outlined text-sm">delete</span>
+        <Trash2 size={14} />
       </button>
     </div>
   );
 }
 
-export default function CompatibleModelsSection({ providerStorageAlias, providerDisplayAlias, modelAliases, copied, onCopy, onSetAlias, onDeleteAlias, connections, isAnthropic }) {
+export default function CompatibleModelsSection({
+  providerStorageAlias,
+  providerDisplayAlias,
+  modelAliases,
+  copied,
+  onCopy,
+  onSetAlias,
+  onDeleteAlias,
+  connections,
+  isAnthropic,
+}: {
+  providerStorageAlias: string;
+  providerDisplayAlias: string;
+  modelAliases: Record<string, string>;
+  copied?: string | null;
+  onCopy: (text: string, key: string) => void;
+  onSetAlias: (modelId: string, alias: string, storageAlias: string) => Promise<void> | void;
+  onDeleteAlias: (alias: string) => Promise<void> | void;
+  connections: Connection[];
+  isAnthropic?: boolean;
+}) {
   const [newModel, setNewModel] = useState("");
   const [adding, setAdding] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [testingModelId, setTestingModelId] = useState(null);
-  const [modelTestResults, setModelTestResults] = useState({});
+  const [testingModelId, setTestingModelId] = useState<string | null>(null);
+  const [modelTestResults, setModelTestResults] = useState<Record<string, "ok" | "error">>({});
 
-  const handleTestModel = async (modelId) => {
+  const handleTestModel = async (modelId: string) => {
     if (testingModelId) return;
     setTestingModelId(modelId);
     try {
@@ -95,8 +145,8 @@ export default function CompatibleModelsSection({ providerStorageAlias, provider
     }
   };
 
-  const providerAliases = Object.entries(modelAliases).filter(
-    ([, model]) => model.startsWith(`${providerStorageAlias}/`)
+  const providerAliases = Object.entries(modelAliases).filter(([, model]) =>
+    model.startsWith(`${providerStorageAlias}/`),
   );
 
   const allModels = providerAliases.map(([alias, fullModel]) => ({
@@ -105,14 +155,13 @@ export default function CompatibleModelsSection({ providerStorageAlias, provider
     alias,
   }));
 
-  const generateDefaultAlias = (modelId) => {
+  const generateDefaultAlias = (modelId: string): string => {
     const parts = modelId.split("/");
-    return parts[parts.length - 1];
+    return parts[parts.length - 1] ?? modelId;
   };
 
-  const resolveAlias = (modelId) => {
+  const resolveAlias = (modelId: string): string | null => {
     const fullModel = `${providerStorageAlias}/${modelId}`;
-    // Skip if this exact model already has an alias
     if (Object.values(modelAliases).includes(fullModel)) return null;
     const baseAlias = generateDefaultAlias(modelId);
     if (!modelAliases[baseAlias]) return baseAlias;
@@ -126,7 +175,9 @@ export default function CompatibleModelsSection({ providerStorageAlias, provider
     const modelId = newModel.trim();
     const resolvedAlias = resolveAlias(modelId);
     if (!resolvedAlias) {
-      alert("All suggested aliases already exist. Please choose a different model or remove conflicting aliases.");
+      alert(
+        "All suggested aliases already exist. Please choose a different model or remove conflicting aliases.",
+      );
       return;
     }
 
@@ -182,13 +233,19 @@ export default function CompatibleModelsSection({ providerStorageAlias, provider
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-text-muted">
-        Add {isAnthropic ? "Anthropic" : "OpenAI"}-compatible models manually or import them from the /models endpoint.
+      <p className="text-sm text-[var(--text-secondary)]">
+        Add {isAnthropic ? "Anthropic" : "OpenAI"}-compatible models manually or import them from
+        the /models endpoint.
       </p>
 
       <div className="flex items-end gap-2 flex-wrap">
         <div className="flex-1 min-w-[240px]">
-          <label htmlFor="new-compatible-model-input" className="text-xs text-text-muted mb-1 block">Model ID</label>
+          <label
+            htmlFor="new-compatible-model-input"
+            className="text-xs text-[var(--text-secondary)] mb-1 block"
+          >
+            Model ID
+          </label>
           <input
             id="new-compatible-model-input"
             type="text"
@@ -196,19 +253,25 @@ export default function CompatibleModelsSection({ providerStorageAlias, provider
             onChange={(e) => setNewModel(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
             placeholder={isAnthropic ? "claude-3-opus-20240229" : "gpt-4o"}
-            className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2 text-sm border border-[var(--bg-secondary)] rounded-lg bg-[var(--bg-primary)] focus:outline-none focus:border-[var(--accent-blue)]"
           />
         </div>
-        <Button size="sm" icon="add" onClick={handleAdd} disabled={!newModel.trim() || adding}>
+        <Button size="sm" icon={Plus} onClick={handleAdd} disabled={!newModel.trim() || adding}>
           {adding ? "Adding..." : "Add"}
         </Button>
-        <Button size="sm" variant="secondary" icon="download" onClick={handleImport} disabled={!canImport || importing}>
+        <Button
+          size="sm"
+          variant="secondary"
+          icon={Download}
+          onClick={handleImport}
+          disabled={!canImport || importing}
+        >
           {importing ? "Importing..." : "Import from /models"}
         </Button>
       </div>
 
       {!canImport && (
-        <p className="text-xs text-text-muted">
+        <p className="text-xs text-[var(--text-secondary)]">
           Add a connection to enable importing models.
         </p>
       )}
@@ -233,18 +296,3 @@ export default function CompatibleModelsSection({ providerStorageAlias, provider
     </div>
   );
 }
-
-CompatibleModelsSection.propTypes = {
-  providerStorageAlias: PropTypes.string.isRequired,
-  providerDisplayAlias: PropTypes.string.isRequired,
-  modelAliases: PropTypes.object.isRequired,
-  copied: PropTypes.string,
-  onCopy: PropTypes.func.isRequired,
-  onSetAlias: PropTypes.func.isRequired,
-  onDeleteAlias: PropTypes.func.isRequired,
-  connections: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string,
-    isActive: PropTypes.bool,
-  })).isRequired,
-  isAnthropic: PropTypes.bool,
-};

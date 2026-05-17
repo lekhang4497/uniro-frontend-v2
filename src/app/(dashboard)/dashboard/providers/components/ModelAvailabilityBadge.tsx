@@ -8,23 +8,38 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { CheckCircle2, Clock, AlertCircle, HelpCircle, ShieldCheck, AlertTriangle, RotateCw } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/shared/components";
 import { useNotificationStore } from "@/store/notificationStore";
 
-const STATUS_CONFIG = {
-  available: { icon: "check_circle", color: "#22c55e", label: "Available" },
-  cooldown: { icon: "schedule", color: "#f59e0b", label: "Cooldown" },
-  unavailable: { icon: "error", color: "#ef4444", label: "Unavailable" },
-  unknown: { icon: "help", color: "#6b7280", label: "Unknown" },
+type StatusKey = "available" | "cooldown" | "unavailable" | "unknown";
+
+const STATUS_CONFIG: Record<StatusKey, { icon: LucideIcon; color: string; label: string }> = {
+  available: { icon: CheckCircle2, color: "var(--accent-green)", label: "Available" },
+  cooldown: { icon: Clock, color: "var(--accent-orange)", label: "Cooldown" },
+  unavailable: { icon: AlertCircle, color: "var(--accent-red)", label: "Unavailable" },
+  unknown: { icon: HelpCircle, color: "var(--text-tertiary)", label: "Unknown" },
+};
+
+type ModelEntry = {
+  provider: string;
+  model: string;
+  status: StatusKey;
+};
+
+type AvailabilityData = {
+  models?: ModelEntry[];
+  unavailableCount?: number;
 };
 
 export default function ModelAvailabilityBadge() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<AvailabilityData | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
-  const [clearing, setClearing] = useState(null);
-  const ref = useRef(null);
-  const notify = useNotificationStore();
+  const [clearing, setClearing] = useState<string | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const notify = useNotificationStore() as { success: (msg: string) => void; error: (msg: string) => void };
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -48,14 +63,14 @@ export default function ModelAvailabilityBadge() {
 
   // Close popover on outside click
   useEffect(() => {
-    const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setExpanded(false);
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setExpanded(false);
     };
     if (expanded) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [expanded]);
 
-  const handleClearCooldown = async (provider, model) => {
+  const handleClearCooldown = async (provider: string, model: string) => {
     setClearing(`${provider}:${model}`);
     try {
       const res = await fetch("/api/models/availability", {
@@ -79,11 +94,12 @@ export default function ModelAvailabilityBadge() {
   if (loading) return null;
 
   const models = data?.models || [];
-  const unavailableCount = data?.unavailableCount || models.filter((m) => m.status !== "available").length;
+  const unavailableCount =
+    data?.unavailableCount || models.filter((m) => m.status !== "available").length;
   const isHealthy = unavailableCount === 0;
 
   // Group unhealthy models by provider
-  const byProvider = {};
+  const byProvider: Record<string, ModelEntry[]> = {};
   models.forEach((m) => {
     if (m.status === "available") return;
     const key = m.provider || "unknown";
@@ -93,70 +109,55 @@ export default function ModelAvailabilityBadge() {
 
   return (
     <div className="relative" ref={ref}>
-      {/* <button
-        onClick={() => setExpanded(!expanded)}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-          isHealthy
-            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/15"
-            : "bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500/15"
-        }`}
-      >
-        <span className="material-symbols-outlined text-[14px]">
-          {isHealthy ? "verified" : "warning"}
-        </span>
-        {isHealthy
-          ? "All models operational"
-          : `${unavailableCount} model${unavailableCount !== 1 ? "s" : ""} with issues`}
-      </button> */}
+      {/* Trigger button intentionally hidden; popover is reserved for future use */}
 
       {expanded && (
-        <div className="absolute top-full right-0 mt-2 w-80 bg-surface border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg">
+        <div className="absolute top-full right-0 mt-2 w-80 bg-[var(--bg-primary)] border border-[var(--bg-secondary)] rounded-xl shadow-2xl z-50 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--bg-secondary)] bg-[var(--bg-secondary)]/30">
             <div className="flex items-center gap-2">
-              <span
-                className="material-symbols-outlined text-[16px]"
-                style={{ color: isHealthy ? "#22c55e" : "#f59e0b" }}
-              >
-                {isHealthy ? "verified" : "warning"}
-              </span>
-              <span className="text-sm font-semibold text-text-main">Model Status</span>
+              {isHealthy ? (
+                <ShieldCheck size={16} className="text-[var(--accent-green)]" />
+              ) : (
+                <AlertTriangle size={16} className="text-[var(--accent-orange)]" />
+              )}
+              <span className="text-sm font-semibold text-[var(--text-primary)]">Model Status</span>
             </div>
             <button
               onClick={fetchStatus}
-              className="p-1 rounded-lg hover:bg-surface text-text-muted hover:text-text-main transition-colors"
+              className="p-1 rounded-lg hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               title="Refresh"
             >
-              <span className="material-symbols-outlined text-[14px]">refresh</span>
+              <RotateCw size={14} />
             </button>
           </div>
 
           <div className="px-4 py-3 max-h-60 overflow-y-auto">
             {isHealthy ? (
-              <p className="text-sm text-text-muted text-center py-2">
+              <p className="text-sm text-[var(--text-secondary)] text-center py-2">
                 All models are responding normally.
               </p>
             ) : (
               <div className="flex flex-col gap-2.5">
                 {Object.entries(byProvider).map(([provider, provModels]) => (
                   <div key={provider}>
-                    <p className="text-xs font-semibold text-text-main mb-1.5 capitalize">{provider}</p>
+                    <p className="text-xs font-semibold text-[var(--text-primary)] mb-1.5 capitalize">
+                      {provider}
+                    </p>
                     <div className="flex flex-col gap-1">
                       {provModels.map((m) => {
                         const status = STATUS_CONFIG[m.status] || STATUS_CONFIG.unknown;
+                        const StatusIcon = status.icon;
                         const isClearing = clearing === `${m.provider}:${m.model}`;
                         return (
                           <div
                             key={`${m.provider}-${m.model}`}
-                            className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-surface/30"
+                            className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[var(--bg-secondary)]/40"
                           >
                             <div className="flex items-center gap-1.5 min-w-0">
-                              <span
-                                className="material-symbols-outlined text-[14px] shrink-0"
-                                style={{ color: status.color }}
-                              >
-                                {status.icon}
+                              <StatusIcon size={14} className="shrink-0" style={{ color: status.color }} />
+                              <span className="font-mono text-xs text-[var(--text-primary)] truncate">
+                                {m.model}
                               </span>
-                              <span className="font-mono text-xs text-text-main truncate">{m.model}</span>
                             </div>
                             {m.status === "cooldown" && (
                               <Button

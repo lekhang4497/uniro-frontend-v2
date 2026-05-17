@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import PropTypes from "prop-types";
 import {
   AreaChart,
   Area,
@@ -10,22 +9,31 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 import Card from "@/shared/components/Card";
 
-const fmtTokens = (n) => {
+const fmtTokens = (n: number) => {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
   return String(n || 0);
 };
 
-const fmtCost = (n) => `$${(n || 0).toFixed(4)}`;
+const fmtCost = (n: number) => `$${(n || 0).toFixed(4)}`;
 
-export default function UsageChart({ period = "7d" }) {
-  const [data, setData] = useState([]);
+type ChartPoint = {
+  label: string;
+  tokens: number;
+  cost: number;
+};
+
+export interface UsageChartProps {
+  period?: string;
+}
+
+export default function UsageChart({ period = "7d" }: UsageChartProps) {
+  const [data, setData] = useState<ChartPoint[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("tokens");
+  const [viewMode, setViewMode] = useState<"tokens" | "cost">("tokens");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -50,25 +58,29 @@ export default function UsageChart({ period = "7d" }) {
 
   return (
     <Card className="flex min-w-0 flex-col gap-3 p-3 sm:p-4">
-      <div className="grid w-full grid-cols-2 items-center gap-1 rounded-lg border border-border bg-bg-subtle p-1 sm:w-auto sm:self-start">
+      <div className="grid w-full grid-cols-2 items-center gap-1 rounded-[var(--radius-md)] border border-[var(--bg-secondary)] bg-[var(--bg-secondary)]/30 p-1 sm:w-auto sm:self-start">
         <button
           onClick={() => setViewMode("tokens")}
-          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${viewMode === "tokens" ? "bg-primary text-white shadow-sm" : "text-text-muted hover:text-text hover:bg-bg-hover"}`}
+          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${viewMode === "tokens" ? "bg-[var(--accent-blue)] text-[var(--text-inverted)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"}`}
         >
           Tokens
         </button>
         <button
           onClick={() => setViewMode("cost")}
-          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${viewMode === "cost" ? "bg-primary text-white shadow-sm" : "text-text-muted hover:text-text hover:bg-bg-hover"}`}
+          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${viewMode === "cost" ? "bg-[var(--accent-blue)] text-[var(--text-inverted)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"}`}
         >
           Cost
         </button>
       </div>
 
       {loading ? (
-        <div className="h-48 flex items-center justify-center text-text-muted text-sm">Loading...</div>
+        <div className="h-48 flex items-center justify-center text-[var(--text-secondary)] text-sm">
+          Loading...
+        </div>
       ) : !hasData ? (
-        <div className="h-48 flex items-center justify-center text-text-muted text-sm">No data for this period</div>
+        <div className="h-48 flex items-center justify-center text-[var(--text-secondary)] text-sm">
+          No data for this period
+        </div>
       ) : (
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
@@ -99,14 +111,17 @@ export default function UsageChart({ period = "7d" }) {
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "var(--color-bg)",
-                border: "1px solid var(--color-border)",
+                backgroundColor: "var(--bg-primary)",
+                border: "1px solid var(--bg-secondary)",
                 borderRadius: "8px",
                 fontSize: "12px",
               }}
-              formatter={(value, name) =>
-                name === "tokens" ? [fmtTokens(value), "Tokens"] : [fmtCost(value), "Cost"]
-              }
+              formatter={(value: unknown, name: unknown) => {
+                const v = Number(value) || 0;
+                return name === "tokens"
+                  ? [fmtTokens(v), "Tokens"]
+                  : [fmtCost(v), "Cost"];
+              }}
             />
             {viewMode === "tokens" ? (
               <Area
@@ -135,7 +150,3 @@ export default function UsageChart({ period = "7d" }) {
     </Card>
   );
 }
-
-UsageChart.propTypes = {
-  period: PropTypes.string,
-};
