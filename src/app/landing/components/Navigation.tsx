@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExternalLink, Menu, X } from "lucide-react";
@@ -26,27 +27,55 @@ export default function Navigation() {
 
         {/* Desktop menu */}
         <div className="hidden md:flex items-center gap-8">
-          <a className="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="#features">Features</a>
-          <a className="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="#how-it-works">How it Works</a>
-          <a className="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="https://github.com/your-org/uniro#readme" target="_blank" rel="noopener noreferrer">Docs</a>
-          <a className="text-gray-300 hover:text-white text-sm font-medium transition-colors flex items-center gap-1" href="https://github.com/your-org/uniro" target="_blank" rel="noopener noreferrer">
+          <a
+            className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+            href="#features"
+          >
+            Features
+          </a>
+          <a
+            className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+            href="#how-it-works"
+          >
+            How it Works
+          </a>
+          <a
+            className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+            href="https://github.com/your-org/uniro#readme"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Docs
+          </a>
+          <a
+            className="text-gray-300 hover:text-white text-sm font-medium transition-colors flex items-center gap-1"
+            href="https://github.com/your-org/uniro"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             GitHub <ExternalLink className="h-3 w-3" />
           </a>
         </div>
 
         {/* CTA + Mobile menu */}
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => router.push("/dashboard")}
             className="hidden sm:flex h-9 items-center justify-center rounded-lg px-4 bg-[#d97757] hover:bg-[#e0650a] transition-all text-[#141413] text-sm font-bold shadow-[0_0_15px_rgba(217,119,87,0.4)] hover:shadow-[0_0_20px_rgba(217,119,87,0.6)]"
           >
             Get Started
           </button>
-          <button 
+          <button
+            type="button"
             className="md:hidden text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle mobile menu"
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
       </div>
@@ -55,11 +84,38 @@ export default function Navigation() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-[#2a2926] bg-[#141413]/95 backdrop-blur-md">
           <div className="flex flex-col gap-4 p-6">
-            <a className="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
-            <a className="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How it Works</a>
-            <a className="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="https://github.com/your-org/uniro#readme" target="_blank" rel="noopener noreferrer">Docs</a>
-            <a className="text-gray-300 hover:text-white text-sm font-medium transition-colors" href="https://github.com/your-org/uniro" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <button 
+            <a
+              className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+              href="#features"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Features
+            </a>
+            <a
+              className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+              href="#how-it-works"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              How it Works
+            </a>
+            <a
+              className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+              href="https://github.com/your-org/uniro#readme"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Docs
+            </a>
+            <a
+              className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+              href="https://github.com/your-org/uniro"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub
+            </a>
+            <button
+              type="button"
               onClick={() => router.push("/dashboard")}
               className="h-9 rounded-lg bg-[#d97757] hover:bg-[#e0650a] text-[#141413] text-sm font-bold"
             >
@@ -71,4 +127,3 @@ export default function Navigation() {
     </nav>
   );
 }
-

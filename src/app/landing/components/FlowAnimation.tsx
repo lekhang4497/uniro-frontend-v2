@@ -1,15 +1,30 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { Network } from "lucide-react";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 
-const CLI_TOOLS = [
+type CliTool = {
+  id: string;
+  name: string;
+  image: string;
+};
+
+type Provider = {
+  id: string;
+  name: string;
+  color: string;
+  textColor: string;
+};
+
+const CLI_TOOLS: CliTool[] = [
   { id: "claude", name: "Claude Code", image: "/providers/claude.png" },
   { id: "codex", name: "OpenAI Codex", image: "/providers/codex.png" },
   { id: "cline", name: "Cline", image: "/providers/cline.png" },
   { id: "cursor", name: "Cursor", image: "/providers/cursor.png" },
 ];
 
-const PROVIDERS = [
+const PROVIDERS: Provider[] = [
   {
     id: "openai",
     name: "OpenAI",
@@ -50,13 +65,11 @@ export default function FlowAnimation() {
     <div className="mt-16 w-full max-w-4xl relative h-[360px] hidden md:flex items-center justify-center animate-[float_6s_ease-in-out_infinite]">
       {/* Uniro Hub - Center */}
       <div className="relative z-20 w-32 h-32 rounded-full bg-[#1f1e1c] border-2 border-[#d97757] shadow-[0_0_40px_rgba(217,119,87,0.3)] flex flex-col items-center justify-center gap-1 group cursor-pointer hover:scale-105 transition-transform duration-500">
-        <span className="material-symbols-outlined text-4xl text-[#d97757]">
-          hub
-        </span>
+        <Network className="h-8 w-8 text-[#d97757]" />
         <span className="text-xs font-bold text-white tracking-widest uppercase">
           Uniro
         </span>
-        <div className="absolute inset-0 rounded-full border border-[#d97757]/30 animate-ping opacity-20"></div>
+        <div className="absolute inset-0 rounded-full border border-[#d97757]/30 animate-ping opacity-20" />
       </div>
 
       {/* CLI Tools - Left side */}
@@ -90,28 +103,28 @@ export default function FlowAnimation() {
           fill="none"
           strokeDasharray="5,5"
           strokeWidth="2"
-        ></path>
+        />
         <path
           className="animate-[dash_2s_linear_infinite]"
           d="M 60 140 C 250 140, 250 180, 360 180"
           fill="none"
           strokeDasharray="5,5"
           strokeWidth="2"
-        ></path>
+        />
         <path
           className="animate-[dash_2s_linear_infinite]"
           d="M 60 210 C 250 210, 250 180, 360 180"
           fill="none"
           strokeDasharray="5,5"
           strokeWidth="2"
-        ></path>
+        />
         <path
           className="animate-[dash_2s_linear_infinite]"
           d="M 60 300 C 250 280, 250 180, 360 180"
           fill="none"
           strokeDasharray="5,5"
           strokeWidth="2"
-        ></path>
+        />
       </svg>
 
       {/* SVG Lines from Uniro to Providers */}
@@ -125,28 +138,28 @@ export default function FlowAnimation() {
           stroke={activeFlow === 0 ? "#d97757" : "rgb(75, 85, 99)"}
           strokeWidth={activeFlow === 0 ? "3" : "2"}
           className={activeFlow === 0 ? "animate-pulse" : ""}
-        ></path>
+        />
         <path
           d="M 440 180 C 550 180, 550 130, 740 130"
           fill="none"
           stroke={activeFlow === 1 ? "#d97757" : "rgb(75, 85, 99)"}
           strokeWidth={activeFlow === 1 ? "3" : "2"}
           className={activeFlow === 1 ? "animate-pulse" : ""}
-        ></path>
+        />
         <path
           d="M 440 180 C 550 180, 550 230, 740 230"
           fill="none"
           stroke={activeFlow === 2 ? "#d97757" : "rgb(75, 85, 99)"}
           strokeWidth={activeFlow === 2 ? "3" : "2"}
           className={activeFlow === 2 ? "animate-pulse" : ""}
-        ></path>
+        />
         <path
           d="M 440 180 C 550 180, 550 310, 740 310"
           fill="none"
           stroke={activeFlow === 3 ? "#d97757" : "rgb(75, 85, 99)"}
           strokeWidth={activeFlow === 3 ? "3" : "2"}
           className={activeFlow === 3 ? "animate-pulse" : ""}
-        ></path>
+        />
       </svg>
 
       {/* AI Providers - Right side */}

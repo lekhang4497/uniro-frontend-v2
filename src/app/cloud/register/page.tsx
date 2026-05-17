@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card, Button, Input } from "@/shared/components";
+import { Loader2 } from "lucide-react";
+import { Card } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import { UniroMark } from "@/shared/components/UniroMark";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 
@@ -18,7 +22,7 @@ export default function CloudRegisterPage() {
   const supabase = getBrowserSupabase();
   const disabled = !supabase;
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!supabase) return;
     setLoading(true);
@@ -46,25 +50,30 @@ export default function CloudRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg p-4 relative overflow-hidden">
-      <div className="landing-grid absolute inset-0 pointer-events-none" aria-hidden="true" />
-      <div className="relative z-10 w-full max-w-md">
-        <div className="flex flex-col items-center mb-8">
-          <UniroMark size={48} className="text-primary mb-3" />
-          <h1 className="text-3xl font-bold text-primary mb-2">Create account</h1>
-          <p className="text-text-muted">Free plan includes 1M Uniro-provider tokens / month</p>
+    <div className="flex min-h-screen items-center justify-center bg-[var(--bg-tertiary)] p-6">
+      <div className="w-full max-w-[400px]">
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <UniroMark size={44} className="text-[var(--text-primary)]" />
+          <h1 className="text-[22px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+            Create account
+          </h1>
+          <p className="text-[13px] text-[var(--text-secondary)]">
+            Free plan includes 1M Uniro-provider tokens / month
+          </p>
         </div>
 
-        <Card>
+        <Card className="p-6">
           {disabled ? (
-            <p className="text-sm text-text-muted text-center py-6">
-              Connected mode is not configured. Set Supabase env vars to enable registration.
+            <p className="py-6 text-center text-[13px] text-[var(--text-secondary)]">
+              Connected mode is not configured. Set Supabase env vars to enable
+              registration.
             </p>
           ) : (
             <form onSubmit={handleRegister} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Email</label>
+                <Label htmlFor="email">Email</Label>
                 <Input
+                  id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={email}
@@ -74,8 +83,9 @@ export default function CloudRegisterPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Password</label>
+                <Label htmlFor="password">Password</Label>
                 <Input
+                  id="password"
                   type="password"
                   placeholder="At least 8 characters"
                   value={password}
@@ -83,15 +93,29 @@ export default function CloudRegisterPage() {
                   required
                   minLength={8}
                 />
-                {error && <p className="text-xs text-red-500">{error}</p>}
-                {info && <p className="text-xs text-emerald-500">{info}</p>}
+                {error && (
+                  <p className="text-[12px] text-[var(--accent-red)]">{error}</p>
+                )}
+                {info && (
+                  <p className="text-[12px] text-[var(--accent-green)]">{info}</p>
+                )}
               </div>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Creating…" : "Create account"}
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create account"
+                )}
               </Button>
-              <p className="text-xs text-text-muted text-center">
+              <p className="text-center text-[12px] text-[var(--text-secondary)]">
                 Have an account?{" "}
-                <Link href="/cloud/login" className="text-primary hover:underline">
+                <Link
+                  href="/cloud/login"
+                  className="text-[var(--accent-blue)] hover:underline"
+                >
                   Sign in
                 </Link>
               </p>

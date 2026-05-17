@@ -2,6 +2,6 @@
 import "@/lib/initCloudSync";
 import { redirect } from "next/navigation";
 
-export default function InitPage() {
-  redirect('/dashboard');
+export default function InitPage(): never {
+  redirect("/dashboard");
 }
