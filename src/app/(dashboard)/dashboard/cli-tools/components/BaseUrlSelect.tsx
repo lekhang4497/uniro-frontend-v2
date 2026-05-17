@@ -1,37 +1,75 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Trash2 } from "lucide-react";
 import { UPDATER_CONFIG } from "@/shared/constants/config";
 
 const STORAGE_KEY = "uniro.cliToolEndpointPresets";
 const CUSTOM_VALUE = "__custom__";
 const SAVE_VALUE = "__save__";
 
-const ensureV1 = (url) => {
+type Preset = {
+  name: string;
+  baseUrl: string;
+};
+
+type Option = {
+  value: string;
+  label: string;
+  url: string;
+  saved?: boolean;
+};
+
+type Props = {
+  value: string;
+  onChange: (url: string) => void;
+  requiresExternalUrl?: boolean;
+  tunnelEnabled?: boolean;
+  tunnelPublicUrl?: string;
+  tailscaleEnabled?: boolean;
+  tailscaleUrl?: string;
+  cloudEnabled?: boolean;
+  cloudUrl?: string;
+  withV1?: boolean;
+};
+
+const ensureV1 = (url: string): string => {
   const trimmed = (url || "").replace(/\/+$/, "");
   if (!trimmed) return "";
   return /\/v1$/.test(trimmed) ? trimmed : `${trimmed}/v1`;
 };
 
-const readSavedPresets = () => {
+const readSavedPresets = (): Preset[] => {
   if (typeof window === "undefined") return [];
   try {
     const raw = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "[]");
     if (!Array.isArray(raw)) return [];
-    return raw.filter((p) => p?.name && p?.baseUrl);
+    return raw.filter((p: any) => p?.name && p?.baseUrl) as Preset[];
   } catch {
     return [];
   }
 };
 
-const writeSavedPresets = (presets) => {
+const writeSavedPresets = (presets: Preset[]): void => {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(presets));
 };
 
-const buildOptions = ({ requiresExternalUrl, tunnelEnabled, tunnelPublicUrl, tailscaleEnabled, tailscaleUrl, cloudEnabled, cloudUrl, savedPresets, withV1 }) => {
-  const opts = [];
-  const wrap = (url) => (withV1 ? ensureV1(url) : (url || "").replace(/\/+$/, ""));
+type BuildOptionsArgs = {
+  requiresExternalUrl: boolean;
+  tunnelEnabled: boolean;
+  tunnelPublicUrl: string;
+  tailscaleEnabled: boolean;
+  tailscaleUrl: string;
+  cloudEnabled: boolean;
+  cloudUrl: string;
+  savedPresets: Preset[];
+  withV1: boolean;
+};
+
+const buildOptions = ({ requiresExternalUrl, tunnelEnabled, tunnelPublicUrl, tailscaleEnabled, tailscaleUrl, cloudEnabled, cloudUrl, savedPresets, withV1 }: BuildOptionsArgs): Option[] => {
+  const opts: Option[] = [];
+  const wrap = (url: string) => (withV1 ? ensureV1(url) : (url || "").replace(/\/+$/, ""));
   if (!requiresExternalUrl) {
     const localUrl = wrap(`http://127.0.0.1:${UPDATER_CONFIG.appPort}`);
     opts.push({ value: "local", label: localUrl, url: localUrl });
@@ -66,17 +104,17 @@ export default function BaseUrlSelect({
   cloudEnabled = false,
   cloudUrl = "",
   withV1 = true,
-}) {
-  const [savedPresets, setSavedPresets] = useState([]);
-  const [mode, setMode] = useState("");
-  const [customInput, setCustomInput] = useState("");
+}: Props) {
+  const [savedPresets, setSavedPresets] = useState<Preset[]>([]);
+  const [mode, setMode] = useState<string>("");
+  const [customInput, setCustomInput] = useState<string>("");
   const initializedRef = useRef(false);
 
   useEffect(() => {
     setSavedPresets(readSavedPresets());
   }, []);
 
-  const options = useMemo(
+  const options = useMemo<Option[]>(
     () => buildOptions({ requiresExternalUrl, tunnelEnabled, tunnelPublicUrl, tailscaleEnabled, tailscaleUrl, cloudEnabled, cloudUrl, savedPresets, withV1 }),
     [requiresExternalUrl, tunnelEnabled, tunnelPublicUrl, tailscaleEnabled, tailscaleUrl, cloudEnabled, cloudUrl, savedPresets, withV1]
   );
@@ -95,7 +133,7 @@ export default function BaseUrlSelect({
     }
   }, [options, onChange]);
 
-  const handleSelect = (e) => {
+  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const next = e.target.value;
     if (next === SAVE_VALUE) {
       const trimmed = (value || "").trim();
@@ -120,7 +158,7 @@ export default function BaseUrlSelect({
     if (opt) onChange(opt.url);
   };
 
-  const handleCustomInput = (e) => {
+  const handleCustomInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setCustomInput(v);
     onChange(v);
@@ -147,7 +185,7 @@ export default function BaseUrlSelect({
         <select
           value={mode}
           onChange={handleSelect}
-          className="flex-1 min-w-0 px-2 py-2 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50 sm:py-1.5"
+          className="flex-1 min-w-0 px-2 py-2 bg-[var(--bg-elevated)] rounded text-xs border border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-orange)]/50 sm:py-1.5"
         >
           {options.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -155,8 +193,8 @@ export default function BaseUrlSelect({
           {canSave && <option value={SAVE_VALUE}>+ Save current as...</option>}
         </select>
         {isSaved && (
-          <button type="button" onClick={handleDeleteSaved} className="p-1 text-text-muted hover:text-red-500 rounded transition-colors shrink-0" title="Delete saved endpoint">
-            <span className="material-symbols-outlined text-[14px]">delete</span>
+          <button type="button" onClick={handleDeleteSaved} className="p-1 text-[var(--text-secondary)] hover:text-red-500 rounded transition-colors shrink-0" title="Delete saved endpoint">
+            <Trash2 size={14} />
           </button>
         )}
       </div>
@@ -166,7 +204,7 @@ export default function BaseUrlSelect({
           value={customInput}
           onChange={handleCustomInput}
           placeholder={withV1 ? "https://example.com/v1" : "https://example.com"}
-          className="w-full min-w-0 px-2 py-2 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 sm:py-1.5"
+          className="w-full min-w-0 px-2 py-2 bg-[var(--bg-elevated)] rounded border border-[var(--border-default)] text-xs focus:outline-none focus:ring-1 focus:ring-[var(--accent-orange)]/50 sm:py-1.5"
         />
       )}
     </div>

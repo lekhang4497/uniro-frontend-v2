@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 import { Card, Button } from "@/shared/components";
 import { CONSOLE_LOG_CONFIG } from "@/shared/constants/config";
 
-const LOG_LEVEL_COLORS = {
+type LogLevel = "LOG" | "INFO" | "WARN" | "ERROR" | "DEBUG";
+
+const LOG_LEVEL_COLORS: Record<LogLevel, string> = {
   LOG: "text-green-400",
   INFO: "text-blue-400",
   WARN: "text-yellow-400",
@@ -12,17 +15,22 @@ const LOG_LEVEL_COLORS = {
   DEBUG: "text-purple-400",
 };
 
-function colorLine(line) {
+function colorLine(line: string): ReactNode {
   const match = line.match(/\[(\w+)\]/g);
   const levelTag = match ? match[1]?.replace(/\[|\]/g, "") : null;
-  const color = LOG_LEVEL_COLORS[levelTag] || "text-green-400";
+  const color = LOG_LEVEL_COLORS[(levelTag as LogLevel) ?? "LOG"] || "text-green-400";
   return <span className={color}>{line}</span>;
 }
 
+type StreamMessage =
+  | { type: "init"; logs: string[] }
+  | { type: "line"; line: string }
+  | { type: "clear" };
+
 export default function ConsoleLogClient() {
-  const [logs, setLogs] = useState([]);
-  const [connected, setConnected] = useState(false);
-  const logRef = useRef(null);
+  const [logs, setLogs] = useState<string[]>([]);
+  const [, setConnected] = useState<boolean>(false);
+  const logRef = useRef<HTMLDivElement | null>(null);
 
   const handleClear = async () => {
     try {
@@ -39,7 +47,7 @@ export default function ConsoleLogClient() {
     es.onopen = () => setConnected(true);
 
     es.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
+      const msg = JSON.parse(e.data) as StreamMessage;
       if (msg.type === "init") {
         setLogs(msg.logs.slice(-CONSOLE_LOG_CONFIG.maxLines));
       } else if (msg.type === "line") {
@@ -67,7 +75,7 @@ export default function ConsoleLogClient() {
     <div className="">
       <Card>
         <div className="flex items-center justify-end px-4 pt-3 pb-2">
-          <Button size="sm" variant="outline" icon="delete" onClick={handleClear}>
+          <Button size="sm" variant="outline" icon="Trash2" onClick={handleClear}>
             Clear
           </Button>
         </div>
@@ -76,7 +84,7 @@ export default function ConsoleLogClient() {
           className="bg-black rounded-b-lg p-4 text-xs font-mono h-[calc(100vh-220px)] overflow-y-auto"
         >
           {logs.length === 0 ? (
-            <span className="text-text-muted">No console logs yet.</span>
+            <span className="text-[var(--text-secondary)]">No console logs yet.</span>
           ) : (
             <div className="space-y-0.5">
               {logs.map((line, i) => (

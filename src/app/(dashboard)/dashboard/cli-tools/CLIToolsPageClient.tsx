@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardSkeleton } from "@/shared/components";
+import { CardSkeleton } from "@/shared/components";
+import { Shield } from "lucide-react";
 import { CLI_TOOLS } from "@/shared/constants/cliTools";
 import { getModelsByProviderId, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { ClaudeToolCard, CodexToolCard, DroidToolCard, OpenClawToolCard, HermesToolCard, DefaultToolCard, OpenCodeToolCard, CoworkToolCard, CopilotToolCard, ClineToolCard, KiloToolCard, MitmLinkCard } from "./components";
@@ -11,18 +12,33 @@ const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
 const ALL_STATUSES_URL = "/api/cli-tools/all-statuses";
 
-export default function CLIToolsPageClient({ machineId }) {
-  const [connections, setConnections] = useState([]);
+type Props = {
+  machineId: string;
+};
+
+type Connection = {
+  provider: string;
+  isActive?: boolean;
+  name?: string;
+};
+
+type ApiKey = {
+  id: string | number;
+  key: string;
+};
+
+export default function CLIToolsPageClient({ machineId: _machineId }: Props) {
+  const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedTool, setExpandedTool] = useState(null);
-  const [modelMappings, setModelMappings] = useState({});
+  const [expandedTool, setExpandedTool] = useState<string | null>(null);
+  const [modelMappings, setModelMappings] = useState<Record<string, Record<string, string>>>({});
   const [cloudEnabled, setCloudEnabled] = useState(false);
   const [tunnelEnabled, setTunnelEnabled] = useState(false);
   const [tunnelPublicUrl, setTunnelPublicUrl] = useState("");
   const [tailscaleEnabled, setTailscaleEnabled] = useState(false);
   const [tailscaleUrl, setTailscaleUrl] = useState("");
-  const [apiKeys, setApiKeys] = useState([]);
-  const [toolStatuses, setToolStatuses] = useState({});
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [toolStatuses, setToolStatuses] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
     fetchConnections();
@@ -88,16 +104,23 @@ export default function CLIToolsPageClient({ machineId }) {
     }
   };
 
-  const getActiveProviders = () => connections.filter(c => c.isActive !== false);
+  const getActiveProviders = () => connections.filter((c) => c.isActive !== false);
 
   const getAllAvailableModels = () => {
     const activeProviders = getActiveProviders();
-    const models = [];
-    const seenModels = new Set();
-    activeProviders.forEach(conn => {
-      const alias = PROVIDER_ID_TO_ALIAS[conn.provider] || conn.provider;
+    const models: Array<{
+      value: string;
+      label: string;
+      provider: string;
+      alias: string;
+      connectionName?: string;
+      modelId: string;
+    }> = [];
+    const seenModels = new Set<string>();
+    activeProviders.forEach((conn) => {
+      const alias = (PROVIDER_ID_TO_ALIAS as Record<string, string>)[conn.provider] || conn.provider;
       const providerModels = getModelsByProviderId(conn.provider);
-      providerModels.forEach(m => {
+      providerModels.forEach((m: any) => {
         const modelValue = `${alias}/${m.id}`;
         if (!seenModels.has(modelValue)) {
           seenModels.add(modelValue);
@@ -108,8 +131,8 @@ export default function CLIToolsPageClient({ machineId }) {
     return models;
   };
 
-  const handleModelMappingChange = useCallback((toolId, modelAlias, targetModel) => {
-    setModelMappings(prev => {
+  const handleModelMappingChange = useCallback((toolId: string, modelAlias: string, targetModel: string) => {
+    setModelMappings((prev) => {
       if (prev[toolId]?.[modelAlias] === targetModel) return prev;
       return { ...prev, [toolId]: { ...prev[toolId], [modelAlias]: targetModel } };
     });
@@ -135,7 +158,7 @@ export default function CLIToolsPageClient({ machineId }) {
   const availableModels = getAllAvailableModels();
   const hasActiveProviders = availableModels.length > 0;
 
-  const renderToolCard = (toolId, tool) => {
+  const renderToolCard = (toolId: string, tool: any) => {
     const commonProps = {
       tool,
       isExpanded: expandedTool === toolId,
@@ -156,16 +179,16 @@ export default function CLIToolsPageClient({ machineId }) {
             {...commonProps}
             activeProviders={getActiveProviders()}
             modelMappings={modelMappings[toolId] || {}}
-            onModelMappingChange={(alias, target) => handleModelMappingChange(toolId, alias, target)}
+            onModelMappingChange={(alias: string, target: string) => handleModelMappingChange(toolId, alias, target)}
             hasActiveProviders={hasActiveProviders}
             cloudEnabled={cloudEnabled}
-            initialStatus={toolStatuses.claude}
+            initialStatus={(toolStatuses as any).claude}
           />
         );
       case "codex":
-        return <CodexToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={toolStatuses.codex} />;
+        return <CodexToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={(toolStatuses as any).codex} />;
       case "opencode":
-        return <OpenCodeToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={toolStatuses.opencode} />;
+        return <OpenCodeToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={(toolStatuses as any).opencode} />;
       case "cowork":
         return (
           <CoworkToolCard
@@ -179,21 +202,21 @@ export default function CLIToolsPageClient({ machineId }) {
             tunnelPublicUrl={tunnelPublicUrl}
             tailscaleEnabled={tailscaleEnabled}
             tailscaleUrl={tailscaleUrl}
-            initialStatus={toolStatuses.cowork}
+            initialStatus={(toolStatuses as any).cowork}
           />
         );
       case "droid":
-        return <DroidToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} hasActiveProviders={hasActiveProviders} cloudEnabled={cloudEnabled} initialStatus={toolStatuses.droid} />;
+        return <DroidToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} hasActiveProviders={hasActiveProviders} cloudEnabled={cloudEnabled} initialStatus={(toolStatuses as any).droid} />;
       case "openclaw":
-        return <OpenClawToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} hasActiveProviders={hasActiveProviders} cloudEnabled={cloudEnabled} initialStatus={toolStatuses.openclaw} />;
+        return <OpenClawToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} hasActiveProviders={hasActiveProviders} cloudEnabled={cloudEnabled} initialStatus={(toolStatuses as any).openclaw} />;
       case "hermes":
-        return <HermesToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} hasActiveProviders={hasActiveProviders} cloudEnabled={cloudEnabled} initialStatus={toolStatuses.hermes} />;
+        return <HermesToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} hasActiveProviders={hasActiveProviders} cloudEnabled={cloudEnabled} initialStatus={(toolStatuses as any).hermes} />;
       case "copilot":
-        return <CopilotToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={toolStatuses.copilot} />;
+        return <CopilotToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={(toolStatuses as any).copilot} />;
       case "cline":
-        return <ClineToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={toolStatuses.cline} />;
+        return <ClineToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={(toolStatuses as any).cline} />;
       case "kilo":
-        return <KiloToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={toolStatuses.kilo} />;
+        return <KiloToolCard key={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} initialStatus={(toolStatuses as any).kilo} />;
       default:
         return <DefaultToolCard key={toolId} toolId={toolId} {...commonProps} activeProviders={getActiveProviders()} cloudEnabled={cloudEnabled} tunnelEnabled={tunnelEnabled} />;
     }
@@ -205,16 +228,16 @@ export default function CLIToolsPageClient({ machineId }) {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-1 sm:px-0">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-text-main sm:text-2xl">CLI Tools</h1>
-        <p className="text-sm text-text-muted">Configure local coding tools to use your Uniro providers.</p>
+        <h1 className="text-[26px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">CLI Tools</h1>
+        <p className="text-[14px] text-[var(--text-secondary)]">Configure local coding tools to use your Uniro providers.</p>
       </div>
       <div className="grid gap-3 sm:gap-4">
         {regularTools.map(([toolId, tool]) => renderToolCard(toolId, tool))}
       </div>
       <div className="grid gap-3 sm:gap-4">
         <div className="flex items-center gap-2 px-1">
-          <span className="material-symbols-outlined text-[18px] text-primary">security</span>
-          <h2 className="text-sm font-semibold text-text-main">MITM Tools</h2>
+          <Shield size={18} className="text-[var(--accent-orange)]" />
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">MITM Tools</h2>
         </div>
         {mitmTools.map(([toolId, tool]) => (
           <MitmLinkCard key={toolId} tool={tool} />

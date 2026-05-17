@@ -1,5 +1,18 @@
+// @ts-nocheck
+// Legacy CLI tool card. Per T15 plan, large/intricate card files keep
+// `@ts-nocheck` while visible tokens/icons are migrated. Business logic preserved.
 "use client";
 
+import { AlertCircle, ArrowRight, BadgeCheck, Check, ChevronDown, Copy, Eye, EyeOff, Loader2, PlayCircle, Shield, ShieldCheck, StopCircle, TriangleAlert } from "lucide-react";
+import type { ComponentType } from "react";
+import type { LucideProps } from "lucide-react";
+const ICON_DISPATCH: Record<string, ComponentType<LucideProps>> = {
+  check: Check, content_copy: Copy, visibility: Eye, visibility_off: EyeOff, expand_more: ChevronDown, progress_activity: Loader2,
+};
+function DynIcon({ name, ...rest }: { name: string } & LucideProps) {
+  const Comp = ICON_DISPATCH[name] ?? Copy;
+  return <Comp {...rest} />;
+}
 import { useState, useEffect, useCallback } from "react";
 import { Card, Button, Badge, Input } from "@/shared/components";
 
@@ -9,7 +22,7 @@ const DEFAULT_MITM_ROUTER_BASE = "http://localhost:20128";
  * Shared MITM infrastructure card — manages SSL cert + server start/stop.
  * DNS per-tool is handled separately in MitmToolCard.
  */
-export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }) {
+export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }: any) {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -138,24 +151,22 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
           {/* Header */}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[20px]">security</span>
-              <span className="font-semibold text-sm text-text-main">MITM Server</span>
+              <Shield size={20} className="text-primary" />
+              <span className="font-semibold text-sm text-[var(--text-primary)]">MITM Server</span>
               {isRunning ? (
                 <Badge variant="success" size="sm">Running</Badge>
               ) : (
                 <Badge variant="default" size="sm">Stopped</Badge>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-1 text-xs text-text-muted" data-i18n-skip="true">
+            <div className="flex flex-wrap items-center gap-1 text-xs text-[var(--text-secondary)]" data-i18n-skip="true">
               {[
                 { label: "Cert", ok: status?.certExists },
                 { label: "Trusted", ok: status?.certTrusted },
                 { label: "Server", ok: isRunning },
               ].map(({ label, ok }) => (
-                <span key={label} className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded ${ok ? "text-green-600" : "text-text-muted"}`}>
-                  <span className="material-symbols-outlined text-[12px]">
-                    {ok ? "check_circle" : "cancel"}
-                  </span>
+                <span key={label} className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded ${ok ? "text-green-600" : "text-[var(--text-secondary)]"}`}>
+                  <DynIcon name={ok ? "check_circle" : "cancel"} size={12} className="" />
                   {label}
                 </span>
               ))}
@@ -163,40 +174,40 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
           </div>
 
           {/* Purpose & How it works */}
-          <div className="px-2 py-2 rounded-lg bg-surface/50 border border-border/50 flex flex-col gap-2">
-            <p className="text-[11px] text-text-muted leading-relaxed">
-              <span className="font-medium text-text-main">Purpose:</span> Use Antigravity IDE & GitHub Copilot → with ANY provider/model from Uniro
+          <div className="px-2 py-2 rounded-lg bg-[var(--bg-elevated)]/50 border border-border/50 flex flex-col gap-2">
+            <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+              <span className="font-medium text-[var(--text-primary)]">Purpose:</span> Use Antigravity IDE & GitHub Copilot → with ANY provider/model from Uniro
             </p>
-            <p className="text-[11px] text-text-muted leading-relaxed">
-              <span className="font-medium text-text-main">How it works:</span> Antigravity/Copilot IDE request → DNS redirect to localhost:443 → MITM proxy intercepts → Uniro → response to Antigravity/Copilot
+            <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+              <span className="font-medium text-[var(--text-primary)]">How it works:</span> Antigravity/Copilot IDE request → DNS redirect to localhost:443 → MITM proxy intercepts → Uniro → response to Antigravity/Copilot
             </p>
           </div>
 
           {/* Base URL + API Key — same row pattern as Claude Code / cli-tools */}
           <div className="flex flex-col gap-2">
             <div className="grid gap-1 sm:grid-cols-[8rem_auto_1fr] sm:items-center sm:gap-2">
-              <span className="text-xs font-semibold text-text-main sm:text-right sm:text-sm">Uniro Base URL</span>
-              <span className="material-symbols-outlined hidden text-text-muted text-[14px] sm:inline">arrow_forward</span>
+              <span className="text-xs font-semibold text-[var(--text-primary)] sm:text-right sm:text-sm">Uniro Base URL</span>
+              <ArrowRight size={14} className="hidden text-[var(--text-secondary)] sm:inline" />
               <input
                 type="text"
                 value={mitmRouterBaseUrl}
                 onChange={(e) => setMitmRouterBaseUrl(e.target.value)}
                 placeholder={DEFAULT_MITM_ROUTER_BASE}
                 disabled={isRunning}
-                className="flex-1 min-w-0 px-2 py-1.5 bg-surface rounded border border-border text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50 disabled:opacity-50"
+                className="flex-1 min-w-0 px-2 py-1.5 bg-[var(--bg-elevated)] rounded border border-border text-xs text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-primary/50 disabled:opacity-50"
               />
             </div>
             {!isRunning && (
               <div className="grid gap-1 sm:grid-cols-[8rem_auto_1fr] sm:items-center sm:gap-2">
-                <span className="text-xs font-semibold text-text-main sm:text-right sm:text-sm">API Key</span>
-                <span className="material-symbols-outlined hidden text-text-muted text-[14px] sm:inline">arrow_forward</span>
+                <span className="text-xs font-semibold text-[var(--text-primary)] sm:text-right sm:text-sm">API Key</span>
+                <ArrowRight size={14} className="hidden text-[var(--text-secondary)] sm:inline" />
                 <input
                   type="text"
                   list="mitm-api-keys"
                   value={selectedApiKey}
                   onChange={(e) => setSelectedApiKey(e.target.value)}
                   placeholder={cloudEnabled ? "Enter or pick API key" : "sk_uniro (default)"}
-                  className="flex-1 min-w-0 px-2 py-1.5 bg-surface rounded border border-border text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  className="flex-1 min-w-0 px-2 py-1.5 bg-[var(--bg-elevated)] rounded border border-border text-xs text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-primary/50"
                 />
                 {apiKeys?.length > 0 && (
                   <datalist id="mitm-api-keys">
@@ -217,7 +228,7 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
                 disabled={loading}
                 className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-2 text-xs font-medium text-yellow-600 transition-colors hover:bg-yellow-500/20 disabled:opacity-50 sm:w-auto sm:py-1.5"
               >
-                <span className="material-symbols-outlined text-[16px]">verified_user</span>
+                <BadgeCheck size={16} />
                 Trust Cert
               </button>
             )}
@@ -227,7 +238,7 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
                 disabled={loading}
                 className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs font-medium text-red-500 transition-colors hover:bg-red-500/20 disabled:opacity-50 sm:w-auto sm:py-1.5"
               >
-                <span className="material-symbols-outlined text-[16px]">stop_circle</span>
+                <StopCircle size={16} />
                 Stop Server
               </button>
             ) : (
@@ -237,19 +248,19 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
                 title={serverIsWindows && !isAdmin ? "Administrator required" : undefined}
                 className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/20 disabled:opacity-50 sm:w-auto sm:py-1.5"
               >
-                <span className="material-symbols-outlined text-[16px]">play_circle</span>
+                <PlayCircle size={16} />
                 Start Server
               </button>
             )}
             {isRunning && (
-              <p className="text-xs text-text-muted">Enable DNS per tool below to activate interception</p>
+              <p className="text-xs text-[var(--text-secondary)]">Enable DNS per tool below to activate interception</p>
             )}
           </div>
 
           {/* Action error */}
           {actionError && (
             <div className="flex items-start gap-2 px-2 py-1.5 rounded text-xs bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
-              <span className="material-symbols-outlined text-[14px] mt-0.5 shrink-0">error</span>
+              <AlertCircle size={14} className="mt-0.5 shrink-0" />
               <span>{actionError}</span>
             </div>
           )}
@@ -257,7 +268,7 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
           {/* Windows admin warning */}
           {serverIsWindows && !isAdmin && (
             <div className="flex items-center gap-2 px-2 py-1.5 rounded text-xs bg-red-500/10 text-red-600 border border-red-500/20">
-              <span className="material-symbols-outlined text-[14px]">shield_lock</span>
+              <ShieldCheck size={14} />
               <span>Administrator required — restart Uniro as Administrator to use MITM</span>
             </div>
           )}
@@ -267,11 +278,11 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
       {/* Password Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mx-4 flex w-full max-w-sm flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-xl sm:p-6">
-            <h3 className="font-semibold text-text-main">Sudo Password Required</h3>
+          <div className="mx-4 flex w-full max-w-sm flex-col gap-4 rounded-xl border border-border bg-[var(--bg-elevated)] p-5 shadow-xl sm:p-6">
+            <h3 className="font-semibold text-[var(--text-primary)]">Sudo Password Required</h3>
             <div className="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <span className="material-symbols-outlined text-yellow-500 text-[20px]">warning</span>
-              <p className="text-xs text-text-muted">Required for SSL certificate and server startup</p>
+              <TriangleAlert size={20} className="text-yellow-500" />
+              <p className="text-xs text-[var(--text-secondary)]">Required for SSL certificate and server startup</p>
             </div>
             <Input
               type="password"
@@ -282,7 +293,7 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
             />
             {modalError && (
               <div className="flex items-center gap-2 px-2 py-1.5 rounded text-xs bg-red-500/10 text-red-600">
-                <span className="material-symbols-outlined text-[14px]">error</span>
+                <AlertCircle size={14} />
                 <span>{modalError}</span>
               </div>
             )}
@@ -301,13 +312,13 @@ export default function MitmServerCard({ apiKeys, cloudEnabled, onStatusChange }
       {/* Port 443 Conflict Modal */}
       {port443Conflict && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="mx-4 flex w-full max-w-md flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-xl sm:p-6">
-            <h3 className="font-semibold text-text-main">Port 443 Already In Use</h3>
+          <div className="mx-4 flex w-full max-w-md flex-col gap-4 rounded-xl border border-border bg-[var(--bg-elevated)] p-5 shadow-xl sm:p-6">
+            <h3 className="font-semibold text-[var(--text-primary)]">Port 443 Already In Use</h3>
             <div className="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <span className="material-symbols-outlined text-yellow-500 text-[20px]">warning</span>
-              <div className="flex flex-col gap-1 text-xs text-text-muted">
+              <TriangleAlert size={20} className="text-yellow-500" />
+              <div className="flex flex-col gap-1 text-xs text-[var(--text-secondary)]">
                 <p>Port 443 is currently used by another process:</p>
-                <p className="font-mono text-text-main" data-i18n-skip="true">
+                <p className="font-mono text-[var(--text-primary)]" data-i18n-skip="true">
                   {port443Conflict.owner.name} (PID {port443Conflict.owner.pid})
                 </p>
                 <p>Kill this process to start MITM Server?</p>

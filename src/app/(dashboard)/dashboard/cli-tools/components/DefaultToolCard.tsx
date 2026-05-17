@@ -1,12 +1,36 @@
+// @ts-nocheck
+// Legacy CLI tool card. Per T15 plan, large/intricate card files keep
+// `@ts-nocheck` while visible tokens/icons are migrated. Business logic preserved.
 "use client";
 
+import { Check, ChevronDown, Copy, Eye, EyeOff, Loader2, X } from "lucide-react";
+import type { ComponentType } from "react";
+import type { LucideProps } from "lucide-react";
+import { Info, TriangleAlert, AlertCircle, MessageSquare, Code, Globe, Network, Bot, Box, Settings, Sparkles, Cog, Wrench } from "lucide-react";
+const NOTE_ICON_MAP: Record<string, ComponentType<LucideProps>> = {
+  info: Info, warning: TriangleAlert, error: AlertCircle,
+  chat: MessageSquare, code: Code, public: Globe, language: Globe,
+  hub: Network, robot: Bot, robot_2: Bot, smart_toy: Bot,
+  build: Wrench, construction: Wrench, settings: Settings, cognition: Cog, auto_awesome: Sparkles,
+};
+function NoteIcon({ name, ...rest }: { name: string } & LucideProps) {
+  const Comp = NOTE_ICON_MAP[name] ?? Box;
+  return <Comp {...rest} />;
+}
+const ICON_DISPATCH: Record<string, ComponentType<LucideProps>> = {
+  check: Check, content_copy: Copy, visibility: Eye, visibility_off: EyeOff, expand_more: ChevronDown, progress_activity: Loader2,
+};
+function DynIcon({ name, ...rest }: { name: string } & LucideProps) {
+  const Comp = ICON_DISPATCH[name] ?? Copy;
+  return <Comp {...rest} />;
+}
 import { useState } from "react";
 import { Card, ModelSelectModal } from "@/shared/components";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import Image from "next/image";
 import ApiKeySelect from "./ApiKeySelect";
 
-export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, baseUrl, apiKeys, activeProviders = [], cloudEnabled = false, tunnelEnabled = false }) {
+export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, baseUrl, apiKeys, activeProviders = [], cloudEnabled = false, tunnelEnabled = false }: any) {
   const [copiedField, setCopiedField] = useState(null);
   const [showModelModal, setShowModelModal] = useState(false);
   const [modelValue, setModelValue] = useState("");
@@ -68,7 +92,7 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
           disabled={!hasActiveProviders}
           className={`shrink-0 px-3 py-2 rounded-lg border text-sm transition-colors ${
             hasActiveProviders
-              ? "bg-bg-secondary border-border text-text-main hover:border-primary cursor-pointer"
+              ? "bg-bg-secondary border-border text-[var(--text-primary)] hover:border-primary cursor-pointer"
               : "opacity-50 cursor-not-allowed border-border"
           }`}
         >
@@ -80,16 +104,14 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
               onClick={() => handleCopy(modelValue, "model")}
               className="shrink-0 px-3 py-2 bg-bg-secondary hover:bg-bg-tertiary rounded-lg border border-border transition-colors"
             >
-              <span className="material-symbols-outlined text-lg">
-                {copiedField === "model" ? "check" : "content_copy"}
-              </span>
+              <DynIcon name={copiedField === "model" ? "check" : "content_copy"} size={18} className="" />
             </button>
             <button
               onClick={() => setModelValue("")}
-              className="p-2 text-text-muted hover:text-red-500 rounded transition-colors"
+              className="p-2 text-[var(--text-secondary)] hover:text-red-500 rounded transition-colors"
               title="Clear"
             >
-              <span className="material-symbols-outlined text-lg">close</span>
+              <X size={18} />
             </button>
           </>
         )}
@@ -128,7 +150,7 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
           
           return (
             <div key={index} className={`flex items-start gap-3 p-3 rounded-lg border ${bgClass}`}>
-              <span className={`material-symbols-outlined text-lg ${iconClass}`}>{icon}</span>
+              <NoteIcon name={icon} size={18} className={iconClass} />
               <p className={`text-sm ${textClass}`}>{note.text}</p>
             </div>
           );
@@ -144,7 +166,7 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
   };
 
   const renderGuideSteps = () => {
-    if (!tool.guideSteps) return <p className="text-text-muted text-sm">Coming soon...</p>;
+    if (!tool.guideSteps) return <p className="text-[var(--text-secondary)] text-sm">Coming soon...</p>;
 
     return (
       <div className="flex flex-col gap-4">
@@ -159,7 +181,7 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-text">{item.title}</p>
-              {item.desc && <p className="text-sm text-text-muted mt-0.5">{item.desc}</p>}
+              {item.desc && <p className="text-sm text-[var(--text-secondary)] mt-0.5">{item.desc}</p>}
               {item.type === "apiKeySelector" && renderApiKeySelector()}
               {item.type === "modelSelector" && renderModelSelector()}
               {item.value && (
@@ -172,9 +194,7 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
                       onClick={() => handleCopy(item.value, `${item.step}-${item.title}`)}
                       className="shrink-0 px-3 py-2 bg-bg-secondary hover:bg-bg-tertiary rounded-lg border border-border transition-colors"
                     >
-                      <span className="material-symbols-outlined text-lg">
-                        {copiedField === `${item.step}-${item.title}` ? "check" : "content_copy"}
-                      </span>
+                      <DynIcon name={copiedField === `${item.step}-${item.title}` ? "check" : "content_copy"} size={18} />
                     </button>
                   )}
                 </div>
@@ -186,14 +206,12 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
         {canShowGuide() && tool.codeBlock && (
           <div className="mt-2">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-text-muted uppercase tracking-wide">{tool.codeBlock.language}</span>
+              <span className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">{tool.codeBlock.language}</span>
               <button
                 onClick={() => handleCopy(tool.codeBlock.code, "codeblock")}
                 className="flex items-center gap-1 px-2 py-1 text-xs bg-bg-secondary hover:bg-bg-tertiary rounded border border-border transition-colors"
               >
-                <span className="material-symbols-outlined text-sm">
-                  {copiedField === "codeblock" ? "check" : "content_copy"}
-                </span>
+                <DynIcon name={copiedField === "codeblock" ? "check" : "content_copy"} size={14} className="" />
                 {copiedField === "codeblock" ? "Copied!" : "Copy"}
               </button>
             </div>
@@ -221,7 +239,7 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
       );
     }
     if (tool.icon) {
-      return <span className="material-symbols-outlined text-xl" style={{ color: tool.color }}>{tool.icon}</span>;
+      return <NoteIcon name={tool.icon} size={20} style={{ color: tool.color }} />;
     }
     return (
       <Image
@@ -245,10 +263,10 @@ export default function DefaultToolCard({ toolId, tool, isExpanded, onToggle, ba
           </div>
           <div className="min-w-0">
             <h3 className="font-medium text-sm">{tool.name}</h3>
-            <p className="text-xs text-text-muted truncate">{tool.description}</p>
+            <p className="text-xs text-[var(--text-secondary)] truncate">{tool.description}</p>
           </div>
         </div>
-        <span className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}>expand_more</span>
+        <ChevronDown size={20} className={`text-[var(--text-secondary)] transition-transform ${isExpanded ? "rotate-180" : ""}`} />
       </div>
 
       {isExpanded && (

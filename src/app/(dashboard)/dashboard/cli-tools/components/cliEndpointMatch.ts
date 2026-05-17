@@ -1,7 +1,13 @@
 // Match a configured CLI base URL against all known endpoints (local/tunnel/tailscale/cloud)
-const stripTrailingSlash = (s) => (s || "").replace(/\/+$/, "");
+const stripTrailingSlash = (s?: string): string => (s || "").replace(/\/+$/, "");
 
-export function matchKnownEndpoint(currentUrl, opts = {}) {
+export type MatchOpts = {
+  tunnelPublicUrl?: string;
+  tailscaleUrl?: string;
+  cloudUrl?: string;
+};
+
+export function matchKnownEndpoint(currentUrl: string | undefined | null, opts: MatchOpts = {}): boolean {
   if (!currentUrl) return false;
   const url = stripTrailingSlash(currentUrl);
   const { tunnelPublicUrl, tailscaleUrl, cloudUrl } = opts;

@@ -1,9 +1,25 @@
+// @ts-nocheck
+// Large legacy page (1400+ LOC, intricate tunnel/Tailscale/API-key state).
+// Per the T15 plan, large files keep `@ts-nocheck` while visible tokens/icons
+// are migrated. All business logic is preserved verbatim.
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import PropTypes from "prop-types";
 import { Card, Button, Input, Modal, CardSkeleton, Toggle } from "@/shared/components";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
+import { AlertCircle, Check, CheckCircle2, Code, CloudUpload, Copy, Eye, EyeOff, Globe, HelpCircle, KeyRound, Loader2, Lock, Power, Trash2, TriangleAlert, Users, Webhook, Zap } from "lucide-react";
+import type { ComponentType } from "react";
+import type { LucideProps } from "lucide-react";
+
+// Dynamic icon dispatcher for legacy ternary expressions (content_copy/check, etc).
+const ICON_DISPATCH: Record<string, ComponentType<LucideProps>> = {
+  check: Check, content_copy: Copy, visibility: Eye, visibility_off: EyeOff,
+  public: Globe, group: Users, code: Code, lock: Lock,
+};
+function DynIcon({ name, ...rest }: { name: string } & LucideProps) {
+  const Comp = ICON_DISPATCH[name] ?? Copy;
+  return <Comp {...rest} />;
+}
 
 const TUNNEL_BENEFITS = [
   { icon: "public", title: "Access Anywhere", desc: "Use your API from any network" },
@@ -732,7 +748,7 @@ export default function APIPageClient({ machineId }) {
       {/* Endpoint Card */}
       <Card>
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary">api</span>
+          <Webhook size={16} className="text-primary" />
           API Endpoint
         </h2>
 
@@ -749,29 +765,29 @@ export default function APIPageClient({ machineId }) {
           {/* Cloudflare Tunnel */}
           <div className="flex items-center gap-2">
             <span className={`text-xs font-mono px-1.5 py-0.5 rounded shrink-0 min-w-[88px] text-center ${
-              tunnelEnabled ? "bg-primary/10 text-primary" : "bg-surface-2 text-text-muted"
+              tunnelEnabled ? "bg-primary/10 text-primary" : "bg-[var(--bg-muted)] text-[var(--text-secondary)]"
             }`}>Tunnel</span>
             {tunnelEnabled && !tunnelLoading && tunnelReachable ? (
               <>
                 <Input value={`${tunnelPublicUrl || tunnelUrl}/v1`} readOnly className="flex-1 font-mono text-sm" />
                 <button
                   onClick={() => copy(`${tunnelPublicUrl || tunnelUrl}/v1`, "tunnel_url")}
-                  className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors shrink-0"
+                  className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded text-[var(--text-secondary)] hover:text-primary transition-colors shrink-0"
                 >
-                  <span className="material-symbols-outlined text-[18px]">{copied === "tunnel_url" ? "check" : "content_copy"}</span>
+                  <DynIcon name={copied === "tunnel_url" ? "check" : "content_copy"} size={18} className="" />
                 </button>
                 <button
                   onClick={() => setShowDisableTunnelModal(true)}
                   className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors shrink-0"
                   title="Disable Tunnel"
                 >
-                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
+                  <Power size={18} />
                 </button>
               </>
             ) : tunnelEnabled && !tunnelLoading && !tunnelReachable ? (
               <>
                 <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-amber-300 dark:border-amber-800 bg-amber-500/5 text-sm text-amber-600 dark:text-amber-400">
-                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                  <Loader2 size={14} className="animate-spin" />
                   {tunnelEverReachable ? "Tunnel reconnecting..." : "Tunnel checking..."}
                 </div>
                 <button
@@ -779,13 +795,13 @@ export default function APIPageClient({ machineId }) {
                   className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors shrink-0"
                   title="Disable Tunnel"
                 >
-                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
+                  <Power size={18} />
                 </button>
               </>
             ) : tunnelLoading ? (
               <>
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-input text-sm text-text-muted">
-                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-input text-sm text-[var(--text-secondary)]">
+                  <Loader2 size={14} className="animate-spin" />
                   {tunnelProgress || "Creating tunnel..."}
                 </div>
                 <button
@@ -793,21 +809,21 @@ export default function APIPageClient({ machineId }) {
                   className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors shrink-0"
                   title="Stop"
                 >
-                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
+                  <Power size={18} />
                 </button>
               </>
             ) : tunnelStatus?.type === "error" ? (
               <>
                 <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-red-300 dark:border-red-800 bg-red-500/5 text-sm text-red-600 dark:text-red-400">
-                  <span className="material-symbols-outlined text-sm">error</span>
+                  <AlertCircle size={14} />
                   {tunnelStatus.message}
                 </div>
-                <Button size="sm" icon="cloud_upload" onClick={() => setShowEnableTunnelModal(true)}>Enable</Button>
+                <Button size="sm" icon="CloudUpload" onClick={() => setShowEnableTunnelModal(true)}>Enable</Button>
               </>
             ) : tunnelChecking ? (
               <>
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-input text-sm text-text-muted">
-                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-input text-sm text-[var(--text-secondary)]">
+                  <Loader2 size={14} className="animate-spin" />
                   Checking...
                 </div>
                 <button
@@ -815,13 +831,13 @@ export default function APIPageClient({ machineId }) {
                   className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors shrink-0"
                   title="Stop"
                 >
-                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
+                  <Power size={18} />
                 </button>
               </>
             ) : (
               <Button
                 size="sm"
-                icon="cloud_upload"
+                icon="CloudUpload"
                 onClick={() => {
                   if (!requireApiKey) {
                     setTunnelStatus({ type: "error", message: "Security required: Enable \"Require API key\" before activating the tunnel." });
@@ -837,29 +853,29 @@ export default function APIPageClient({ machineId }) {
           {/* Tailscale */}
           <div className="flex items-center gap-2">
             <span className={`text-xs font-mono px-1.5 py-0.5 rounded shrink-0 min-w-[88px] text-center ${
-              tsEnabled ? "bg-primary/10 text-primary" : "bg-surface-2 text-text-muted"
+              tsEnabled ? "bg-primary/10 text-primary" : "bg-[var(--bg-muted)] text-[var(--text-secondary)]"
             }`}>Tailscale</span>
             {tsEnabled && !tsLoading && tsReachable ? (
               <>
                 <Input value={`${tsUrl}/v1`} readOnly className="flex-1 font-mono text-sm" />
                 <button
                   onClick={() => copy(`${tsUrl}/v1`, "ts_url")}
-                  className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors shrink-0"
+                  className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded text-[var(--text-secondary)] hover:text-primary transition-colors shrink-0"
                 >
-                  <span className="material-symbols-outlined text-[18px]">{copied === "ts_url" ? "check" : "content_copy"}</span>
+                  <DynIcon name={copied === "ts_url" ? "check" : "content_copy"} size={18} className="" />
                 </button>
                 <button
                   onClick={() => setShowDisableTsModal(true)}
                   className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors shrink-0"
                   title="Disable Tailscale"
                 >
-                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
+                  <Power size={18} />
                 </button>
               </>
             ) : tsEnabled && !tsLoading && !tsReachable ? (
               <>
                 <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-amber-300 dark:border-amber-800 bg-amber-500/5 text-sm text-amber-600 dark:text-amber-400">
-                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                  <Loader2 size={14} className="animate-spin" />
                   {tsEverReachable ? "Tailscale reconnecting..." : "Tailscale checking..."}
                 </div>
                 <button
@@ -867,19 +883,19 @@ export default function APIPageClient({ machineId }) {
                   className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors shrink-0"
                   title="Disable Tailscale"
                 >
-                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
+                  <Power size={18} />
                 </button>
               </>
             ) : (tsLoading || tsConnecting) ? (
               <>
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-input text-sm text-text-muted">
-                  <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-input text-sm text-[var(--text-secondary)]">
+                  <Loader2 size={14} className="animate-spin" />
                   {tsProgress || "Connecting..."}
                 </div>
                 {tsAuthUrl && (
                   <Button
                     size="sm"
-                    icon="open_in_new"
+                    icon="ExternalLink"
                     onClick={() => window.open(tsAuthUrl, "tailscale_auth", "width=600,height=700,noopener,noreferrer")}
                   >
                     {tsAuthLabel || "Open"}
@@ -890,21 +906,21 @@ export default function APIPageClient({ machineId }) {
                   className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors shrink-0"
                   title="Stop"
                 >
-                  <span className="material-symbols-outlined text-[18px]">power_settings_new</span>
+                  <Power size={18} />
                 </button>
               </>
             ) : tsStatus?.type === "error" ? (
               <>
                 <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded border border-red-300 dark:border-red-800 bg-red-500/5 text-sm text-red-600 dark:text-red-400">
-                  <span className="material-symbols-outlined text-sm">error</span>
+                  <AlertCircle size={14} />
                   {tsStatus.message}
                 </div>
-                <Button size="sm" icon="vpn_lock" onClick={handleOpenTsModal}>Enable</Button>
+                <Button size="sm" icon="ShieldCheck" onClick={handleOpenTsModal}>Enable</Button>
               </>
             ) : (
               <Button
                 size="sm"
-                icon="vpn_lock"
+                icon="ShieldCheck"
                 onClick={handleOpenTsModal}
                 className="bg-linear-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white!"
               >
@@ -958,7 +974,7 @@ export default function APIPageClient({ machineId }) {
       <Card id="rtk">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">bolt</span>
+            <Zap size={16} className="text-primary" />
             Token Saver
           </h2>
         </div>
@@ -975,7 +991,7 @@ export default function APIPageClient({ machineId }) {
                 (RTK)
               </a>
             </p>
-            <p className="text-sm text-text-muted">
+            <p className="text-sm text-[var(--text-secondary)]">
               git/grep/ls/tree/logs → 60-90% fewer input tokens
             </p>
           </div>
@@ -997,7 +1013,7 @@ export default function APIPageClient({ machineId }) {
                 (Caveman)
               </a>
             </p>
-            <p className="text-sm text-text-muted">
+            <p className="text-sm text-[var(--text-secondary)]">
               Terse-style system prompt → ~65% fewer output tokens (up to 87%)
             </p>
           </div>
@@ -1011,7 +1027,7 @@ export default function APIPageClient({ machineId }) {
                     className={`px-3 py-1.5 rounded text-xs font-medium border transition-colors ${
                       cavemanLevel === lvl.id
                         ? "bg-primary text-white border-primary"
-                        : "bg-transparent border-border text-text-muted hover:bg-surface-2"
+                        : "bg-transparent border-border text-[var(--text-secondary)] hover:bg-[var(--bg-muted)]"
                     }`}
                     title={lvl.desc}
                   >
@@ -1032,10 +1048,10 @@ export default function APIPageClient({ machineId }) {
       <Card id="require-api-key">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">vpn_key</span>
+            <KeyRound size={16} className="text-primary" />
             API Keys
           </h2>
-          <Button icon="add" onClick={() => setShowAddModal(true)}>
+          <Button icon="Plus" onClick={() => setShowAddModal(true)}>
             Create Key
           </Button>
         </div>
@@ -1043,7 +1059,7 @@ export default function APIPageClient({ machineId }) {
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-border">
           <div>
             <p className="font-medium">Require API key</p>
-            <p className="text-sm text-text-muted">
+            <p className="text-sm text-[var(--text-secondary)]">
               Requests without a valid key will be rejected
             </p>
           </div>
@@ -1056,11 +1072,11 @@ export default function APIPageClient({ machineId }) {
         {keys.length === 0 ? (
           <div className="text-center py-12">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-              <span className="material-symbols-outlined text-[32px]">vpn_key</span>
+              <KeyRound size={32} />
             </div>
-            <p className="text-text-main font-medium mb-1">No API keys yet</p>
-            <p className="text-sm text-text-muted mb-4">Create your first API key to get started</p>
-            <Button icon="add" onClick={() => setShowAddModal(true)}>
+            <p className="text-[var(--text-primary)] font-medium mb-1">No API keys yet</p>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">Create your first API key to get started</p>
+            <Button icon="Plus" onClick={() => setShowAddModal(true)}>
               Create Key
             </Button>
           </div>
@@ -1074,28 +1090,24 @@ export default function APIPageClient({ machineId }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{key.name}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <code className="text-xs text-text-muted font-mono">
+                    <code className="text-xs text-[var(--text-secondary)] font-mono">
                       {visibleKeys.has(key.id) ? key.key : maskKey(key.key)}
                     </code>
                     <button
                       onClick={() => toggleKeyVisibility(key.id)}
-                      className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded text-[var(--text-secondary)] hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
                       title={visibleKeys.has(key.id) ? "Hide key" : "Show key"}
                     >
-                      <span className="material-symbols-outlined text-[14px]">
-                        {visibleKeys.has(key.id) ? "visibility_off" : "visibility"}
-                      </span>
+                      <DynIcon name={visibleKeys.has(key.id) ? "visibility_off" : "visibility"} size={14} className="" />
                     </button>
                     <button
                       onClick={() => copy(key.key, key.id)}
-                      className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded text-[var(--text-secondary)] hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
                     >
-                      <span className="material-symbols-outlined text-[14px]">
-                        {copied === key.id ? "check" : "content_copy"}
-                      </span>
+                      <DynIcon name={copied === key.id ? "check" : "content_copy"} size={14} className="" />
                     </button>
                   </div>
-                  <p className="text-xs text-text-muted mt-1">
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">
                     Created {new Date(key.createdAt).toLocaleDateString()}
                   </p>
                   {key.isActive === false && (
@@ -1121,7 +1133,7 @@ export default function APIPageClient({ machineId }) {
                     onClick={() => handleDeleteKey(key.id)}
                     className="p-2 hover:bg-red-500/10 rounded text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                   >
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>
@@ -1206,14 +1218,14 @@ export default function APIPageClient({ machineId }) {
         onClose={() => setShowEnableTunnelModal(false)}
       >
         <div className="flex flex-col gap-4">
-          <div className="bg-surface-2 border border-border-subtle rounded-lg p-4">
+          <div className="bg-[var(--bg-muted)] border border-[var(--border-default)] rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <span className="material-symbols-outlined text-primary">cloud_upload</span>
+              <CloudUpload size={16} className="text-primary" />
               <div>
-                <p className="text-sm text-text-main font-medium mb-1">
+                <p className="text-sm text-[var(--text-primary)] font-medium mb-1">
                   Cloudflare Tunnel
                 </p>
-                <p className="text-sm text-text-muted">
+                <p className="text-sm text-[var(--text-secondary)]">
                   Expose your local Uniro to the internet. No port forwarding, no static IP needed. Share endpoint URL with your team or use it in Cursor, Cline, and other AI tools from anywhere.
                 </p>
               </div>
@@ -1223,14 +1235,14 @@ export default function APIPageClient({ machineId }) {
           <div className="grid grid-cols-2 gap-3">
             {TUNNEL_BENEFITS.map((benefit) => (
               <div key={benefit.title} className="flex flex-col items-center text-center p-3 rounded-lg bg-sidebar/50">
-                <span className="material-symbols-outlined text-xl text-primary mb-1">{benefit.icon}</span>
+                <DynIcon name={benefit.icon} size={20} className="text-primary mb-1" />
                 <p className="text-xs font-semibold">{benefit.title}</p>
-                <p className="text-xs text-text-muted">{benefit.desc}</p>
+                <p className="text-xs text-[var(--text-secondary)]">{benefit.desc}</p>
               </div>
             ))}
           </div>
 
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-[var(--text-secondary)]">
             Requires outbound port 7844 (TCP/UDP). Connection may take 10-30s.
           </p>
 
@@ -1250,7 +1262,7 @@ export default function APIPageClient({ machineId }) {
         onClose={() => !tunnelLoading && setShowDisableTunnelModal(false)}
       >
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-text-muted">The Cloudflare tunnel will be disconnected. Remote access via tunnel URL will stop working.</p>
+          <p className="text-sm text-[var(--text-secondary)]">The Cloudflare tunnel will be disconnected. Remote access via tunnel URL will stop working.</p>
           <div className="flex gap-2">
             <Button onClick={handleDisableTunnel} fullWidth disabled={tunnelLoading} variant="danger">
               {tunnelLoading ? "Disabling..." : "Disable"}
@@ -1269,8 +1281,8 @@ export default function APIPageClient({ machineId }) {
         <div className="flex flex-col gap-4">
           {/* Checking state */}
           {tsInstalled === null && (
-            <p className="text-sm text-text-muted flex items-center gap-2">
-              <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+            <p className="text-sm text-[var(--text-secondary)] flex items-center gap-2">
+              <Loader2 size={14} className="animate-spin" />
               Checking...
             </p>
           )}
@@ -1278,7 +1290,7 @@ export default function APIPageClient({ machineId }) {
           {/* Not installed */}
           {tsInstalled === false && !tsInstalling && (
             <div className="flex flex-col gap-3">
-              <p className="text-sm text-text-muted">Tailscale is not installed. Install it to enable Funnel.</p>
+              <p className="text-sm text-[var(--text-secondary)]">Tailscale is not installed. Install it to enable Funnel.</p>
               <div className="flex gap-2">
                 <Button onClick={handleInstallTailscale} fullWidth>
                   Install Tailscale
@@ -1291,12 +1303,12 @@ export default function APIPageClient({ machineId }) {
           {/* Installing with progress log */}
           {tsInstalling && (
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-sm text-text-muted">
-                <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+              <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                <Loader2 size={14} className="animate-spin" />
                 Installing Tailscale...
               </div>
               {tsInstallLog.length > 0 && (
-                <div ref={tsLogRef} className="bg-black/5 dark:bg-white/5 rounded p-2 max-h-40 overflow-y-auto font-mono text-xs text-text-muted">
+                <div ref={tsLogRef} className="bg-black/5 dark:bg-white/5 rounded p-2 max-h-40 overflow-y-auto font-mono text-xs text-[var(--text-secondary)]">
                   {tsInstallLog.map((line, i) => (
                     <div key={i}>{line}</div>
                   ))}
@@ -1309,7 +1321,7 @@ export default function APIPageClient({ machineId }) {
           {tsInstalled === true && !tsInstalling && (
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                <CheckCircle2 size={16} />
                 Tailscale installed
               </div>
               <div className="flex gap-2">
@@ -1335,7 +1347,7 @@ export default function APIPageClient({ machineId }) {
         onClose={() => !tsLoading && setShowDisableTsModal(false)}
       >
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-text-muted">Tailscale Funnel will be stopped. Remote access via Tailscale URL will stop working.</p>
+          <p className="text-sm text-[var(--text-secondary)]">Tailscale Funnel will be stopped. Remote access via Tailscale URL will stop working.</p>
           <div className="flex gap-2">
             <Button onClick={handleDisableTailscale} fullWidth disabled={tsLoading} variant="danger">
               {tsLoading ? "Disabling..." : "Disable"}
@@ -1353,14 +1365,14 @@ function EndpointRow({ label, url, copyId, copied, onCopy, badge, actions }) {
   return (
     <div className="flex items-center gap-2">
       <span className={`text-xs font-mono px-1.5 py-0.5 rounded shrink-0 min-w-[88px] text-center ${
-          (badge === "CF" || badge === "TS") ? "bg-primary/10 text-primary" : "bg-surface-2 text-text-muted"
+          (badge === "CF" || badge === "TS") ? "bg-primary/10 text-primary" : "bg-[var(--bg-muted)] text-[var(--text-secondary)]"
         }`}>{label}</span>
       <Input value={url} readOnly className="flex-1 font-mono text-sm" />
       <button
         onClick={() => onCopy(url, copyId)}
-        className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors shrink-0"
+        className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded text-[var(--text-secondary)] hover:text-primary transition-colors shrink-0"
       >
-        <span className="material-symbols-outlined text-[18px]">{copied === copyId ? "check" : "content_copy"}</span>
+        <DynIcon name={copied === copyId ? "check" : "content_copy"} size={18} className="" />
       </button>
       {actions}
     </div>
@@ -1394,7 +1406,7 @@ function StatusAlert({ status, className = "" }) {
 function Tooltip({ text }) {
   return (
     <span className="relative group inline-flex items-center">
-      <span className="material-symbols-outlined text-[14px] text-text-muted cursor-help">help</span>
+      <HelpCircle size={14} className="text-[var(--text-secondary)] cursor-help" />
       <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 z-50 w-64 rounded bg-gray-900 dark:bg-gray-800 text-white text-xs px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
         {text}
       </span>
@@ -1406,7 +1418,7 @@ function Tooltip({ text }) {
 function SecurityWarning({ message, action }) {
   return (
     <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
-      <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5">warning</span>
+      <TriangleAlert size={16} className="shrink-0 mt-0.5" />
       <p className="text-xs flex-1">{message}</p>
       {action && (
         <a
@@ -1424,6 +1436,3 @@ function SecurityWarning({ message, action }) {
   );
 }
 
-APIPageClient.propTypes = {
-  machineId: PropTypes.string.isRequired,
-};

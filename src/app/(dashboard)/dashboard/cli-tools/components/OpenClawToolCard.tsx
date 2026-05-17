@@ -1,5 +1,18 @@
+// @ts-nocheck
+// Legacy CLI tool card. Per T15 plan, large/intricate card files keep
+// `@ts-nocheck` while visible tokens/icons are migrated. Business logic preserved.
 "use client";
 
+import { ArrowRight, Check, ChevronDown, Copy, Eye, EyeOff, Loader2, Save, TriangleAlert, Undo2, X } from "lucide-react";
+import type { ComponentType } from "react";
+import type { LucideProps } from "lucide-react";
+const ICON_DISPATCH: Record<string, ComponentType<LucideProps>> = {
+  check: Check, content_copy: Copy, visibility: Eye, visibility_off: EyeOff, expand_more: ChevronDown, progress_activity: Loader2,
+};
+function DynIcon({ name, ...rest }: { name: string } & LucideProps) {
+  const Comp = ICON_DISPATCH[name] ?? Copy;
+  return <Comp {...rest} />;
+}
 import { useState, useEffect, useRef } from "react";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
 import Image from "next/image";
@@ -21,7 +34,7 @@ export default function OpenClawToolCard({
   tunnelPublicUrl,
   tailscaleEnabled,
   tailscaleUrl,
-}) {
+}: any) {
   const [openclawStatus, setOpenclawStatus] = useState(initialStatus || null);
   const [checkingOpenclaw, setCheckingOpenclaw] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -242,17 +255,17 @@ export default function OpenClawToolCard({
               {configStatus === "not_configured" && <span className="px-1.5 py-0.5 text-[10px] font-medium bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full">Not configured</span>}
               {configStatus === "other" && <span className="px-1.5 py-0.5 text-[10px] font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full">Other</span>}
             </div>
-            <p className="text-xs text-text-muted truncate">{tool.description}</p>
+            <p className="text-xs text-[var(--text-secondary)] truncate">{tool.description}</p>
           </div>
         </div>
-        <span className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}>expand_more</span>
+        <ChevronDown size={20} className={`text-[var(--text-secondary)] transition-transform ${isExpanded ? "rotate-180" : ""}`} />
       </div>
 
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
           {checkingOpenclaw && (
-            <div className="flex items-center gap-2 text-text-muted">
-              <span className="material-symbols-outlined animate-spin">progress_activity</span>
+            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+              <Loader2 size={16} className="animate-spin" />
               <span>Checking Open Claw CLI...</span>
             </div>
           )}
@@ -261,15 +274,15 @@ export default function OpenClawToolCard({
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                 <div className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-yellow-500">warning</span>
+                  <TriangleAlert size={16} className="text-yellow-500" />
                   <div className="flex-1">
                     <p className="font-medium text-yellow-600 dark:text-yellow-400">Open Claw CLI not detected locally</p>
-                    <p className="text-sm text-text-muted">Manual configuration is still available if uniro is deployed on a remote server.</p>
+                    <p className="text-sm text-[var(--text-secondary)]">Manual configuration is still available if uniro is deployed on a remote server.</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 pl-9">
                   <Button variant="secondary" size="sm" onClick={() => setShowManualConfigModal(true)} className="!bg-yellow-500/20 !border-yellow-500/40 !text-yellow-700 dark:!text-yellow-300 hover:!bg-yellow-500/30">
-                    <span className="material-symbols-outlined text-[18px] mr-1">content_copy</span>
+                    <Copy size={18} className="mr-1" />
                     Manual Config
                   </Button>
                 </div>
@@ -282,8 +295,8 @@ export default function OpenClawToolCard({
               <div className="flex flex-col gap-2">
                 {/* Endpoint (selector) */}
                 <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[8rem_auto_1fr] sm:items-center sm:gap-2">
-                  <span className="text-xs font-semibold text-text-main sm:text-right sm:text-sm">Select Endpoint</span>
-                  <span className="material-symbols-outlined hidden text-text-muted text-[14px] sm:inline">arrow_forward</span>
+                  <span className="text-xs font-semibold text-[var(--text-primary)] sm:text-right sm:text-sm">Select Endpoint</span>
+                  <ArrowRight size={14} className="hidden text-[var(--text-secondary)] sm:inline" />
                   <BaseUrlSelect
                     value={customBaseUrl || getDisplayUrl()}
                     onChange={setCustomBaseUrl}
@@ -298,9 +311,9 @@ export default function OpenClawToolCard({
                 {/* Current configured */}
                 {openclawStatus?.settings?.models?.providers?.["uniro"]?.baseUrl && (
                   <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[8rem_auto_1fr_auto] sm:items-center sm:gap-2">
-                    <span className="text-xs font-semibold text-text-main sm:text-right sm:text-sm">Current</span>
-                    <span className="material-symbols-outlined hidden text-text-muted text-[14px] sm:inline">arrow_forward</span>
-                    <span className="min-w-0 truncate rounded bg-surface/40 px-2 py-2 text-xs text-text-muted sm:py-1.5">
+                    <span className="text-xs font-semibold text-[var(--text-primary)] sm:text-right sm:text-sm">Current</span>
+                    <ArrowRight size={14} className="hidden text-[var(--text-secondary)] sm:inline" />
+                    <span className="min-w-0 truncate rounded bg-[var(--bg-elevated)]/40 px-2 py-2 text-xs text-[var(--text-secondary)] sm:py-1.5">
                       {openclawStatus.settings.models.providers["uniro"].baseUrl}
                     </span>
                   </div>
@@ -308,58 +321,58 @@ export default function OpenClawToolCard({
 
                 {/* API Key */}
                 <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[8rem_auto_1fr_auto] sm:items-center sm:gap-2">
-                  <span className="text-xs font-semibold text-text-main sm:text-right sm:text-sm">API Key</span>
-                  <span className="material-symbols-outlined hidden text-text-muted text-[14px] sm:inline">arrow_forward</span>
+                  <span className="text-xs font-semibold text-[var(--text-primary)] sm:text-right sm:text-sm">API Key</span>
+                  <ArrowRight size={14} className="hidden text-[var(--text-secondary)] sm:inline" />
                   <ApiKeySelect value={selectedApiKey} onChange={setSelectedApiKey} apiKeys={apiKeys} cloudEnabled={cloudEnabled} />
                 </div>
 
                 {/* Default Model */}
                 <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[8rem_auto_1fr_auto] sm:items-center sm:gap-2">
-                  <span className="text-xs font-semibold text-text-main sm:text-right sm:text-sm">Default Model</span>
-                  <span className="material-symbols-outlined hidden text-text-muted text-[14px] sm:inline">arrow_forward</span>
+                  <span className="text-xs font-semibold text-[var(--text-primary)] sm:text-right sm:text-sm">Default Model</span>
+                  <ArrowRight size={14} className="hidden text-[var(--text-secondary)] sm:inline" />
                   <div className="relative w-full min-w-0">
-                    <input type="text" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} placeholder="provider/model-id" className="w-full min-w-0 pl-2 pr-7 py-2 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 sm:py-1.5" />
-                    {selectedModel && <button onClick={() => setSelectedModel("")} className="absolute right-1 top-1/2 -translate-y-1/2 p-0.5 text-text-muted hover:text-red-500 rounded transition-colors" title="Clear"><span className="material-symbols-outlined text-[14px]">close</span></button>}
+                    <input type="text" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} placeholder="provider/model-id" className="w-full min-w-0 pl-2 pr-7 py-2 bg-[var(--bg-elevated)] rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 sm:py-1.5" />
+                    {selectedModel && <button onClick={() => setSelectedModel("")} className="absolute right-1 top-1/2 -translate-y-1/2 p-0.5 text-[var(--text-secondary)] hover:text-red-500 rounded transition-colors" title="Clear"><X size={14} /></button>}
                   </div>
-                  <button onClick={() => { setAgentModalFor(null); setModalOpen(true); }} disabled={!hasActiveProviders} className={`w-full sm:w-auto rounded border px-2 py-2 text-xs transition-colors sm:py-1.5 whitespace-nowrap sm:shrink-0 ${hasActiveProviders ? "bg-surface border-border text-text-main hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}>Select</button>
+                  <button onClick={() => { setAgentModalFor(null); setModalOpen(true); }} disabled={!hasActiveProviders} className={`w-full sm:w-auto rounded border px-2 py-2 text-xs transition-colors sm:py-1.5 whitespace-nowrap sm:shrink-0 ${hasActiveProviders ? "bg-[var(--bg-elevated)] border-border text-[var(--text-primary)] hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}>Select</button>
                 </div>
 
                 {/* Per-agent model overrides */}
                 {(openclawStatus.agents || []).filter(a => a.agentDir).map((agent) => (
                   <div key={agent.id} className="flex items-center gap-2 pl-4">
                     <span className="w-32 shrink-0 text-xs text-primary text-right truncate" title={agent.name || agent.id}>Agent {agent.name || agent.id}</span>
-                    <span className="material-symbols-outlined hidden text-text-muted text-[14px] sm:inline">arrow_forward</span>
+                    <ArrowRight size={14} className="hidden text-[var(--text-secondary)] sm:inline" />
                     <div className="relative w-full min-w-0">
                       <input
                         type="text"
                         value={agentModels[agent.id] || ""}
                         onChange={(e) => setAgentModels(prev => ({ ...prev, [agent.id]: e.target.value }))}
                         placeholder={`default (${selectedModel || "provider/model-id"})`}
-                        className="w-full min-w-0 pl-2 pr-7 py-2 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 sm:py-1.5"
+                        className="w-full min-w-0 pl-2 pr-7 py-2 bg-[var(--bg-elevated)] rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 sm:py-1.5"
                       />
-                      {agentModels[agent.id] && <button onClick={() => setAgentModels(prev => ({ ...prev, [agent.id]: "" }))} className="absolute right-1 top-1/2 -translate-y-1/2 p-0.5 text-text-muted hover:text-red-500 rounded transition-colors" title="Clear"><span className="material-symbols-outlined text-[14px]">close</span></button>}
+                      {agentModels[agent.id] && <button onClick={() => setAgentModels(prev => ({ ...prev, [agent.id]: "" }))} className="absolute right-1 top-1/2 -translate-y-1/2 p-0.5 text-[var(--text-secondary)] hover:text-red-500 rounded transition-colors" title="Clear"><X size={14} /></button>}
                     </div>
-                    <button onClick={() => { setAgentModalFor(agent.id); setModalOpen(true); }} disabled={!hasActiveProviders} className={`w-full sm:w-auto rounded border px-2 py-2 text-xs transition-colors sm:py-1.5 whitespace-nowrap sm:shrink-0 ${hasActiveProviders ? "bg-surface border-border text-text-main hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}>Select</button>
+                    <button onClick={() => { setAgentModalFor(agent.id); setModalOpen(true); }} disabled={!hasActiveProviders} className={`w-full sm:w-auto rounded border px-2 py-2 text-xs transition-colors sm:py-1.5 whitespace-nowrap sm:shrink-0 ${hasActiveProviders ? "bg-[var(--bg-elevated)] border-border text-[var(--text-primary)] hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}>Select</button>
                   </div>
                 ))}
               </div>
 
               {message && (
                 <div className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}>
-                  <span className="material-symbols-outlined text-[14px]">{message.type === "success" ? "check_circle" : "error"}</span>
+                  <DynIcon name={message.type === "success" ? "check_circle" : "error"} size={14} className="" />
                   <span>{message.text}</span>
                 </div>
               )}
 
               <div className="grid grid-cols-1 gap-2 sm:flex sm:items-center">
                 <Button variant="primary" size="sm" onClick={handleApplySettings} disabled={!selectedModel} loading={applying}>
-                  <span className="material-symbols-outlined text-[14px] mr-1">save</span>Apply
+                  <Save size={14} className="mr-1" />Apply
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleResetSettings} disabled={!openclawStatus?.hasUniro} loading={restoring}>
-                  <span className="material-symbols-outlined text-[14px] mr-1">restore</span>Reset
+                  <Undo2 size={14} className="mr-1" />Reset
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowManualConfigModal(true)}>
-                  <span className="material-symbols-outlined text-[14px] mr-1">content_copy</span>Manual Config
+                  <Copy size={14} className="mr-1" />Manual Config
                 </Button>
               </div>
             </>

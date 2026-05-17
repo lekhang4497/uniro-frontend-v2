@@ -1,21 +1,35 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, Trash2 } from "lucide-react";
 
 const STORAGE_KEY = "uniro.cliToolEndpointPresets";
 
-function maskApiKey(apiKey) {
+type Preset = {
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+};
+
+type Props = {
+  baseUrl: string;
+  apiKey: string;
+  onBaseUrlChange: (v: string) => void;
+  onApiKeyChange: (v: string) => void;
+};
+
+function maskApiKey(apiKey: string): string {
   if (!apiKey) return "No API key";
   if (apiKey.length <= 12) return `${apiKey.slice(0, 4)}...`;
   return `${apiKey.slice(0, 8)}...${apiKey.slice(-4)}`;
 }
 
-function normalizePresets(value) {
+function normalizePresets(value: unknown): Preset[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((preset) => preset?.name && preset?.baseUrl && preset?.apiKey);
+  return value.filter((preset: any) => preset?.name && preset?.baseUrl && preset?.apiKey) as Preset[];
 }
 
-function readPresets() {
+function readPresets(): Preset[] {
   if (typeof window === "undefined") return [];
   try {
     return normalizePresets(JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "[]"));
@@ -24,7 +38,7 @@ function readPresets() {
   }
 }
 
-function writePresets(presets) {
+function writePresets(presets: Preset[]): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizePresets(presets)));
 }
@@ -34,20 +48,20 @@ export default function EndpointPresetControl({
   apiKey,
   onBaseUrlChange,
   onApiKeyChange,
-}) {
-  const [presets, setPresets] = useState([]);
-  const [selectedName, setSelectedName] = useState("");
+}: Props) {
+  const [presets, setPresets] = useState<Preset[]>([]);
+  const [selectedName, setSelectedName] = useState<string>("");
 
   useEffect(() => {
     setPresets(readPresets());
   }, []);
 
-  const selectedPreset = useMemo(
+  const selectedPreset = useMemo<Preset | null>(
     () => presets.find((preset) => preset.name === selectedName) || null,
     [presets, selectedName]
   );
 
-  const handleSelect = (name) => {
+  const handleSelect = (name: string) => {
     setSelectedName(name);
     const preset = presets.find((item) => item.name === name);
     if (!preset) return;
@@ -69,7 +83,7 @@ export default function EndpointPresetControl({
     const name = window.prompt("Preset name", defaultName);
     if (!name?.trim()) return;
 
-    const nextPreset = { name: name.trim(), baseUrl: trimmedBaseUrl, apiKey: trimmedApiKey };
+    const nextPreset: Preset = { name: name.trim(), baseUrl: trimmedBaseUrl, apiKey: trimmedApiKey };
     const nextPresets = [
       ...presets.filter((preset) => preset.name !== nextPreset.name),
       nextPreset,
@@ -90,12 +104,12 @@ export default function EndpointPresetControl({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">Preset</span>
-      <span className="material-symbols-outlined text-text-muted text-[14px]">arrow_forward</span>
+      <span className="w-32 shrink-0 text-sm font-semibold text-[var(--text-primary)] text-right">Preset</span>
+      <ArrowRight size={14} className="text-[var(--text-secondary)]" />
       <select
         value={selectedName}
         onChange={(event) => handleSelect(event.target.value)}
-        className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+        className="flex-1 px-2 py-1.5 bg-[var(--bg-elevated)] rounded text-xs border border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-orange)]/50"
       >
         <option value="">Manual / current endpoint</option>
         {presets.map((preset) => (
@@ -108,7 +122,7 @@ export default function EndpointPresetControl({
         type="button"
         onClick={handleSave}
         disabled={!baseUrl || !apiKey}
-        className="px-2 py-1.5 rounded border text-xs bg-surface border-border text-text-main hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+        className="px-2 py-1.5 rounded border text-xs bg-[var(--bg-elevated)] border-[var(--border-default)] text-[var(--text-primary)] hover:border-[var(--accent-orange)] disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
         title="Save current Base URL and API key as a browser-local preset"
       >
         Save
@@ -117,10 +131,10 @@ export default function EndpointPresetControl({
         <button
           type="button"
           onClick={handleDelete}
-          className="p-1 text-text-muted hover:text-red-500 rounded transition-colors"
+          className="p-1 text-[var(--text-secondary)] hover:text-red-500 rounded transition-colors"
           title="Delete selected preset"
         >
-          <span className="material-symbols-outlined text-[14px]">delete</span>
+          <Trash2 size={14} />
         </button>
       )}
     </div>
