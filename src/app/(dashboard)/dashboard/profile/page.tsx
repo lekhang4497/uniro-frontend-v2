@@ -654,7 +654,7 @@ export default function ProfilePage() {
         {/* Network */}
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-[var(--radius)] bg-[var(--accent-purple)]/10 text-[var(--accent-purple)] shrink-0">
+            <div className="p-2 rounded-[var(--radius)] bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] shrink-0">
               <Wifi className="h-5 w-5" />
             </div>
             <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">Network</h3>
