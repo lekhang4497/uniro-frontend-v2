@@ -20,11 +20,18 @@ import {
 //   loadYaml(yaml)    — (string) => void ; loads a YAML payload into the canvas
 //   activeName        — string | undefined
 //   onActiveIdChange  — (id) => void
-export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange }) {
-  const [routers, setRouters] = useState([]);
+interface CloudSyncPanelProps {
+  getYaml: () => string;
+  loadYaml: (yaml: string) => void;
+  activeName?: string;
+  onActiveIdChange?: (id: string | null) => void;
+}
+
+export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange }: CloudSyncPanelProps) {
+  const [routers, setRouters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeId, setActiveId] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [engine, setEngine] = useState("local");
   const [fallbackModel, setFallbackModel] = useState("gpt-4o-mini");
@@ -40,7 +47,7 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
     try {
       const rows = await listRouters();
       setRouters(rows);
-    } catch (e) {
+    } catch (e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
@@ -66,19 +73,19 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
           engine,
           fallbackModel,
           configYaml: yaml,
-        });
+        } as any);
         setActiveId(created.id);
         onActiveIdChange?.(created.id);
       }
       await refresh();
-    } catch (e) {
+    } catch (e: any) {
       setError(e.message);
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleLoad(id) {
+  async function handleLoad(id: string) {
     setError(null);
     try {
       const r = await getRouter(id);
@@ -88,29 +95,29 @@ export function CloudSyncPanel({ getYaml, loadYaml, activeName, onActiveIdChange
       setFallbackModel(r.fallback_model);
       setName(r.name);
       onActiveIdChange?.(r.id);
-    } catch (e) {
+    } catch (e: any) {
       setError(e.message);
     }
   }
 
-  async function handleDelete(id) {
+  async function handleDelete(id: string) {
     if (!confirm("Delete this router from the cloud?")) return;
     setError(null);
     try {
       await deleteRouter(id);
       if (activeId === id) setActiveId(null);
       await refresh();
-    } catch (e) {
+    } catch (e: any) {
       setError(e.message);
     }
   }
 
-  async function handleMakeDefault(id) {
+  async function handleMakeDefault(id: string) {
     setError(null);
     try {
       await setDefaultRouter(id);
       await refresh();
-    } catch (e) {
+    } catch (e: any) {
       setError(e.message);
     }
   }

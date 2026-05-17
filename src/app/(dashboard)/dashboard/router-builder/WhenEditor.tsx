@@ -8,7 +8,7 @@
 import { cn } from "@/lib/utils";
 import { LEAF_OPERATORS, LEAF_OPERATOR_BY_KEY, WHEN_KINDS } from "./catalog";
 
-const KIND_LABEL = {
+const KIND_LABEL: Record<string, string> = {
   leaf: "leaf",
   all: "all (AND)",
   any: "any (OR)",
@@ -16,7 +16,7 @@ const KIND_LABEL = {
   always: "always",
 };
 
-function makeDefault(kind) {
+function makeDefault(kind: string): any {
   switch (kind) {
     case "leaf":
       return { kind: "leaf", signalId: "", op: "equals", value: "" };
@@ -31,10 +31,19 @@ function makeDefault(kind) {
   }
 }
 
-export function WhenEditor({ value, onChange, signalIds = [], projIds = [], depth = 0, onRemove }) {
+interface WhenEditorProps {
+  value: any;
+  onChange: (next: any) => void;
+  signalIds?: string[];
+  projIds?: string[];
+  depth?: number;
+  onRemove?: () => void;
+}
+
+export function WhenEditor({ value, onChange, signalIds = [], projIds = [], depth = 0, onRemove }: WhenEditorProps) {
   const v = value || { kind: "always" };
 
-  const setKind = (newKind) => {
+  const setKind = (newKind: string) => {
     if (newKind === v.kind) return;
     onChange(makeDefault(newKind));
   };
@@ -85,7 +94,7 @@ export function WhenEditor({ value, onChange, signalIds = [], projIds = [], dept
           value={v}
           signalIds={signalIds}
           projIds={projIds}
-          onChange={(patch) => onChange({ ...v, ...patch })}
+          onChange={(patch: any) => onChange({ ...v, ...patch })}
         />
       )}
 
@@ -106,7 +115,7 @@ export function WhenEditor({ value, onChange, signalIds = [], projIds = [], dept
             signalIds={signalIds}
             projIds={projIds}
             depth={depth + 1}
-            onChange={(child) => onChange({ ...v, child })}
+            onChange={(child: any) => onChange({ ...v, child })}
           />
         </div>
       )}
@@ -114,9 +123,16 @@ export function WhenEditor({ value, onChange, signalIds = [], projIds = [], dept
   );
 }
 
-function LeafEditor({ value, signalIds, projIds, onChange }) {
+interface LeafEditorProps {
+  value: any;
+  signalIds: string[];
+  projIds: string[];
+  onChange: (patch: any) => void;
+}
+
+function LeafEditor({ value, signalIds, projIds, onChange }: LeafEditorProps) {
   const op = value.op || "equals";
-  const opSpec = LEAF_OPERATOR_BY_KEY[op];
+  const opSpec: any = (LEAF_OPERATOR_BY_KEY as any)[op];
 
   // Determine whether this leaf references a signal or projection
   const hasProj = value.projId && projIds.includes(value.projId);
@@ -267,14 +283,22 @@ function LeafEditor({ value, signalIds, projIds, onChange }) {
   );
 }
 
-function GroupEditor({ value, signalIds, projIds, depth, onChange }) {
-  const setChild = (idx, child) => {
+interface GroupEditorProps {
+  value: any;
+  signalIds: string[];
+  projIds: string[];
+  depth: number;
+  onChange: (next: any) => void;
+}
+
+function GroupEditor({ value, signalIds, projIds, depth, onChange }: GroupEditorProps) {
+  const setChild = (idx: number, child: any) => {
     const next = [...(value.children || [])];
     next[idx] = child;
     onChange({ ...value, children: next });
   };
-  const removeChild = (idx) => {
-    const next = (value.children || []).filter((_, i) => i !== idx);
+  const removeChild = (idx: number) => {
+    const next = (value.children || []).filter((_: any, i: number) => i !== idx);
     onChange({ ...value, children: next });
   };
   const addChild = () => {
@@ -284,14 +308,14 @@ function GroupEditor({ value, signalIds, projIds, depth, onChange }) {
 
   return (
     <div className="pl-3 border-l-2 border-border space-y-2">
-      {(value.children || []).map((c, i) => (
+      {(value.children || []).map((c: any, i: number) => (
         <WhenEditor
           key={i}
           value={c}
           signalIds={signalIds}
           projIds={projIds}
           depth={depth + 1}
-          onChange={(next) => setChild(i, next)}
+          onChange={(next: any) => setChild(i, next)}
           onRemove={() => removeChild(i)}
         />
       ))}

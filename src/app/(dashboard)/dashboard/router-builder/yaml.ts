@@ -16,15 +16,15 @@ import { SIGNAL_TYPE_BY_KEY, PROJECTION_TYPE_BY_KEY } from "./catalog";
 
 // ---------- helpers ----------
 
-function isEmpty(v) {
+function isEmpty(v: unknown): boolean {
   if (v === undefined || v === null) return true;
   if (typeof v === "string") return v.trim() === "";
   if (Array.isArray(v)) return v.length === 0;
-  if (typeof v === "object") return Object.keys(v).length === 0;
+  if (typeof v === "object") return Object.keys(v as object).length === 0;
   return false;
 }
 
-function coerceConfigValue(field, raw) {
+function coerceConfigValue(field: any, raw: any): any {
   if (raw === undefined || raw === null) return undefined;
   switch (field.kind) {
     case "number": {
@@ -59,10 +59,10 @@ function coerceConfigValue(field, raw) {
   }
 }
 
-function buildSignalConfig(signal) {
-  const spec = SIGNAL_TYPE_BY_KEY[signal.type];
+function buildSignalConfig(signal: any): any {
+  const spec: any = (SIGNAL_TYPE_BY_KEY as any)[signal.type];
   if (!spec || spec.fields.length === 0) return undefined;
-  const out = {};
+  const out: any = {};
   for (const field of spec.fields) {
     const raw = signal.config?.[field.key];
     const value = coerceConfigValue(field, raw);
@@ -80,7 +80,7 @@ function buildSignalConfig(signal) {
 //   { kind: 'leaf', projId, ... }                       -> { projection, equals: ... }
 //   { kind: 'all'|'any', children }                     -> { all: [...] }
 //   { kind: 'not', child }                              -> { not: ... }
-export function whenToYaml(when) {
+export function whenToYaml(when: any): any {
   if (!when || !when.kind) return undefined;
   switch (when.kind) {
     case "always":
@@ -94,7 +94,7 @@ export function whenToYaml(when) {
 
       // projection reference
       if (projId) {
-        const out = { projection: projId };
+        const out: any = { projection: projId };
         if (op === "equals" || op === "in" || op === "gte" || op === "lte" || op === "matches") {
           if (op === "in") {
             const arr = Array.isArray(when.value)
@@ -119,7 +119,7 @@ export function whenToYaml(when) {
 
       // signal reference
       if (!id) return undefined;
-      const out = { signal: id };
+      const out: any = { signal: id };
       if (op === "exists") {
         out.exists = when.value !== false;
       } else if (op === "in") {
@@ -144,7 +144,7 @@ export function whenToYaml(when) {
     case "any": {
       const children = (when.children || [])
         .map(whenToYaml)
-        .filter((c) => c !== undefined);
+        .filter((c: any) => c !== undefined);
       if (children.length === 0) return undefined;
       return { [when.kind]: children };
     }
@@ -159,7 +159,7 @@ export function whenToYaml(when) {
 }
 
 // Inverse of whenToYaml — re-tag YAML when-clauses for the UI.
-export function whenFromYaml(node) {
+export function whenFromYaml(node: any): any {
   if (!node || typeof node !== "object") return { kind: "always" };
   if (node.always === true) return { kind: "always" };
   if (Array.isArray(node.all)) {
@@ -192,8 +192,8 @@ export function whenFromYaml(node) {
 
 // ---------- exporter ----------
 
-export function buildRouterDict(state) {
-  const out = {};
+export function buildRouterDict(state: any): any {
+  const out: any = {};
   if (state.name) out.name = state.name;
   if (state.description) out.description = state.description;
   if (Number.isFinite(state.version) && state.version !== 1) out.version = state.version;
@@ -206,7 +206,7 @@ export function buildRouterDict(state) {
     out.created_by_method = state.created_by_method;
   }
 
-  const defaults = {};
+  const defaults: any = {};
   if (Number.isFinite(state.defaults?.alpha) && state.defaults.alpha !== 0.5) {
     defaults.alpha = state.defaults.alpha;
   }
@@ -220,8 +220,8 @@ export function buildRouterDict(state) {
   if (!isEmpty(defaults)) out.defaults = defaults;
 
   // --- Layer 1: Signal Extraction ---
-  const signals = (state.signals || []).map((sig) => {
-    const item = { id: sig.id, type: sig.type };
+  const signals = (state.signals || []).map((sig: any) => {
+    const item: any = { id: sig.id, type: sig.type };
     if (Number.isFinite(sig.version) && sig.version !== 1) item.version = sig.version;
     const cfg = buildSignalConfig(sig);
     if (cfg) item.config = cfg;
@@ -233,12 +233,12 @@ export function buildRouterDict(state) {
   if (signals.length) out.signals = signals;
 
   // --- Layer 2: Projection Coordination ---
-  const partitions = [];
-  const scores = [];
-  const mappings = [];
+  const partitions: any[] = [];
+  const scores: any[] = [];
+  const mappings: any[] = [];
 
   for (const proj of state.projections || []) {
-    const item = { name: proj.name };
+    const item: any = { name: proj.name };
     if (proj.type === "partition") {
       if (proj.config?.members) item.members = proj.config.members;
       if (proj.config?.default) item.default = proj.config.default;
@@ -259,14 +259,14 @@ export function buildRouterDict(state) {
     }
   }
 
-  const routing = {};
+  const routing: any = {};
   if (partitions.length) routing.partitions = partitions;
   if (scores.length) routing.scores = scores;
   if (mappings.length) routing.mappings = mappings;
 
   // --- Layer 3: Routes (Decision Making) ---
-  const routes = (state.routes || []).map((route) => {
-    const item = { name: route.name };
+  const routes = (state.routes || []).map((route: any) => {
+    const item: any = { name: route.name };
     const when = whenToYaml(route.when);
     item.when = when || { always: true };
     if (Number.isFinite(route.priority) && route.priority !== 0) {
@@ -282,14 +282,14 @@ export function buildRouterDict(state) {
   if (routes.length) routing.routes = routes;
 
   // --- Layer 4: Models ---
-  const models = (state.models || []).map((m) => {
-    const item = { name: m.name };
+  const models = (state.models || []).map((m: any) => {
+    const item: any = { name: m.name };
     if (m.model_id) item.model = m.model_id;
     if (Number.isFinite(m.max_tokens)) item.max_tokens = m.max_tokens;
     if (m.temperature !== undefined && m.temperature !== 0.7) {
       item.temperature = m.temperature;
     }
-    const overrides = {};
+    const overrides: any = {};
     if (m.parallel_tool_calls !== undefined) overrides.parallel_tool_calls = m.parallel_tool_calls;
     if (m.extra_config) overrides.extra_config = m.extra_config;
     if (!isEmpty(overrides)) item.config = overrides;
@@ -298,8 +298,8 @@ export function buildRouterDict(state) {
   if (models.length) routing.models = models;
 
   // --- Layer 5: Plugins ---
-  const plugins = (state.plugins || []).map((p) => {
-    const item = { name: p.name, type: p.type };
+  const plugins = (state.plugins || []).map((p: any) => {
+    const item: any = { name: p.name, type: p.type };
     if (p.enabled !== undefined && p.enabled !== true) item.enabled = p.enabled;
     if (p.config && !isEmpty(p.config)) item.config = p.config;
     return item;
@@ -308,7 +308,7 @@ export function buildRouterDict(state) {
 
   if (!isEmpty(routing)) out.routing = routing;
 
-  const g = {};
+  const g: any = {};
   if (Number.isFinite(state.guardrails?.daily_cost_cap_usd)) {
     g.daily_cost_cap_usd = state.guardrails.daily_cost_cap_usd;
   }
@@ -320,7 +320,7 @@ export function buildRouterDict(state) {
   }
   if (!isEmpty(g)) out.guardrails = g;
 
-  const obs = {};
+  const obs: any = {};
   if (state.observability?.log_decisions) obs.log_decisions = true;
   if (state.observability?.shadow) obs.shadow = true;
   if (!isEmpty(obs)) out.observability = obs;
@@ -328,28 +328,28 @@ export function buildRouterDict(state) {
   return out;
 }
 
-export function buildRouterYaml(state) {
+export function buildRouterYaml(state: any): string {
   const dict = buildRouterDict(state);
   return stringifyYAML(dict, {
     indent: 2,
     lineWidth: 120,
     noRefs: true,
     sortKeys: false,
-  });
+  } as any);
 }
 
 // ---------- importer ----------
 
-function configFromYaml(type, raw, fields) {
+function configFromYaml(_type: string, raw: any, fields: any[]): any {
   if (!raw || typeof raw !== "object") return {};
-  const out = {};
+  const out: any = {};
   for (const field of fields) {
     const value = raw[field.key];
     if (value === undefined) continue;
     if (field.kind === "string-list") {
       out[field.key] = Array.isArray(value) ? value.join(", ") : String(value);
     } else if (field.kind === "yaml") {
-      out[field.key] = stringifyYAML(value, { indent: 2, lineWidth: 120 }).trimEnd();
+      out[field.key] = stringifyYAML(value, { indent: 2, lineWidth: 120 } as any).trimEnd();
     } else if (field.kind === "number" || field.kind === "bool") {
       out[field.key] = value;
     } else {
@@ -359,13 +359,13 @@ function configFromYaml(type, raw, fields) {
   return out;
 }
 
-export function fromRouterDict(dict) {
+export function fromRouterDict(dict: any): any {
   const d = dict || {};
   const r = d.routing || {};
 
   // Layer 1: signals
-  const signals = (d.signals || []).map((s, i) => {
-    const spec = SIGNAL_TYPE_BY_KEY[s.type];
+  const signals = (d.signals || []).map((s: any, i: number) => {
+    const spec: any = (SIGNAL_TYPE_BY_KEY as any)[s.type];
     return {
       uid: `sig-${i}-${s.id || ""}`,
       id: s.id || "",
@@ -377,8 +377,8 @@ export function fromRouterDict(dict) {
   });
 
   // Layer 2: projections
-  const projections = [];
-  const addProj = (type, name, config, uid) =>
+  const projections: any[] = [];
+  const addProj = (type: string, name: string, config: any, uid: string) =>
     projections.push({ uid, type, name, config });
   let pi = 0;
   for (const p of r.partitions || []) {
@@ -403,7 +403,7 @@ export function fromRouterDict(dict) {
   }
 
   // Layer 3: routes
-  const routes = (r.routes || []).map((route, i) => ({
+  const routes = (r.routes || []).map((route: any, i: number) => ({
     uid: `route-${i}-${route.name || ""}`,
     name: route.name || "",
     when: whenFromYaml(route.when || { always: true }),
@@ -413,7 +413,7 @@ export function fromRouterDict(dict) {
   }));
 
   // Layer 4: models
-  const models = (r.models || []).map((m, i) => ({
+  const models = (r.models || []).map((m: any, i: number) => ({
     uid: `model-${i}-${m.name || ""}`,
     name: m.name || "",
     model_id: m.model || "",
@@ -424,7 +424,7 @@ export function fromRouterDict(dict) {
   }));
 
   // Layer 5: plugins
-  const plugins = (r.plugins || []).map((p, i) => ({
+  const plugins = (r.plugins || []).map((p: any, i: number) => ({
     uid: `plugin-${i}-${p.name || ""}`,
     name: p.name || "",
     type: p.type || "semantic_cache",
@@ -465,15 +465,15 @@ export function fromRouterDict(dict) {
   };
 }
 
-export function parseRouterYaml(text) {
+export function parseRouterYaml(text: string): any {
   return fromRouterDict(parseYAML(text));
 }
 
 // ---------- validation ----------
 
-export function lintRouter(state) {
-  const errors = [];
-  const warnings = [];
+export function lintRouter(state: any): { errors: string[]; warnings: string[] } {
+  const errors: string[] = [];
+  const warnings: string[] = [];
 
   if (!state.name) errors.push("`name` is required.");
   else if (!/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(state.name)) {
@@ -481,7 +481,7 @@ export function lintRouter(state) {
   }
 
   // Layer 1: signals
-  const sigIds = new Set();
+  const sigIds = new Set<string>();
   for (const s of state.signals || []) {
     if (!s.id) errors.push("Signal is missing `id`.");
     else if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(s.id)) {
@@ -491,13 +491,13 @@ export function lintRouter(state) {
     } else {
       sigIds.add(s.id);
     }
-    if (!SIGNAL_TYPE_BY_KEY[s.type]) {
+    if (!(SIGNAL_TYPE_BY_KEY as any)[s.type]) {
       errors.push(`Signal \`${s.id || "?"}\` has unknown type \`${s.type}\`.`);
     }
   }
 
   // Layer 2: projections
-  const projIds = new Set();
+  const projIds = new Set<string>();
   for (const p of state.projections || []) {
     if (!p.name) errors.push("Projection is missing `name`.");
     else if (projIds.has(p.name)) {
@@ -505,7 +505,7 @@ export function lintRouter(state) {
     } else {
       projIds.add(p.name);
     }
-    if (!PROJECTION_TYPE_BY_KEY[p.type]) {
+    if (!(PROJECTION_TYPE_BY_KEY as any)[p.type]) {
       errors.push(`Projection \`${p.name || "?"}\` has unknown type \`${p.type}\`.`);
     }
   }
@@ -514,7 +514,7 @@ export function lintRouter(state) {
   if (!state.routes || state.routes.length === 0) {
     errors.push("At least one route (decision) is required.");
   }
-  const routeNames = new Set();
+  const routeNames = new Set<string>();
   let hasAlways = false;
   for (const rt of state.routes || []) {
     if (!rt.name) errors.push("Route is missing `name`.");
@@ -523,7 +523,7 @@ export function lintRouter(state) {
     if (!rt.model) errors.push(`Route \`${rt.name || "?"}\` is missing a model.`);
     if (rt.when?.kind === "always") hasAlways = true;
     // signal references in when-clause
-    walkWhen(rt.when, (leaf) => {
+    walkWhen(rt.when, (leaf: any) => {
       if (leaf.signalId && !sigIds.has(leaf.signalId)) {
         errors.push(`Route \`${rt.name || "?"}\` references unknown signal \`${leaf.signalId}\`.`);
       }
@@ -534,7 +534,7 @@ export function lintRouter(state) {
   }
 
   // Layer 4: models
-  const modelNames = new Set();
+  const modelNames = new Set<string>();
   for (const m of state.models || []) {
     if (!m.name) errors.push("Model is missing `name`.");
     else if (modelNames.has(m.name)) {
@@ -561,11 +561,11 @@ export function lintRouter(state) {
   return { errors, warnings };
 }
 
-function walkWhen(when, onLeaf) {
+function walkWhen(when: any, onLeaf: (leaf: any) => void): void {
   if (!when) return;
   if (when.kind === "leaf") onLeaf(when);
   else if (when.kind === "all" || when.kind === "any") {
-    (when.children || []).forEach((c) => walkWhen(c, onLeaf));
+    (when.children || []).forEach((c: any) => walkWhen(c, onLeaf));
   } else if (when.kind === "not") {
     walkWhen(when.child, onLeaf);
   }
