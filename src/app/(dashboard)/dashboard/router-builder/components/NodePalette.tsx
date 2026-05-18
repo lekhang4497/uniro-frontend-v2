@@ -1,7 +1,7 @@
 "use client";
 
 // Left-rail palette of draggable node types.
-// Extracted from page.js with no behavior change.
+// Flat, borderless structure: section header (collapsible) > optional category label > rows.
 
 import { useState } from "react";
 import { Boxes, ChevronDown, Cpu, ShieldCheck, Workflow } from "lucide-react";
@@ -22,39 +22,37 @@ export function Palette() {
   };
 
   return (
-    <aside className="hidden md:flex w-[240px] shrink-0 border-r border-[var(--bg-secondary)] bg-[var(--bg-primary)] flex-col overflow-y-auto custom-scrollbar">
-      <div className="px-4 py-3 border-b border-[var(--bg-secondary)] shrink-0">
-        <div className="text-[11px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold">
-          Palette
+    <aside className="hidden md:flex w-[260px] shrink-0 border-r border-[var(--border)] bg-[var(--bg-primary)] flex-col overflow-y-auto custom-scrollbar">
+      <div className="px-4 pt-4 pb-2 shrink-0">
+        <div className="text-[14px] font-semibold text-[var(--text-primary)]">
+          Components
         </div>
-        <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
-          Drag onto canvas
+        <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5">
+          Drag onto the canvas
         </div>
       </div>
-      <div className="flex-1 p-2 space-y-3">
+
+      <div className="flex-1 px-2 pb-3">
         {/* Signal Extraction */}
         <PaletteSection title="Signal Extraction">
           {SIGNAL_CATEGORIES.map((cat: any) => {
             const items = SIGNAL_TYPES.filter((s: any) => s.category === cat.key);
             if (!items.length) return null;
             return (
-              <div key={cat.key}>
-                <div className="px-2 py-1 text-[9.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold">
-                  {cat.label}
-                </div>
+              <CategoryGroup key={cat.key} label={cat.label}>
                 {items.map((s: any) => {
                   const Icon = ICONS[s.icon] || Boxes;
                   return (
                     <PaletteItem
                       key={s.type}
-                      onDragStart={(e: React.DragEvent) => onDragStart(e, `signal:${s.type}`)}
+                      onDragStart={(e) => onDragStart(e, `signal:${s.type}`)}
                       icon={Icon}
                       label={s.label}
                       description={s.summary}
                     />
                   );
                 })}
-              </div>
+              </CategoryGroup>
             );
           })}
         </PaletteSection>
@@ -65,20 +63,17 @@ export function Palette() {
             const items = PROJECTION_TYPES.filter((p: any) => p.category === cat.key);
             if (!items.length) return null;
             return (
-              <div key={cat.key}>
-                <div className="px-2 py-1 text-[9.5px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold">
-                  {cat.label}
-                </div>
+              <CategoryGroup key={cat.key} label={cat.label}>
                 {items.map((p: any) => (
                   <PaletteItem
                     key={p.type}
-                    onDragStart={(e: React.DragEvent) => onDragStart(e, `projection:${p.type}`)}
+                    onDragStart={(e) => onDragStart(e, `projection:${p.type}`)}
                     icon={ICONS[p.icon] || Boxes}
                     label={p.label}
                     description={p.summary}
                   />
                 ))}
-              </div>
+              </CategoryGroup>
             );
           })}
         </PaletteSection>
@@ -86,7 +81,7 @@ export function Palette() {
         {/* Decision Making */}
         <PaletteSection title="Decision Making">
           <PaletteItem
-            onDragStart={(e: React.DragEvent) => onDragStart(e, "route")}
+            onDragStart={(e) => onDragStart(e, "route")}
             icon={Workflow}
             label="Route"
             description="Routing rule (when → model)"
@@ -96,7 +91,7 @@ export function Palette() {
         {/* Model Selection */}
         <PaletteSection title="Model Selection">
           <PaletteItem
-            onDragStart={(e: React.DragEvent) => onDragStart(e, "model")}
+            onDragStart={(e) => onDragStart(e, "model")}
             icon={Cpu}
             label="Model"
             description="Add a model for dispatch"
@@ -108,7 +103,7 @@ export function Palette() {
           {PLUGINS.map((p: any) => (
             <PaletteItem
               key={p.type}
-              onDragStart={(e: React.DragEvent) => onDragStart(e, `plugin:${p.type}`)}
+              onDragStart={(e) => onDragStart(e, `plugin:${p.type}`)}
               icon={ShieldCheck}
               label={p.label}
               description={p.summary}
@@ -130,18 +125,38 @@ export function PaletteSection({
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="border border-[var(--bg-secondary)] rounded-[var(--radius)] overflow-hidden">
+    <div className="mt-2 first:mt-1">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-2 py-1.5 text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] font-semibold hover:bg-[var(--bg-tertiary)] transition-colors"
+        className="w-full flex items-center justify-between px-2 py-1.5 text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-[var(--radius-sm)]"
       >
         <span>{title}</span>
         <ChevronDown
-          className={cn("h-3 w-3 transition-transform", !isExpanded && "-rotate-90")}
+          className={cn(
+            "h-3.5 w-3.5 text-[var(--text-tertiary)] transition-transform",
+            !isExpanded && "-rotate-90"
+          )}
         />
       </button>
-      {isExpanded && <div className="px-1 pb-2">{children}</div>}
+      {isExpanded && <div className="mt-0.5">{children}</div>}
+    </div>
+  );
+}
+
+function CategoryGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="mt-1">
+      <div className="px-2 pt-1.5 pb-0.5 text-[10px] uppercase tracking-[0.06em] text-[var(--text-tertiary)] font-medium">
+        {label}
+      </div>
+      {children}
     </div>
   );
 }
@@ -161,15 +176,18 @@ export function PaletteItem({
     <div
       draggable
       onDragStart={onDragStart}
-      className="flex items-center gap-2 rounded-[var(--radius)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] p-2 cursor-grab active:cursor-grabbing hover:bg-[var(--bg-tertiary)] mb-1 transition-colors"
+      className="flex items-start gap-2.5 rounded-[var(--radius-sm)] px-2 py-1.5 cursor-grab active:cursor-grabbing hover:bg-[var(--bg-tertiary)] transition-colors"
       title={description}
     >
-      <Icon className="h-3.5 w-3.5 text-[var(--accent-blue)] shrink-0" />
+      <Icon
+        className="h-[14px] w-[14px] mt-[3px] text-[var(--text-tertiary)] shrink-0"
+        strokeWidth={1.75}
+      />
       <div className="min-w-0 flex-1">
-        <div className="text-[11.5px] font-medium truncate text-[var(--text-primary)]">
+        <div className="text-[12.5px] font-medium leading-tight text-[var(--text-primary)]">
           {label}
         </div>
-        <div className="text-[10px] text-[var(--text-secondary)] truncate">
+        <div className="text-[11px] leading-tight text-[var(--text-tertiary)] mt-0.5 truncate">
           {description}
         </div>
       </div>

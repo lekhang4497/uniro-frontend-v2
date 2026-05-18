@@ -77,7 +77,7 @@ export default function RouterBuilderPage() {
 function Builder() {
   const [state, setState] = useState<any>(emptyState);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [tool, setTool] = useState("select");
+  const [tool, setTool] = useState("pan");
   const [showSettings, setShowSettings] = useState(false);
   const [showYaml, setShowYaml] = useState(true);
   const [showCloud, setShowCloud] = useState(false);
