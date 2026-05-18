@@ -21,10 +21,16 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     // Ignore fs/path modules in browser bundle
     if (!isServer) {
+      // Stub Node built-ins that some server-shared modules (e.g. open-sse's
+      // providers.js / appConstants.js) import unconditionally for User-Agent
+      // building. The functions that use them are never invoked from browser
+      // code; without these stubs webpack can't statically resolve the
+      // re-export chain and drops symbols like getModelsByProviderId.
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
         path: false,
+        os: false,
       };
     }
     // Exclude logs, .next, gitbook subapp from watcher

@@ -97,7 +97,7 @@ export function CanvasShell({
         onEdgesDelete={onEdgesDelete}
         onSelectionChange={onSelectionChange}
         onNodeDragStop={onNodeDragStop}
-        connectionMode={"loose" as any}
+        connectionMode={"strict" as any}
         connectionLineStyle={{ stroke: "var(--text-tertiary)", strokeWidth: 2 }}
         panOnDrag={tool === "pan"}
         selectionOnDrag={tool === "select"}

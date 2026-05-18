@@ -440,8 +440,8 @@ function Builder() {
           source: srcUid,
           target: route.uid,
           animated: false,
-          style: { stroke: "var(--border-strong)", strokeWidth: 1.5 },
-          markerEnd: { type: MarkerType.ArrowClosed, color: "var(--border-strong)" },
+          style: { stroke: "#fbbf24", strokeWidth: 1.5, strokeDasharray: "6 3" },
+          markerEnd: { type: MarkerType.ArrowClosed, color: "#fbbf24" },
         });
       });
       if (route.model && modelByName[route.model]) {
