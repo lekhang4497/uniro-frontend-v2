@@ -34,8 +34,12 @@
     "typecheck": "tsc --noEmit",
     "pack:assemble": "node scripts/pack-assemble.js",
     "prepack": "node scripts/pack-assemble.js && node scripts/publish-pkg.js trim",
-    "postpack": "node scripts/publish-pkg.js restore"
+    "postpack": "node scripts/publish-pkg.js restore",
+    "electron:dev": "concurrently -k -n NEXT,ELECTRON -c blue,magenta \"next dev --webpack --port 20129\" \"wait-on http://127.0.0.1:20129 && electron electron/main.js\"",
+    "electron:pack": "next build && electron-builder --config electron/builder.json --dir",
+    "electron:build": "next build && electron-builder --config electron/builder.json"
   },
+  "mainElectron": "electron/main.js",
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -105,14 +109,22 @@
   },
   "comment_better_sqlite3": "kept in optionalDependencies so npm install doesn't fail on systems without build tools — sql.js is used as fallback at runtime",
   "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^25.8.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "concurrently": "^9.2.1",
+    "electron": "^32.3.3",
+    "electron-builder": "^25.1.8",
+    "electron-updater": "^6.8.3",
+    "electron-window-state": "^5.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "get-port": "^7.2.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wait-on": "^8.0.5"
   }
 }

@@ -1,0 +1,63 @@
+{
+  "appId": "tech.uniro.app",
+  "productName": "Uniro",
+  "extraMetadata": { "main": "electron/main.js" },
+  "directories": {
+    "output": "release",
+    "buildResources": "electron/icons"
+  },
+  "files": [
+    "electron/**/*",
+    ".next/standalone/**/*",
+    ".next/static/**/*",
+    "public/**/*",
+    "open-sse/**/*",
+    "src/mitm/**/*",
+    "package.json",
+    "!**/*.{md,map}",
+    "!node_modules/**/{test,tests,__tests__,docs,example,examples}/**",
+    "!**/.bin/**",
+    "!**/data/**"
+  ],
+  "asarUnpack": [
+    "node_modules/better-sqlite3/**/*",
+    "src/mitm/cert/**/*",
+    ".next/standalone/**/*",
+    ".next/static/**/*",
+    "public/**/*"
+  ],
+  "npmRebuild": true,
+  "publish": {
+    "provider": "github",
+    "owner": "lekhang4497",
+    "repo": "uniro-frontend-v2",
+    "releaseType": "draft"
+  },
+  "mac": {
+    "target": [
+      { "target": "dmg", "arch": ["x64", "arm64"] },
+      { "target": "zip", "arch": ["x64", "arm64"] }
+    ],
+    "category": "public.app-category.developer-tools",
+    "icon": "electron/icons/mac.png",
+    "identity": null,
+    "hardenedRuntime": false,
+    "gatekeeperAssess": false
+  },
+  "win": {
+    "target": ["nsis", "portable"],
+    "icon": "electron/icons/win.png"
+  },
+  "linux": {
+    "target": ["AppImage", "deb"],
+    "category": "Development",
+    "icon": "electron/icons/linux.png",
+    "maintainer": "lekhang4497@gmail.com"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true
+  }
+}
