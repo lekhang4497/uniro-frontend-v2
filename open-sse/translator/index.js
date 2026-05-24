@@ -6,53 +6,39 @@ import { filterToOpenAIFormat } from "./helpers/openaiHelper.js";
 import { normalizeThinkingConfig } from "../services/provider.js";
 import { AntigravityExecutor } from "../executors/antigravity.js";
 
-// Registry for translators
-const requestRegistry = new Map();
-const responseRegistry = new Map();
+// Translator registries live in their own module so we can statically import
+// every translator file below without creating a circular dep through
+// index.js (which is what forced the original lazy-require pattern).
+import { requestRegistry, responseRegistry } from "./registry.js";
+export { register } from "./registry.js";
 
-// Track initialization state
-let initialized = false;
+// Static side-effect imports — each file calls register() at module load
+// time, populating the registries before translateRequest/Response runs.
+// Order doesn't matter; we just need them all evaluated.
+import "./request/claude-to-openai.js";
+import "./request/openai-to-claude.js";
+import "./request/gemini-to-openai.js";
+import "./request/openai-to-gemini.js";
+import "./request/openai-to-vertex.js";
+import "./request/antigravity-to-openai.js";
+import "./request/openai-responses.js";
+import "./request/openai-to-kiro.js";
+import "./request/openai-to-cursor.js";
+import "./request/openai-to-ollama.js";
+import "./request/openai-to-commandcode.js";
+import "./response/claude-to-openai.js";
+import "./response/openai-to-claude.js";
+import "./response/gemini-to-openai.js";
+import "./response/openai-to-antigravity.js";
+import "./response/openai-responses.js";
+import "./response/kiro-to-openai.js";
+import "./response/cursor-to-openai.js";
+import "./response/ollama-to-openai.js";
+import "./response/commandcode-to-openai.js";
 
-// Register translator
-export function register(from, to, requestFn, responseFn) {
-  const key = `${from}:${to}`;
-  if (requestFn) {
-    requestRegistry.set(key, requestFn);
-  }
-  if (responseFn) {
-    responseRegistry.set(key, responseFn);
-  }
-}
-
-// Lazy load translators (called once on first use)
-function ensureInitialized() {
-  if (initialized) return;
-  initialized = true;
-
-  // Request translators - sync require pattern for bundler
-  require("./request/claude-to-openai.js");
-  require("./request/openai-to-claude.js");
-  require("./request/gemini-to-openai.js");
-  require("./request/openai-to-gemini.js");
-  require("./request/openai-to-vertex.js");
-  require("./request/antigravity-to-openai.js");
-  require("./request/openai-responses.js");
-  require("./request/openai-to-kiro.js");
-  require("./request/openai-to-cursor.js");
-  require("./request/openai-to-ollama.js");
-  require("./request/openai-to-commandcode.js");
-
-  // Response translators
-  require("./response/claude-to-openai.js");
-  require("./response/openai-to-claude.js");
-  require("./response/gemini-to-openai.js");
-  require("./response/openai-to-antigravity.js");
-  require("./response/openai-responses.js");
-  require("./response/kiro-to-openai.js");
-  require("./response/cursor-to-openai.js");
-  require("./response/ollama-to-openai.js");
-  require("./response/commandcode-to-openai.js");
-}
+// Kept as a no-op for callers that still invoke it (registries are populated
+// at import time now).
+function ensureInitialized() {}
 
 // Strip specific content types from messages (explicit opt-in via strip[] in PROVIDER_MODELS)
 function stripContentTypes(body, stripList = []) {

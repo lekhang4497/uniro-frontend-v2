@@ -487,10 +487,18 @@ export const PROVIDER_MODELS = {
     { id: "command-a-03-2025", name: "Command A (Mar 2025)" },
   ],
   nvidia: [
-    { id: "minimaxai/minimax-m2.7", name: "Minimax M2.7" },
-    { id: "z-ai/glm4.7", name: "GLM 4.7" },
+    // LLMs currently served on integrate.api.nvidia.com (build.nvidia.com catalog)
+    { id: "openai/gpt-oss-20b", name: "GPT-OSS 20B" },
+    { id: "openai/gpt-oss-120b", name: "GPT-OSS 120B" },
+    { id: "meta/llama-3.3-70b-instruct", name: "Llama 3.3 70B Instruct" },
+    { id: "meta/llama-3.1-8b-instruct", name: "Llama 3.1 8B Instruct" },
+    { id: "deepseek-ai/deepseek-r1", name: "DeepSeek R1" },
+    { id: "qwen/qwen2.5-coder-32b-instruct", name: "Qwen 2.5 Coder 32B" },
+    { id: "nvidia/llama-3.1-nemotron-70b-instruct", name: "Nemotron 70B Instruct" },
+    { id: "mistralai/mixtral-8x22b-instruct-v0.1", name: "Mixtral 8x22B Instruct" },
+    // Embedding
     { id: "nvidia/nv-embedqa-e5-v5", name: "NV EmbedQA E5 v5", type: "embedding" },
-    // STT models
+    // STT
     { id: "nvidia/parakeet-ctc-1.1b-asr", name: "Parakeet CTC 1.1B", type: "stt", params: ["language"] },
   ],
   nebius: [
