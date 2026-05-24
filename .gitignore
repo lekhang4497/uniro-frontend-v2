@@ -63,6 +63,21 @@ PUBLIC.en.md
 PR/*
 package-lock.json
 
+# transient backup left by scripts/publish-pkg.js if a publish is interrupted
+package.json.bak
+
+# packed npm tarballs (output of `npm pack` / publish-pkg.js)
+*.tgz
+
+# pack-assemble.js output — assembled standalone bundle
+/dist/
+
+# Claude Code per-project local state
+.claude/
+
+# Windows shell redirect artifact accidentally created from `> nul`
+/nul
+
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
