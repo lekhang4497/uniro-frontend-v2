@@ -25,6 +25,7 @@ export interface CanvasShellProps {
   onEdgesChange: any;
   onConnect: any;
   onEdgesDelete: any;
+  onNodesDelete: any;
   onSelectionChange: any;
   onNodeDragStop: any;
   tool: string;
@@ -43,6 +44,7 @@ export function CanvasShell({
   onEdgesChange,
   onConnect,
   onEdgesDelete,
+  onNodesDelete,
   onSelectionChange,
   onNodeDragStop,
   tool,
@@ -95,6 +97,7 @@ export function CanvasShell({
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onEdgesDelete={onEdgesDelete}
+        onNodesDelete={onNodesDelete}
         onSelectionChange={onSelectionChange}
         onNodeDragStop={onNodeDragStop}
         connectionMode={"strict" as any}

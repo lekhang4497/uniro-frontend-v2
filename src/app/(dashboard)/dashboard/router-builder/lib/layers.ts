@@ -89,14 +89,20 @@ export function getLayerByKey(key: string): LayerDef | undefined {
   return LAYERS.find((l) => l.key === key);
 }
 
+// `model` and `modelGroup` are two node types that share the Model Selection
+// layer/column — normalize the group type onto the layer's `model` nodeType.
+export function layerNodeType(nodeType: string): string {
+  return nodeType === "modelGroup" ? "model" : nodeType;
+}
+
 // Helper to get layer by node type
 export function getLayerByNodeType(nodeType: string): LayerDef | undefined {
-  return LAYERS.find((l) => l.nodeType === nodeType);
+  return LAYERS.find((l) => l.nodeType === layerNodeType(nodeType));
 }
 
 // Get the order index of a layer (0-4)
 export function getLayerIndex(nodeType: string): number {
-  const index = LAYERS.findIndex((l) => l.nodeType === nodeType);
+  const index = LAYERS.findIndex((l) => l.nodeType === layerNodeType(nodeType));
   return index;
 }
 
@@ -139,7 +145,8 @@ export function getRealignedNodes(nodes: any[]): any[] {
     plugin: [],
   };
   nodes.forEach((node) => {
-    const nodeType = node.type;
+    // modelGroup nodes share the model column — bucket them together.
+    const nodeType = layerNodeType(node.type);
     if (byType[nodeType]) {
       byType[nodeType].push(node);
     }

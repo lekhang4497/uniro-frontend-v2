@@ -22,32 +22,32 @@ export const SIGNAL_CATEGORIES = [
 
 export const SIGNAL_TYPES = [
   {
-    type: "language_detector",
-    label: "Language detector",
+    type: "always",
+    label: "Always",
     category: "language",
-    icon: "Languages",
-    summary: "Auto-detect language code (vi/en/zh/ja/\u2026)",
+    icon: "Check",
+    summary: "Always fires \u2014 use as the catch-all on a default decision.",
     fields: [],
   },
   {
-    type: "utterance_set_classifier",
-    label: "Utterance set classifier",
-    category: "topic",
-    icon: "MessagesSquare",
-    summary: "Multi-class topic classifier (BoW + cosine)",
+    type: "language",
+    label: "Language detector",
+    category: "language",
+    icon: "Languages",
+    summary: "Fires when the prompt language matches the configured ISO code.",
     fields: [
-      { key: "threshold", label: "Threshold", kind: "number", default: 0.3 },
       {
-        key: "utterances",
-        label: "Utterances (YAML map)",
-        kind: "yaml",
-        placeholder: "complaint:\n  - I want to complain\nrefund:\n  - I want a refund",
-        help: "Map of category \u2192 list of example utterances.",
+        key: "language",
+        label: "ISO 639-1 code",
+        kind: "string",
+        default: "en",
+        placeholder: "vi, en, zh, ja, \u2026",
+        help: "Required. Two-letter language code to match.",
       },
     ],
   },
   {
-    type: "embedding_real",
+    type: "embedding",
     label: "Embedding classifier",
     category: "topic",
     icon: "Sparkles",
@@ -64,7 +64,7 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "domain_mmlu",
+    type: "domain",
     label: "MMLU domain",
     category: "topic",
     icon: "GraduationCap",
@@ -81,7 +81,7 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "complexity_classifier",
+    type: "complexity",
     label: "Complexity classifier",
     category: "complexity",
     icon: "Gauge",
@@ -94,7 +94,7 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "pii_regex",
+    type: "pii",
     label: "PII regex",
     category: "safety",
     icon: "Lock",
@@ -116,23 +116,6 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "pii_learned",
-    label: "PII (learned)",
-    category: "safety",
-    icon: "LockKeyhole",
-    summary: "Presidio/spaCy-backed PII detector",
-    fields: [
-      {
-        key: "entities",
-        label: "Entities",
-        kind: "string-list",
-        placeholder: "PERSON, EMAIL_ADDRESS, PHONE_NUMBER",
-      },
-      { key: "score_threshold", label: "Score threshold", kind: "number", default: 0.5 },
-      { key: "language", label: "Language", kind: "string", default: "en" },
-    ],
-  },
-  {
     type: "token_estimator",
     label: "Token estimator",
     category: "complexity",
@@ -143,22 +126,33 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
+    type: "structure",
+    label: "Structure",
+    category: "content",
+    icon: "Boxes",
+    summary: "Feature \u00d7 source rules (count/exists/density/sequence over regex/keyword-set).",
+    fields: [
+      {
+        key: "rules",
+        label: "Rules (YAML list)",
+        kind: "yaml",
+        placeholder: "- name: has_code\n  feature: {type: exists, source: {type: regex, pattern: '```'}}\n  predicate: {gte: 1}",
+        help: "Each rule has name, feature, predicate. See engine docs for shape.",
+      },
+    ],
+  },
+  // Legacy entry kept temporarily for back-compat with old YAMLs; the new
+  // engine doesn't have a `reasoning` signal. Will be dropped once any
+  // stored router that references it has been migrated.
+  {
     type: "reasoning",
-    label: "Reasoning marker",
+    label: "Reasoning marker (legacy)",
     category: "complexity",
     icon: "Brain",
-    summary: "Count CoT-style markers (\"step 1:\", \"let me think\"\u2026)",
+    summary: "DEPRECATED \u2014 use `structure` with a sequence rule instead.",
     fields: [
       { key: "min_markers", label: "Min markers", kind: "number", default: 2 },
     ],
-  },
-  {
-    type: "vision",
-    label: "Vision",
-    category: "content",
-    icon: "Image",
-    summary: "Fires when message contains image content",
-    fields: [],
   },
   {
     type: "modality",
@@ -169,21 +163,35 @@ export const SIGNAL_TYPES = [
     fields: [],
   },
   {
-    type: "keyword_match",
+    type: "keyword",
     label: "Keyword match",
     category: "content",
     icon: "Search",
-    summary: "Single regex (binary true/false)",
+    summary: "Keyword-list match via bm25 / ngram / fuzzy.",
     fields: [
-      { key: "pattern", label: "Pattern (regex)", kind: "string", placeholder: "\\b(urgent|asap)\\b" },
       {
-        key: "flags",
-        label: "Flags",
-        kind: "string",
-        placeholder: "I",
-        help: "I=ignorecase, M=multiline, S=dotall",
+        key: "method",
+        label: "Method",
+        kind: "select",
+        options: ["bm25", "ngram", "fuzzy"],
+        default: "bm25",
+        help: "bm25 = substring/token presence; ngram = char Jaccard; fuzzy = Levenshtein.",
       },
-      { key: "lowercase", label: "Lowercase input", kind: "bool", default: false },
+      {
+        key: "keywords",
+        label: "Keywords",
+        kind: "string-list",
+        placeholder: "prove, theorem, square root",
+        help: "Comma- or newline-separated. At least one required.",
+      },
+      {
+        key: "operator",
+        label: "Operator",
+        kind: "select",
+        options: ["OR", "AND"],
+        default: "OR",
+      },
+      { key: "case_sensitive", label: "Case sensitive", kind: "bool", default: false },
     ],
   },
   {
@@ -210,7 +218,7 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "request_metadata",
+    type: "context",
     label: "Request metadata",
     category: "identity",
     icon: "Tag",
@@ -221,7 +229,7 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "conversation_depth",
+    type: "conversation",
     label: "Conversation depth",
     category: "conversation",
     icon: "MessageCircle",
@@ -254,7 +262,7 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "jailbreak_regex",
+    type: "jailbreak",
     label: "Jailbreak (regex)",
     category: "safety",
     icon: "ShieldAlert",
@@ -271,31 +279,7 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "jailbreak_learned",
-    label: "Jailbreak (learned)",
-    category: "safety",
-    icon: "ShieldX",
-    summary: "ML jailbreak classifier",
-    fields: [
-      {
-        key: "model_name",
-        label: "Model",
-        kind: "string",
-        default: "jackhhao/jailbreak-classifier",
-      },
-      { key: "threshold", label: "Threshold", kind: "number", default: 0.5 },
-      {
-        key: "output",
-        label: "Output",
-        kind: "select",
-        options: ["score", "bool"],
-        default: "bool",
-      },
-      { key: "positive_label", label: "Positive label", kind: "string", default: "JAILBREAK" },
-    ],
-  },
-  {
-    type: "feedback",
+    type: "user_feedback",
     label: "Feedback (sentiment)",
     category: "conversation",
     icon: "ThumbsUp",
@@ -325,17 +309,7 @@ export const SIGNAL_TYPES = [
     ],
   },
   {
-    type: "agentic",
-    label: "Agentic",
-    category: "complexity",
-    icon: "Cog",
-    summary: "Heuristic for tool-use / agent requests",
-    fields: [
-      { key: "threshold", label: "Threshold", kind: "number", default: 0.35 },
-    ],
-  },
-  {
-    type: "fact_check_heuristic",
+    type: "fact_check",
     label: "Fact-check heuristic",
     category: "complexity",
     icon: "CheckCircle2",
@@ -532,3 +506,27 @@ export const LEAF_OPERATOR_BY_KEY = Object.fromEntries(
 
 // kinds of when-clause node
 export const WHEN_KINDS = ["leaf", "all", "any", "not", "always"];
+
+// modelRefs algorithm catalog — mirrors router_service uniro_router/schema.py
+// (AlgorithmConfig.type): 8 supported + 7 experimental. Every type validates;
+// all currently delegate to `static` at runtime.
+export const ALGORITHM_TYPES = [
+  "static",
+  "confidence",
+  "ratings",
+  "remom",
+  "elo",
+  "router_dc",
+  "hybrid",
+  "latency_aware",
+  "automix",
+  "gmtrouter",
+  "rl_driven",
+  "knn",
+  "kmeans",
+  "svm",
+  "mlp",
+];
+
+// ModelRef.reasoning_effort enum — see schema.py.
+export const REASONING_EFFORTS = ["minimal", "low", "medium", "high"];

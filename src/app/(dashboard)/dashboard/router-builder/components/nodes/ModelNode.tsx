@@ -1,6 +1,7 @@
 "use client";
 
-// Model node renderer. Extracted from page.js with no behavior change.
+// Model node renderer. A Model node is just the YAML `model:` string — the
+// YAML is the source of truth, so there is no canvas-only alias to show.
 
 import { Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,23 +27,8 @@ export function ModelNodeRenderer({
             Model
           </NodeBadge>
           <div className="text-[12px] font-semibold font-mono truncate">
-            {model.name || "(no name)"}
+            {model.model_id || "(no model)"}
           </div>
-          {model.model_id && (
-            <div className="text-[10px] text-muted-foreground font-mono truncate mt-0.5">
-              {model.model_id}
-            </div>
-          )}
-          {(model.max_tokens || model.temperature !== undefined) && (
-            <div className="flex gap-2 mt-1">
-              {model.max_tokens && (
-                <span className="text-[9.5px] text-muted-foreground">max: {model.max_tokens}</span>
-              )}
-              {model.temperature !== undefined && (
-                <span className="text-[9.5px] text-muted-foreground">t: {model.temperature}</span>
-              )}
-            </div>
-          )}
         </div>
       </div>
       <NodeHandle type="source" side="source" color="#34d399" />

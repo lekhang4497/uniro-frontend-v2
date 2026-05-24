@@ -14,7 +14,14 @@ export function RouteNodeRenderer({
   selected?: boolean;
 }) {
   const route = data.node;
-  const isAlways = route.when?.kind === "always";
+  // "always" badge fires when the route's rules tree is a single leaf
+  // pointing at a signal of type `always` — i.e. a catch-all default.
+  const allSignals: any[] = data.allSignals || [];
+  const leaf = route.rules?.kind === "leaf" ? route.rules : null;
+  const refSignal = leaf
+    ? allSignals.find((s) => s.name === leaf.signalName)
+    : null;
+  const isAlways = refSignal?.type === "always";
   return (
     <div className={cn(CARD_BASE, selected && CARD_SELECTED)}>
       <NodeHandle type="target" side="target" color="#fbbf24" />
@@ -42,7 +49,7 @@ export function RouteNodeRenderer({
         </div>
         {route.model && (
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono truncate pl-10">
-            {"\\u2192"} {route.model}
+            → {route.model}
           </div>
         )}
         {route.plugins?.length > 0 && (

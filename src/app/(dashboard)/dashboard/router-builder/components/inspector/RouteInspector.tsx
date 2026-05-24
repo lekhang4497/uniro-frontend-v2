@@ -5,28 +5,34 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PLUGINS } from "../../catalog";
-import { WhenEditor } from "../../WhenEditor";
+import { RulesEditor } from "../../RulesEditor";
 import { Field, FormRow, SectionLabel, SelectInput, TextInput } from "./primitives";
 
 export function RouteEditor({
   route,
   signalIds,
   projIds,
-  modelNames,
+  modelOptions,
   pluginNames: _pluginNames,
   routes: _routes,
   onUpdate,
 }: {
   route: any;
-  signalIds: string[];
-  projIds: string[];
-  modelNames: string[];
+  signalIds: string[];      // signal NAMES (label kept for back-compat of callsite)
+  projIds: string[];        // projection names
+  // Layer-4 nodes (Model + Model Group) — value is the node uid, label is a
+  // human-readable model summary. `route.model` stores the chosen uid.
+  modelOptions: { value: string; label: string }[];
   pluginNames: string[];
   routes: any[];
   onUpdate: (patch: any) => void;
 }) {
   void _pluginNames;
   void _routes;
+  // The new rules tree references signals AND projections (which the runtime
+  // exposes as boolean facts named after the projection). Both kinds appear
+  // in the leaf-signal dropdown as a single namespace.
+  const referenceNames = [...signalIds, ...projIds];
   const togglePlugin = (name: string) => {
     const has = route.plugins?.includes(name);
     onUpdate({
@@ -52,10 +58,7 @@ export function RouteEditor({
           <SelectInput
             value={route.model || ""}
             onChange={(v) => onUpdate({ model: v })}
-            options={[
-              { value: "", label: "(none)" },
-              ...modelNames.map((n: string) => ({ value: n, label: n })),
-            ]}
+            options={[{ value: "", label: "(none)" }, ...modelOptions]}
           />
         </Field>
       </FormRow>
@@ -81,12 +84,11 @@ export function RouteEditor({
           );
         })}
       </div>
-      <SectionLabel>When</SectionLabel>
-      <WhenEditor
-        value={route.when}
-        signalIds={signalIds}
-        projIds={projIds}
-        onChange={(when: any) => onUpdate({ when })}
+      <SectionLabel>Rules</SectionLabel>
+      <RulesEditor
+        value={route.rules}
+        signalNames={referenceNames}
+        onChange={(rules: any) => onUpdate({ rules })}
       />
     </>
   );

@@ -31,7 +31,7 @@ export function SignalNodeRenderer({
           </NodeBadge>
           <div className="text-[10px] text-muted-foreground">{spec?.label || sig.type}</div>
           <div className="text-[12px] font-semibold font-mono truncate mt-0.5">
-            {sig.id || "(no id)"}
+            {sig.name || "(no name)"}
           </div>
         </div>
       </div>

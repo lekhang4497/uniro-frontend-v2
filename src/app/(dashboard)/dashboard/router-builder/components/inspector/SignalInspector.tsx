@@ -17,8 +17,8 @@ export function SignalEditor({
     onUpdate({ config: { ...(signal.config || {}), [key]: value } });
   return (
     <>
-      <Field label="ID" required>
-        <TextInput value={signal.id} onChange={(v) => onUpdate({ id: v })} mono />
+      <Field label="Name" required>
+        <TextInput value={signal.name} onChange={(v) => onUpdate({ name: v })} mono />
       </Field>
       <Field label="Type" required>
         <SelectInput

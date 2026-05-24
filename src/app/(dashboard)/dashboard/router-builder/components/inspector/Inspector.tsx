@@ -1,20 +1,30 @@
 "use client";
 
 // Right-rail container for the currently-selected node's inspector.
-// Extracted from page.js (PropertiesPanel) with no behavior change.
 
 import { Trash2, X } from "lucide-react";
 import { ModelEditor } from "./ModelInspector";
+import { ModelGroupEditor } from "./ModelGroupInspector";
 import { PluginEditor } from "./PluginInspector";
 import { ProjectionEditor } from "./ProjectionInspector";
 import { RouteEditor } from "./RouteInspector";
 import { SignalEditor } from "./SignalInspector";
 
+// Human-readable panel titles for each node kind.
+const KIND_LABEL: Record<string, string> = {
+  signal: "Signal",
+  projection: "Projection",
+  route: "Route",
+  model: "Model",
+  modelGroup: "Model Group",
+  plugin: "Plugin",
+};
+
 export function PropertiesPanel({
   node,
   signalIds,
   projIds,
-  modelNames,
+  modelOptions,
   pluginNames,
   routes,
   onClose,
@@ -22,13 +32,14 @@ export function PropertiesPanel({
   onUpdateProjection,
   onUpdateRoute,
   onUpdateModel,
+  onUpdateModelGroup,
   onUpdatePlugin,
   onRemove,
 }: {
   node: { kind: string; value: any };
   signalIds: string[];
   projIds: string[];
-  modelNames: string[];
+  modelOptions: { value: string; label: string }[];
   pluginNames: string[];
   routes: any[];
   onClose: () => void;
@@ -36,14 +47,15 @@ export function PropertiesPanel({
   onUpdateProjection: (uid: string, patch: any) => void;
   onUpdateRoute: (uid: string, patch: any) => void;
   onUpdateModel: (uid: string, patch: any) => void;
+  onUpdateModelGroup: (uid: string, patch: any) => void;
   onUpdatePlugin: (uid: string, patch: any) => void;
   onRemove: (uid: string) => void;
 }) {
   return (
     <aside className="hidden lg:flex w-[340px] shrink-0 flex-col border-l border-[var(--bg-secondary)] bg-[var(--bg-primary)]">
       <div className="px-4 py-3 border-b border-[var(--bg-secondary)] flex items-center gap-2 shrink-0">
-        <div className="text-sm font-semibold flex-1 capitalize text-[var(--text-primary)]">
-          {node.kind}
+        <div className="text-sm font-semibold flex-1 text-[var(--text-primary)]">
+          {KIND_LABEL[node.kind] || node.kind}
         </div>
         <button
           type="button"
@@ -72,7 +84,7 @@ export function PropertiesPanel({
             route={node.value}
             signalIds={signalIds}
             projIds={projIds}
-            modelNames={modelNames}
+            modelOptions={modelOptions}
             pluginNames={pluginNames}
             routes={routes}
             onUpdate={(p: any) => onUpdateRoute(node.value.uid, p)}
@@ -82,6 +94,12 @@ export function PropertiesPanel({
           <ModelEditor
             model={node.value}
             onUpdate={(p: any) => onUpdateModel(node.value.uid, p)}
+          />
+        )}
+        {node.kind === "modelGroup" && (
+          <ModelGroupEditor
+            group={node.value}
+            onUpdate={(p: any) => onUpdateModelGroup(node.value.uid, p)}
           />
         )}
         {node.kind === "plugin" && (

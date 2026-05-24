@@ -4,7 +4,7 @@
 // Flat, borderless structure: section header (collapsible) > optional category label > rows.
 
 import { useState } from "react";
-import { Boxes, ChevronDown, Cpu, ShieldCheck, Workflow } from "lucide-react";
+import { Boxes, ChevronDown, Cpu, Layers, ShieldCheck, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   PLUGINS,
@@ -94,7 +94,13 @@ export function Palette() {
             onDragStart={(e) => onDragStart(e, "model")}
             icon={Cpu}
             label="Model"
-            description="Add a model for dispatch"
+            description="A single model for dispatch"
+          />
+          <PaletteItem
+            onDragStart={(e) => onDragStart(e, "modelGroup")}
+            icon={Layers}
+            label="Model Group"
+            description="A weighted set of models (modelRefs)"
           />
         </PaletteSection>
 

@@ -35,13 +35,22 @@ import {
   Zap,
 } from "lucide-react";
 
-export const STORAGE_KEY = "uniro:router-builder:v3";
+// v4 drops the canvas-only Model alias `name` (+ unmodelled config fields) and
+// adds `modelGroups` for the `modelRefs` form. Old v3 state is migrated on
+// load — see migrateLegacyState in lib/state.ts.
+export const STORAGE_KEY = "uniro:router-builder:v4";
+export const LEGACY_STORAGE_KEYS = ["uniro:router-builder:v3"];
 
-// Drag-and-drop payload types. Six flavors from the palette:
+// Singleton ID for the User Query entry node. Edges from this UID to a
+// signal mark that signal as "active" — see yaml.ts buildRouterDict.
+export const USER_QUERY_NODE_ID = "__user_query__";
+
+// Drag-and-drop payload types. Flavors from the palette:
 //   "signal:<type>"        — drop creates a signal node
 //   "projection:<type>"   — drop creates a projection node
 //   "route"               — drop creates a route with `when: always`
-//   "model"               — drop creates a model node
+//   "model"               — drop creates a single-model node
+//   "modelGroup"          — drop creates a model-group node (the modelRefs form)
 //   "plugin:<type>"       — drop creates a plugin node
 export const DRAG_TYPE = "application/x-uniro-rb";
 
