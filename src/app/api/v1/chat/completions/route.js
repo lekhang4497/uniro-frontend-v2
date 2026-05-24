@@ -41,13 +41,27 @@ export async function POST(request) {
     return await handleChat(request);
   }
 
-  const apiKey = getApiKeyFromHeaders(request.headers);
+  // 1. Authorization header (CLI / API clients).
+  // 2. uniro_chat_key cookie (dashboard Chat UI; issued by /api/internal/chat-key).
+  let apiKey = getApiKeyFromHeaders(request.headers);
+  let apiKeySource = apiKey ? "authorization_header" : null;
   if (!apiKey) {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const m = cookieHeader.match(/(?:^|;\s*)uniro_chat_key=([^;]+)/);
+    if (m) {
+      apiKey = decodeURIComponent(m[1]);
+      apiKeySource = "uniro_chat_key_cookie";
+    }
+  }
+  if (!apiKey) {
+    console.log("[ROUTING] /v1/chat/completions  no api key (header + cookie both empty) → 401");
     return new Response(JSON.stringify({ error: "missing_api_key" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
   }
+  const routerIdOverride = request.headers.get("x-uniro-router-id") || null;
+  console.log(`[ROUTING] /v1/chat/completions  key=${apiKey.slice(0, 14)}…  source=${apiKeySource}  routerIdOverride=${routerIdOverride || "(none)"}`);
 
   // Coordinator path. We need to peek at the body to make routing decisions
   // and to mutate `model` based on the router. We re-emit the (possibly
@@ -64,11 +78,13 @@ export async function POST(request) {
 
   let routing, envelope;
   try {
-    const result = await resolveRouting({ apiKey, request: payload });
+    const result = await resolveRouting({ apiKey, request: payload, routerIdOverride });
     routing = result.routing;
     envelope = result.envelope;
+    console.log(`[ROUTING] resolved  engine=${routing.engine}  model=${routing.model || "(none)"}  router=${envelope.router?.name || "(no router)"}`);
   } catch (err) {
     const status = coordinatorErrorStatus(err);
+    console.log(`[ROUTING] coordinator error  code=${err?.code || "(none)"}  message=${err?.message || ""}  →  HTTP ${status}`);
     return new Response(
       JSON.stringify({ error: err?.message || "coordinator_error" }),
       { status, headers: { "Content-Type": "application/json" } },

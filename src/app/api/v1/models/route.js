@@ -121,8 +121,15 @@ function comboMatchesKinds(combo, kindFilter) {
 /**
  * Build OpenAI-format models list filtered by service kinds.
  * @param {string[]} kindFilter - List of service kinds to include (e.g. ["llm"], ["webSearch","webFetch"]).
+ * @param {object} [options]
+ * @param {boolean} [options.connectedOnly=false] - When true, suppress the
+ *   static fallback catalog that gets returned when no provider connections
+ *   exist. Only models actually backed by an active provider connection
+ *   (and combos) are returned. Used by the dashboard Chat UI so the dropdown
+ *   matches what can actually be served.
  */
-export async function buildModelsList(kindFilter) {
+export async function buildModelsList(kindFilter, options = {}) {
+  const { connectedOnly = false } = options;
   let connections = [];
   try {
     connections = await getProviderConnections();
@@ -183,7 +190,7 @@ export async function buildModelsList(kindFilter) {
     models.push(entry);
   }
 
-  if (connections.length === 0) {
+  if (connections.length === 0 && !connectedOnly) {
     // DB unavailable -> return static models, filtered by per-model kind
     const aliasToProviderId = Object.fromEntries(
       Object.entries(PROVIDER_ID_TO_ALIAS).map(([id, alias]) => [alias, id])
@@ -386,9 +393,11 @@ export async function OPTIONS() {
  * GET /v1/models - OpenAI compatible models list (LLM/chat models only by default).
  * For other capabilities use /v1/models/{kind} (image, tts, stt, embedding, image-to-text, web).
  */
-export async function GET() {
+export async function GET(request) {
   try {
-    const data = await buildModelsList([LLM_KIND]);
+    const url = new URL(request.url);
+    const connectedOnly = url.searchParams.get("connectedOnly") === "true";
+    const data = await buildModelsList([LLM_KIND], { connectedOnly });
     return Response.json({ object: "list", data }, {
       headers: { "Access-Control-Allow-Origin": "*" },
     });

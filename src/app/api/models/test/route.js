@@ -1,39 +1,62 @@
 import { NextResponse } from "next/server";
-import { getApiKeys } from "@/lib/localDb";
-import { UPDATER_CONFIG } from "@/shared/constants/config";
+import { handleChat } from "@/sse/handlers/chat.js";
+import { initTranslators } from "open-sse/translator/index.js";
 
-// POST /api/models/test - Ping a single model via internal completions or embeddings
+// POST /api/models/test - Ping a single model.
+//
+// This endpoint exists to test that a PROVIDER CONNECTION can serve a given
+// model — it has nothing to do with the user's router or quota. So we call
+// handleChat (open-sse) directly instead of going back through HTTP to
+// /api/v1/chat/completions, which would otherwise drag the connected-mode
+// coordinator + Supabase session-resolve into a self-test that should be
+// purely local.
+let translatorsInitialized = false;
+async function ensureTranslators() {
+  if (translatorsInitialized) return;
+  await initTranslators();
+  translatorsInitialized = true;
+}
+
+function buildChatRequest(model) {
+  return new Request("http://127.0.0.1/api/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1,
+      stream: false,
+      messages: [{ role: "user", content: "hi" }],
+    }),
+  });
+}
+
+async function readJsonResponse(res) {
+  const rawText = await res.text().catch(() => "");
+  let parsed = null;
+  try { parsed = rawText ? JSON.parse(rawText) : null; } catch {}
+  return { rawText, parsed };
+}
+
 export async function POST(request) {
   try {
     const { model, kind } = await request.json();
     if (!model) return NextResponse.json({ error: "Model required" }, { status: 400 });
 
-    const baseUrl = `http://127.0.0.1:${UPDATER_CONFIG.appPort}`;
-
-    // Get an active internal API key for auth (if requireApiKey is enabled)
-    let apiKey = null;
-    try {
-      const keys = await getApiKeys();
-      apiKey = keys.find((k) => k.isActive !== false)?.key || null;
-    } catch {}
-
-    const headers = { "Content-Type": "application/json" };
-    if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
-
     const start = Date.now();
 
-    // Route to appropriate endpoint based on kind
+    // Embeddings path still goes through the HTTP layer because the embeddings
+    // handler doesn't have an in-process entry point on this branch.
     if (kind === "embedding") {
+      const { UPDATER_CONFIG } = await import("@/shared/constants/config");
+      const baseUrl = `http://127.0.0.1:${UPDATER_CONFIG.appPort}`;
       const res = await fetch(`${baseUrl}/api/v1/embeddings`, {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ model, input: "test" }),
         signal: AbortSignal.timeout(15000),
       });
       const latencyMs = Date.now() - start;
-      const rawText = await res.text().catch(() => "");
-      let parsed = null;
-      try { parsed = rawText ? JSON.parse(rawText) : null; } catch {}
+      const { rawText, parsed } = await readJsonResponse(res);
 
       if (!res.ok) {
         const detail = parsed?.error?.message || parsed?.error || rawText;
@@ -46,25 +69,12 @@ export async function POST(request) {
       return NextResponse.json({ ok: true, latencyMs, error: null, status: res.status });
     }
 
-    // Default: chat completions
-    const res = await fetch(`${baseUrl}/api/v1/chat/completions`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        model,
-        max_tokens: 1,
-        stream: false,
-        messages: [{ role: "user", content: "hi" }],
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
+    // Chat completions: call open-sse directly. No HTTP hop, no coordinator.
+    await ensureTranslators();
+    const res = await handleChat(buildChatRequest(model));
     const latencyMs = Date.now() - start;
 
-    const rawText = await res.text().catch(() => "");
-    let parsed = null;
-    try {
-      parsed = rawText ? JSON.parse(rawText) : null;
-    } catch {}
+    const { rawText, parsed } = await readJsonResponse(res);
 
     if (!res.ok) {
       const detail = parsed?.error?.message || parsed?.msg || parsed?.message || parsed?.error || rawText;
