@@ -1,9 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { getSupabaseConfig, getServiceRoleKey } from "./config";
+import { getSupabaseConfig } from "./config";
 
 // Cookie-bound server client for use inside Server Components / Route Handlers
 // that act on behalf of the signed-in user. Honours RLS.
+//
+// NOTE: the previous `getServiceSupabase` (Supabase admin client with the
+// service-role key) was removed. All server-side admin operations now go
+// through the Management Service (UNIRO_MGMT_URL). The service-role key no
+// longer needs to live in the frontend's env, so distributing the frontend
+// via npm doesn't leak admin credentials.
 export async function getServerSupabase() {
   const cfg = getSupabaseConfig();
   if (!cfg) return null;
@@ -23,21 +29,4 @@ export async function getServerSupabase() {
       },
     },
   });
-}
-
-// Service-role client for trusted server-only operations (Edge Function calls,
-// privileged RPCs). NEVER expose to the browser; never use inside Server
-// Components rendered to the client.
-let _service = null;
-export function getServiceSupabase() {
-  if (_service) return _service;
-  const cfg = getSupabaseConfig();
-  const serviceKey = getServiceRoleKey();
-  if (!cfg || !serviceKey) return null;
-  // Lazy import to avoid bundling for client.
-  const { createClient } = require("@supabase/supabase-js");
-  _service = createClient(cfg.url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  return _service;
 }

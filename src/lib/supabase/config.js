@@ -41,10 +41,13 @@ export function isConnectedMode() {
   );
 }
 
-export function getServiceRoleKey() {
-  return pickSecret();
-}
+// Both the service-role key and the gateway secret moved to the Management
+// Service (see frontend/src/lib/routing/mgmtClient.js + UNIRO_MGMT_URL).
+// The frontend no longer needs admin Supabase credentials at all.
+//
+// `pickSecret()` is retained for back-compat with any legacy code path still
+// reading it server-side; new code should NOT use these.
 
-export function getGatewaySecret() {
-  return process.env.UNIRO_GATEWAY_SECRET || null;
+export function getMgmtUrl() {
+  return process.env.UNIRO_MGMT_URL || "http://127.0.0.1:8859";
 }
