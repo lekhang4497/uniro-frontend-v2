@@ -33,8 +33,15 @@ const nextConfig = {
         os: false,
       };
     }
-    // Exclude logs, .next, gitbook subapp from watcher
-    config.watchOptions = { ...config.watchOptions, ignored: /[\\/](logs|\.next|gitbook)[\\/]/ };
+    // Exclude logs, .next, gitbook subapp, and node_modules from the watcher.
+    // node_modules MUST stay in this list: assigning `ignored` overwrites
+    // Next.js's default (which already excludes node_modules), so omitting it
+    // makes Watchpack recurse into every dependency and exhaust the inotify
+    // watch limit (ENOSPC: System limit for number of file watchers reached).
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: /[\\/](logs|\.next|gitbook|node_modules)[\\/]/,
+    };
     return config;
   },
   async rewrites() {

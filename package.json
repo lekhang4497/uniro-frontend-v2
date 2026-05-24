@@ -1,8 +1,29 @@
 {
-  "name": "uniro-app",
-  "version": "0.4.29",
-  "description": "Uniro web dashboard",
-  "private": true,
+  "name": "uniro-router",
+  "version": "0.5.2",
+  "description": "OpenAI-compatible LLM router with RTK token compression, multi-provider fallback, and a self-hosted dashboard",
+  "keywords": [
+    "llm",
+    "openai",
+    "claude",
+    "router",
+    "proxy",
+    "ai-gateway"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lekhang4497/uniro-frontend-v2.git"
+  },
+  "homepage": "https://www.uniro.tech",
+  "bin": {
+    "uniro": "bin/uniro.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "dev": "next dev --webpack --port 20129",
     "build": "NODE_ENV=production next build --webpack",
@@ -10,7 +31,10 @@
     "dev:bun": "bun --bun next dev --webpack --port 20128",
     "build:bun": "NODE_ENV=production bun --bun next build --webpack",
     "start:bun": "NODE_ENV=production bun ./.next/standalone/server.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "pack:assemble": "node scripts/pack-assemble.js",
+    "prepack": "node scripts/pack-assemble.js && node scripts/publish-pkg.js trim",
+    "postpack": "node scripts/publish-pkg.js restore"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

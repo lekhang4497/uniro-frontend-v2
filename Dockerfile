@@ -13,6 +13,21 @@ RUN --mount=type=cache,target=/root/.npm \
 
 COPY . ./
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Client-side env vars MUST be present at `npm run build` time so Next.js can
+# inline them into the browser bundle. .env is excluded from the build context
+# (.dockerignore), so the compose file passes them as build args.
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_UNIRO_CONNECTED_MODE
+ARG NEXT_PUBLIC_BASE_URL
+ARG NEXT_PUBLIC_CLOUD_URL
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL} \
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY} \
+    NEXT_PUBLIC_UNIRO_CONNECTED_MODE=${NEXT_PUBLIC_UNIRO_CONNECTED_MODE} \
+    NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL} \
+    NEXT_PUBLIC_CLOUD_URL=${NEXT_PUBLIC_CLOUD_URL}
+
 RUN npm run build
 
 FROM ${NODE_IMAGE} AS runner
