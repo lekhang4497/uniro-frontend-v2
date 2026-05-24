@@ -7,12 +7,27 @@
 // flow when needed.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, MessageSquarePlus, Send, Sparkles, Trash2 } from "lucide-react";
+import { ChevronDown, MessageSquarePlus, Send, Sparkles, Trash2, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { UniroMark } from "@/shared/components/UniroMark";
+import { listRouters } from "@/lib/routing/routersApi";
 
-const DEFAULT_MODEL = "auto";
+type Router = {
+  id: string;
+  name: string;
+  description?: string | null;
+  engine: "local" | "remote";
+  is_default?: boolean;
+};
+
+// Selection is either a router (let the user's router decide the model) OR
+// a direct model id (skip routing, dispatch to that model verbatim).
+type Selection =
+  | { kind: "router"; routerId: string; routerName: string }
+  | { kind: "model"; modelId: string };
+
+const DEFAULT_SELECTION: Selection = { kind: "model", modelId: "auto" };
 
 type Role = "user" | "assistant";
 
@@ -25,7 +40,7 @@ type Message = {
 type Conversation = {
   id: string;
   title: string;
-  model: string;
+  selection: Selection;
   messages: Message[];
   updatedAt: number;
 };
@@ -45,7 +60,7 @@ function newConversation(): Conversation {
   return {
     id: `c-${Date.now().toString(36)}`,
     title: "New chat",
-    model: DEFAULT_MODEL,
+    selection: DEFAULT_SELECTION,
     messages: [],
     updatedAt: Date.now(),
   };
@@ -57,7 +72,9 @@ export default function ChatPage() {
   const [models, setModels] = useState<ModelOption[]>([
     { id: "auto", label: "Auto", description: "Uniro decides" },
   ]);
-  const [modelMenuOpen, setModelMenuOpen] = useState(false);
+  const [routers, setRouters] = useState<Router[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [chatKeyReady, setChatKeyReady] = useState(false);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,11 +85,14 @@ export default function ChatPage() {
     [conversations, activeId]
   );
 
-  // Pull available models from Uniro's own /v1/models endpoint. Failure is
-  // non-fatal — the dropdown just stays on "auto".
+  // /v1/models?connectedOnly=true returns ONLY models backed by an active
+  // provider connection (plus combos). Without the flag, when no providers
+  // are connected the API falls back to the full static catalog — fine for
+  // CLI discovery, but the dashboard Chat dropdown should match what can
+  // actually be served.
   useEffect(() => {
     let cancelled = false;
-    fetch("/v1/models")
+    fetch("/v1/models?connectedOnly=true")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (cancelled || !data) return;
@@ -85,6 +105,30 @@ export default function ChatPage() {
         setModels([{ id: "auto", label: "Auto", description: "Uniro decides" }, ...opts]);
       })
       .catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Load the signed-in user's custom routers (RLS scopes to auth.uid()). On
+  // an unauthenticated or non-connected install this just yields an empty
+  // list and the router selector hides itself.
+  useEffect(() => {
+    let cancelled = false;
+    listRouters()
+      .then((rows: Router[]) => {
+        if (cancelled) return;
+        setRouters(rows || []);
+      })
+      .catch(() => { /* ignore — no connected mode */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Ensure the HttpOnly chat-key cookie is set BEFORE the first message goes
+  // out — otherwise /v1/chat/completions returns 401 with missing_api_key.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/internal/chat-key", { method: "POST", credentials: "include" })
+      .then((r) => { if (!cancelled && r.ok) setChatKeyReady(true); })
+      .catch(() => { /* surfaced as a send-time error */ });
     return () => { cancelled = true; };
   }, []);
 
@@ -107,9 +151,9 @@ export default function ChatPage() {
     setError(null);
   };
 
-  const handleSelectModel = (id: string) => {
-    updateActive((c) => ({ ...c, model: id }));
-    setModelMenuOpen(false);
+  const handleSelect = (sel: Selection) => {
+    updateActive((c) => ({ ...c, selection: sel }));
+    setPickerOpen(false);
   };
 
   const handleDelete = (id: string) => {
@@ -139,16 +183,30 @@ export default function ChatPage() {
     setSending(true);
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      // Router-mode → let the routing pipeline pick the model; we send
+      // model:"auto" so the router-service is what decides.
+      // Direct-mode → no router header; just send the chosen model.
+      let bodyModel = "auto";
+      if (active.selection.kind === "router") {
+        headers["x-uniro-router-id"] = active.selection.routerId;
+      } else {
+        bodyModel = active.selection.modelId;
+      }
       const res = await fetch("/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",  // send HttpOnly uniro_chat_key cookie
+        headers,
         body: JSON.stringify({
-          model: active.model,
+          model: bodyModel,
           messages: baseMessages,
           stream: false,
         }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}${text ? `: ${text}` : ""}`);
+      }
       const data = await res.json();
       const reply: string = data?.choices?.[0]?.message?.content ?? "(empty response)";
       updateActive((c) => ({
@@ -164,7 +222,12 @@ export default function ChatPage() {
     }
   };
 
-  const activeModelLabel = models.find((m) => m.id === active?.model)?.label || active?.model;
+  // Label + icon for the merged picker button
+  const sel = active?.selection ?? DEFAULT_SELECTION;
+  const pickerIcon = sel.kind === "router" ? <Workflow className="h-3.5 w-3.5" /> : <Sparkles className="h-3.5 w-3.5" />;
+  const pickerLabel = sel.kind === "router"
+    ? `Router: ${sel.routerName || routers.find((r) => r.id === sel.routerId)?.name || "(unknown)"}`
+    : (models.find((m) => m.id === sel.modelId)?.label || sel.modelId);
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -216,36 +279,78 @@ export default function ChatPage() {
           <div className="text-[26px] font-semibold tracking-[-0.01em] text-[var(--text-primary)] truncate flex-1">
             {active?.title || "Chat"}
           </div>
+          {/* Combined picker — Routers first, then Direct models. Picking a
+              router lets the router-service decide the model for each request
+              (sends x-uniro-router-id, body.model="auto"). Picking a model
+              skips routing and dispatches verbatim. */}
           <div className="relative">
             <button
               type="button"
-              onClick={() => setModelMenuOpen((v) => !v)}
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-[var(--radius)] border border-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)] text-[12.5px] font-medium text-[var(--text-primary)]"
+              onClick={() => setPickerOpen((v) => !v)}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-[var(--radius)] border border-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)] text-[12.5px] font-medium text-[var(--text-primary)] max-w-[260px]"
+              title={sel.kind === "router" ? "Routing via a custom router" : "Dispatching directly to a model"}
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              {activeModelLabel}
-              <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+              {pickerIcon}
+              <span className="truncate">{pickerLabel}</span>
+              <ChevronDown className="h-3.5 w-3.5 opacity-60 shrink-0" />
             </button>
-            {modelMenuOpen && (
-              <div className="absolute right-0 top-9 z-10 w-64 max-h-80 overflow-y-auto rounded-[var(--radius-md)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] p-1">
-                {models.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => handleSelectModel(m.id)}
-                    className={cn(
-                      "w-full text-left px-2.5 py-1.5 rounded-[var(--radius-sm)] flex items-start gap-2 hover:bg-[var(--bg-secondary)]",
-                      m.id === active?.model && "bg-[var(--bg-secondary)] text-[var(--text-primary)]"
-                    )}
-                  >
-                    <div className="min-w-0 flex-1">
+            {pickerOpen && (
+              <div className="absolute right-0 top-9 z-10 w-80 max-h-96 overflow-y-auto rounded-[var(--radius-md)] border border-[var(--bg-secondary)] bg-[var(--bg-primary)] p-1 shadow-[var(--shadow-popover)]">
+                {/* Section: Routers */}
+                {routers.length > 0 && (
+                  <>
+                    <div className="px-2.5 pt-2 pb-1 text-[10px] uppercase tracking-[0.08em] font-semibold text-[var(--text-tertiary)] flex items-center gap-1.5">
+                      <Workflow className="h-3 w-3" />
+                      Use a router
+                    </div>
+                    {routers.map((r) => {
+                      const isActive = sel.kind === "router" && sel.routerId === r.id;
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => handleSelect({ kind: "router", routerId: r.id, routerName: r.name })}
+                          className={cn(
+                            "w-full text-left px-2.5 py-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-secondary)]",
+                            isActive && "bg-[var(--bg-secondary)]"
+                          )}
+                        >
+                          <div className="text-[12.5px] font-medium text-[var(--text-primary)] truncate">
+                            {r.name}{r.is_default ? " · default" : ""}
+                          </div>
+                          <div className="text-[10.5px] text-[var(--text-secondary)] truncate">
+                            engine: {r.engine}{r.description ? ` — ${r.description}` : ""}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* Section: Direct models */}
+                <div className="px-2.5 pt-3 pb-1 text-[10px] uppercase tracking-[0.08em] font-semibold text-[var(--text-tertiary)] flex items-center gap-1.5 border-t border-[var(--bg-secondary)] mt-1">
+                  <Sparkles className="h-3 w-3" />
+                  Pick a model directly
+                </div>
+                {models.map((m) => {
+                  const isActive = sel.kind === "model" && sel.modelId === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => handleSelect({ kind: "model", modelId: m.id })}
+                      className={cn(
+                        "w-full text-left px-2.5 py-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--bg-secondary)]",
+                        isActive && "bg-[var(--bg-secondary)]"
+                      )}
+                    >
                       <div className="text-[12.5px] font-medium truncate text-[var(--text-primary)]">{m.label}</div>
                       {m.description && (
                         <div className="text-[10.5px] text-[var(--text-secondary)] truncate">{m.description}</div>
                       )}
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -305,7 +410,10 @@ export default function ChatPage() {
               </Button>
             </div>
             <div className="mt-1.5 text-[10.5px] text-[var(--text-secondary)] text-center">
-              Routed through <span className="font-mono">{activeModelLabel}</span>. Press <kbd>Enter</kbd> to send, <kbd>Shift</kbd>+<kbd>Enter</kbd> for newline.
+              {sel.kind === "router" ? "Routing via" : "Direct model"}{" "}
+              <span className="font-mono">{pickerLabel.replace(/^Router: /, "")}</span>
+              {!chatKeyReady && <> · <span className="text-[var(--accent-amber)]">preparing chat key…</span></>}
+              {" · "}Press <kbd>Enter</kbd> to send, <kbd>Shift</kbd>+<kbd>Enter</kbd> for newline.
             </div>
           </div>
         </form>
