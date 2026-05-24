@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from "lucide-react";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -60,8 +60,26 @@ export interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+const SIDEBAR_COLLAPSED_KEY = "uniro:sidebar:collapsed";
+
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Persist the desktop collapsed state across reloads. Hydrate from
+  // localStorage on first client render — undefined / "false" → expanded,
+  // "true" → collapsed.
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  useEffect(() => {
+    try {
+      setSidebarCollapsed(window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true");
+    } catch { /* SSR / disabled storage */ }
+  }, []);
+  const toggleSidebarCollapsed = () => {
+    setSidebarCollapsed((v) => {
+      const next = !v;
+      try { window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next)); } catch {}
+      return next;
+    });
+  };
   const pathname = usePathname();
   const notifications = useNotificationStore(
     (state: NotificationStoreShape) => state.notifications
@@ -122,7 +140,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Sidebar - Desktop */}
       <div className="hidden lg:flex">
-        <Sidebar />
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggleCollapsed={toggleSidebarCollapsed}
+        />
       </div>
 
       {/* Sidebar - Mobile */}

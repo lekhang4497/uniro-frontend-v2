@@ -29,9 +29,13 @@ type SidebarProps = {
   onClose?: () => void;
   /** Show the Admin nav group */
   isAdmin?: boolean;
+  /** Desktop only: render the icons-only narrow variant. */
+  collapsed?: boolean;
+  /** Desktop only: toggle the collapsed state from the brand row button. */
+  onToggleCollapsed?: () => void;
 };
 
-export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
+export default function Sidebar({ onClose, isAdmin = false, collapsed = false, onToggleCollapsed }: SidebarProps) {
   const pathname = usePathname() ?? "/";
   const [showShutdownModal, setShowShutdownModal] = useState(false);
   const [isShuttingDown, setIsShuttingDown] = useState(false);
@@ -126,29 +130,51 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
 
   return (
     <>
-      <aside className="flex h-screen w-[260px] flex-col border-r border-[var(--border)] bg-[var(--bg-primary)]">
-        {/* Brand row — mark only (ChatGPT-style) + sidebar toggle */}
-        <div className="flex items-center justify-between px-3 pt-3 pb-2">
-          <Link
-            href="/dashboard"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-tertiary)]"
-            aria-label="Uniro home"
-          >
-            <UniroMark size={22} title="Uniro" />
-          </Link>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
-            aria-label="Close sidebar"
-          >
-            <PanelLeft className="h-[18px] w-[18px]" />
-          </button>
-        </div>
+      <aside
+        className={cn(
+          "flex h-screen flex-col border-r border-[var(--border)] bg-[var(--bg-primary)] transition-[width] duration-200",
+          collapsed ? "w-[64px]" : "w-[260px]"
+        )}
+      >
+        {/* Brand row.
+            - Expanded: logo on left, toggle on right.
+            - Collapsed: toggle occupies the logo slot (the only thing here). */}
+        {collapsed ? (
+          <div className="flex items-center justify-center pt-3 pb-2">
+            <button
+              type="button"
+              onClick={onToggleCollapsed}
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+              aria-label="Expand sidebar"
+              title="Expand sidebar"
+            >
+              <PanelLeft className="h-[18px] w-[18px]" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between px-3 pt-3 pb-2">
+            <Link
+              href="/dashboard"
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-tertiary)]"
+              aria-label="Uniro home"
+            >
+              <UniroMark size={22} title="Uniro" />
+            </Link>
+            <button
+              type="button"
+              onClick={onToggleCollapsed ?? onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
+              aria-label={onToggleCollapsed ? "Collapse sidebar" : "Close sidebar"}
+              title={onToggleCollapsed ? "Collapse sidebar" : "Close sidebar"}
+            >
+              <PanelLeft className="h-[18px] w-[18px]" />
+            </button>
+          </div>
+        )}
 
-        {/* Update banner */}
-        {updateInfo && (
+        {/* Update banner — hide in collapsed mode (no room for the cmd) */}
+        {!collapsed && updateInfo && (
           <div className="mx-3 mt-1 flex flex-col gap-1.5 rounded-[var(--radius)] border border-[var(--accent-orange)]/30 bg-[color-mix(in_srgb,var(--accent-orange)_8%,transparent)] p-2">
             <span className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--accent-orange)]">
               <ArrowUpCircle className="h-3.5 w-3.5" />
@@ -177,7 +203,7 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
         )}
 
         {/* Navigation */}
-        <nav className="custom-scrollbar flex-1 overflow-y-auto px-2 py-1">
+        <nav className={cn("custom-scrollbar flex-1 overflow-y-auto py-1", collapsed ? "px-2" : "px-2")}>
           {NAV_GROUPS.filter(
             (g) => !g.visibleWhen || g.visibleWhen({ isAdmin, pathname })
           ).map((group, groupIdx) => {
@@ -185,9 +211,11 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
             if (visibleItems.length === 0) return null;
             return (
               <div key={group.label} className={cn("flex flex-col", groupIdx === 0 ? "mb-2" : "mt-3 mb-2")}>
-                <div className="px-2 pb-1 pt-2 text-[11px] font-medium text-[var(--text-tertiary)]">
-                  {group.label}
-                </div>
+                {!collapsed && (
+                  <div className="px-2 pb-1 pt-2 text-[11px] font-medium text-[var(--text-tertiary)]">
+                    {group.label}
+                  </div>
+                )}
                 {visibleItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
@@ -196,8 +224,10 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
                       key={item.href}
                       href={item.href}
                       onClick={onClose}
+                      title={collapsed ? item.label : undefined}
                       className={cn(
-                        "group relative flex h-9 items-center gap-3 rounded-[var(--radius)] px-2 text-[14px] transition-colors",
+                        "group relative flex h-9 items-center rounded-[var(--radius)] text-[14px] transition-colors",
+                        collapsed ? "justify-center px-0" : "gap-3 px-2",
                         active
                           ? "bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
                           : "text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
@@ -207,12 +237,16 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
                         className="h-[18px] w-[18px] shrink-0 text-[var(--text-primary)]"
                         strokeWidth={1.75}
                       />
-                      <span className="flex-1 truncate text-left">{item.label}</span>
-                      {item.dot === "ok" && (
-                        <span
-                          aria-hidden="true"
-                          className="h-1.5 w-1.5 rounded-full bg-[var(--accent-green)]"
-                        />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1 truncate text-left">{item.label}</span>
+                          {item.dot === "ok" && (
+                            <span
+                              aria-hidden="true"
+                              className="h-1.5 w-1.5 rounded-full bg-[var(--accent-green)]"
+                            />
+                          )}
+                        </>
                       )}
                     </Link>
                   );
@@ -222,27 +256,35 @@ export default function Sidebar({ onClose, isAdmin = false }: SidebarProps) {
           })}
         </nav>
 
-        {/* Footer — server status + shutdown */}
-        <div className="border-t border-[var(--border)] px-3 py-2">
-          <div className="flex items-center gap-2 px-1 py-1">
-            <span
-              aria-hidden="true"
-              className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent-green)]"
-            />
-            <span className="truncate font-mono text-[11px] text-[var(--text-secondary)]">
-              localhost:20128/v1
-            </span>
-            <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">
-              v{APP_CONFIG.version}
-            </span>
-          </div>
+        {/* Footer — server status + shutdown.
+            Collapsed mode just shows a green-dot status indicator + a small
+            Power icon button, all centered in the 64px column. */}
+        <div className={cn("border-t border-[var(--border)] py-2", collapsed ? "px-2" : "px-3")}>
+          {!collapsed && (
+            <div className="flex items-center gap-2 px-1 py-1">
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent-green)]"
+              />
+              <span className="truncate font-mono text-[11px] text-[var(--text-secondary)]">
+                localhost:20128/v1
+              </span>
+              <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">
+                v{APP_CONFIG.version}
+              </span>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => setShowShutdownModal(true)}
-            className="mt-1 inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-[var(--radius)] text-[12px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-red)]"
+            title={collapsed ? "Shutdown" : undefined}
+            className={cn(
+              "mt-1 inline-flex h-8 w-full items-center justify-center rounded-[var(--radius)] text-[12px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-red)]",
+              collapsed ? "" : "gap-1.5"
+            )}
           >
             <Power className="h-3.5 w-3.5" />
-            Shutdown
+            {!collapsed && <span>Shutdown</span>}
           </button>
         </div>
       </aside>

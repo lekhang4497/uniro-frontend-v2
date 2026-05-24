@@ -122,6 +122,14 @@ export default function LanguageSwitcher({
       // Reload translations without full page reload
       await reloadTranslations();
       setLocale(nextLocale);
+      // Tell sibling components (HeaderMenu) that the cookie is now updated.
+      // Without this, HeaderMenu's effect could fire before the POST settles
+      // and stamp the stale value into the dropdown row.
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("uniro:locale-changed", { detail: nextLocale })
+        );
+      }
     } catch (err) {
       console.error("Failed to set locale:", err);
     } finally {

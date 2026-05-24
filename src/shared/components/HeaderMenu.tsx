@@ -8,11 +8,12 @@ import {
   Moon,
   Monitor,
   LogOut,
-  Grid3x3,
 } from "lucide-react";
 import type { LucideProps } from "lucide-react";
 import { LOCALE_COOKIE, normalizeLocale } from "@/i18n/config";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { getBrowserSupabase } from "@/lib/supabase/client";
+import Avatar from "./Avatar";
 import ChangelogModal from "./ChangelogModal";
 import NineRemotePromoModal from "./NineRemotePromoModal";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -105,12 +106,48 @@ export default function HeaderMenu({ onLogout }: HeaderMenuProps) {
   const [remoteOpen, setRemoteOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [locale, setLocale] = useState("en");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const { toggleTheme, isDark } = useTheme();
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Re-read the locale cookie any time the trigger menu is opened OR the
+  // language sub-dialog closes. The earlier [langOpen]-only dependency
+  // fired BEFORE LanguageSwitcher's POST /api/locale finished — so the
+  // dropdown row kept the old flag until the next reload. Now we also
+  // refresh on isOpen so every visible state of the menu shows fresh truth.
   useEffect(() => {
     setLocale(getLocaleFromCookie());
-  }, [langOpen]);
+  }, [langOpen, isOpen]);
+
+  // Listen for the custom locale-changed event so the dropdown chip updates
+  // immediately after the user picks a new language (instead of waiting for
+  // the menu to be reopened).
+  useEffect(() => {
+    const onChange = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      setLocale(detail ? normalizeLocale(detail) : getLocaleFromCookie());
+    };
+    window.addEventListener("uniro:locale-changed", onChange);
+    return () => window.removeEventListener("uniro:locale-changed", onChange);
+  }, []);
+
+  // Read the signed-in user's email for the avatar. Browser-side Supabase
+  // client; falls back gracefully when connected mode is off.
+  useEffect(() => {
+    const sb = getBrowserSupabase();
+    if (!sb) return;
+    let cancelled = false;
+    sb.auth.getUser().then(({ data }: any) => {
+      if (!cancelled) setUserEmail(data?.user?.email || null);
+    });
+    const { data: sub } = sb.auth.onAuthStateChange((_event: any, session: any) => {
+      setUserEmail(session?.user?.email || null);
+    });
+    return () => {
+      cancelled = true;
+      sub?.subscription?.unsubscribe?.();
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -134,14 +171,28 @@ export default function HeaderMenu({ onLogout }: HeaderMenuProps) {
         <button
           type="button"
           onClick={() => setIsOpen((v) => !v)}
-          className="flex items-center justify-center p-2 rounded-[var(--radius)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
-          title="Menu"
+          className="flex items-center justify-center rounded-full transition-shadow hover:ring-2 hover:ring-[var(--bg-secondary)]"
+          title={userEmail || "Menu"}
+          aria-label="Account menu"
         >
-          <Grid3x3 className="h-5 w-5" />
+          <Avatar name={userEmail || undefined} size="sm" />
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 top-full mt-2 w-60 bg-[var(--bg-primary)] border border-[var(--bg-secondary)] rounded-[var(--radius-lg)] shadow-[var(--shadow-popover)] z-50 overflow-hidden py-1">
+          <div className="absolute right-0 top-full mt-2 w-64 bg-[var(--bg-primary)] border border-[var(--bg-secondary)] rounded-[var(--radius-lg)] shadow-[var(--shadow-popover)] z-50 overflow-hidden py-1">
+            {userEmail && (
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-[var(--bg-secondary)]">
+                <Avatar name={userEmail} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12.5px] font-medium text-[var(--text-primary)] truncate">
+                    Signed in
+                  </div>
+                  <div className="text-[11px] text-[var(--text-secondary)] truncate">
+                    {userEmail}
+                  </div>
+                </div>
+              </div>
+            )}
             <MenuItem
               Icon={History}
               label="Change Log"
