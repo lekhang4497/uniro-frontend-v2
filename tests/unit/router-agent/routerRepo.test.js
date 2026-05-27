@@ -85,6 +85,16 @@ describe("routerRepo", () => {
     expect(await repo.deleteRouter(r.id)).toBe(false);
   });
 
+  it("deleteRouter → cascades to routerAgentThreads (no orphan thread)", async () => {
+    const repo = await import("@/lib/db/repos/routerRepo.js");
+    const threadRepo = await import("@/lib/db/repos/routerAgentThreadRepo.js");
+    const r = await repo.createRouter();
+    await threadRepo.saveThread(r.id, [{ role: "user", content: "hi" }]);
+    expect(await threadRepo.getThread(r.id)).not.toBeNull();
+    expect(await repo.deleteRouter(r.id)).toBe(true);
+    expect(await threadRepo.getThread(r.id)).toBeNull();
+  });
+
   it("ensureDefaultRouter → creates one on empty, returns existing otherwise", async () => {
     const repo = await import("@/lib/db/repos/routerRepo.js");
     const first = await repo.ensureDefaultRouter();

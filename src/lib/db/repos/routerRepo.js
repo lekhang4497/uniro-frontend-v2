@@ -85,8 +85,13 @@ export async function updateRouter(id, patch = {}) {
 export async function deleteRouter(id) {
   if (!id) return false;
   const db = await getAdapter();
-  const res = db.run(`DELETE FROM routers WHERE id = ?`, [id]);
-  return (res?.changes ?? 0) > 0;
+  let ok = false;
+  db.transaction(() => {
+    db.run(`DELETE FROM routerAgentThreads WHERE routerId = ?`, [id]);
+    const res = db.run(`DELETE FROM routers WHERE id = ?`, [id]);
+    ok = (res?.changes ?? 0) > 0;
+  });
+  return ok;
 }
 
 // Atomic check-then-insert: returns the first router (most-recently-updated),
