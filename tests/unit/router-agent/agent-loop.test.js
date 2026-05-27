@@ -30,6 +30,18 @@ function sseStream(events) {
   });
 }
 
+function rawSseStream(chunks) {
+  // chunks: Array<string> emitted verbatim (no auto-framing). Lets a test
+  // simulate a server that closes the stream without a trailing newline.
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    start(controller) {
+      for (const c of chunks) controller.enqueue(encoder.encode(c));
+      controller.close();
+    },
+  });
+}
+
 function makeAssistantChunk({ content, toolCalls, finishReason }) {
   return {
     choices: [
@@ -334,5 +346,35 @@ describe("runAgentTurn", () => {
     expect(result[2]).toEqual({ role: "user", content: "again" });
     expect(result[3].role).toBe("assistant");
     expect(result[3].content).toBe("ack");
+  });
+
+  it("flushes a trailing SSE event when the server closes without a final newline", async () => {
+    const tools = makeCtx("");
+    // Simulate an upstream that streams two `data:` events but omits the
+    // trailing \n on the last one and never sends [DONE]. The parser must
+    // still process the trailing event from the buffer when the stream ends.
+    const fetchImpl = makeFetchStub([
+      rawSseStream([
+        `data: ${JSON.stringify(
+          makeAssistantChunk({ content: "hello" })
+        )}\n`,
+        `data: ${JSON.stringify(
+          makeAssistantChunk({ content: " world", finishReason: "stop" })
+        )}`,
+      ]),
+    ]);
+
+    const result = await runAgentTurn({
+      messages: [],
+      userInput: "say hi",
+      model: "test-model",
+      tools,
+      systemPrompt: "system",
+      fetchImpl,
+    });
+
+    const assistant = result.find((m) => m.role === "assistant");
+    expect(assistant).toBeDefined();
+    expect(assistant.content).toBe("hello world");
   });
 });

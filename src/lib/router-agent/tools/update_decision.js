@@ -1,9 +1,8 @@
 // Tool: update_decision
 //
-// Shallow-merge `patch` onto the named decision. `rules` and `plugins` in
-// the patch are *replaced* wholesale (they're trees / arrays — deep-
-// merging them would silently corrupt the structure). All other keys are
-// overwritten.
+// Shallow merge -- top-level patch keys replace target keys wholesale. Use
+// `set_router_yaml` for deep restructuring (replacing a subtree under a
+// specific key without touching its siblings, for example).
 //
 // If no matching decision exists, returns a structured error with
 // `code: decision_not_found` so the agent can recover (likely by listing
@@ -11,14 +10,12 @@
 
 import { checkArgsOrError } from "./_argValidate.js";
 
-const REPLACE_WHOLESALE = new Set(["rules", "plugins"]);
-
 export const definition = {
   type: "function",
   function: {
     name: "update_decision",
     description:
-      "Update an existing decision by name. `patch` is shallow-merged onto the decision; `rules` and `plugins` are replaced wholesale rather than deep-merged.",
+      "Update an existing decision by name. `patch` is shallow-merged onto the decision: top-level patch keys replace target keys wholesale (no deep merge). Use `set_router_yaml` for deep restructuring.",
     parameters: {
       type: "object",
       properties: {
@@ -63,14 +60,7 @@ export function makeExecute({ getYaml, setYaml, validate, summarize, parseYaml, 
     }
 
     const original = decisions[idx];
-    const merged = { ...original };
-    for (const [k, v] of Object.entries(args.patch || {})) {
-      if (REPLACE_WHOLESALE.has(k)) {
-        merged[k] = v;
-      } else {
-        merged[k] = v;
-      }
-    }
+    const merged = { ...original, ...(args.patch || {}) };
     decisions[idx] = merged;
 
     const nextYaml = stringifyYaml(doc);

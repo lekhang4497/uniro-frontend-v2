@@ -239,6 +239,35 @@ async function parseSseAssistant(stream, { signal, onAssistantDelta }) {
   /** @type {Array<{id: string, type: string, function: {name: string, arguments: string}}>} */
   const toolCalls = [];
 
+  function processSseLine(rawLine) {
+    const stripped = rawLine.replace(/\r$/, "");
+    if (!stripped.startsWith("data:")) return;
+    const data = stripped.slice(5).trim();
+    if (data === "" || data === "[DONE]") return;
+
+    let chunk;
+    try {
+      chunk = JSON.parse(data);
+    } catch {
+      // Skip unparseable lines; some upstreams sprinkle keep-alives.
+      return;
+    }
+
+    const delta = chunk?.choices?.[0]?.delta;
+    if (!delta) return;
+
+    if (typeof delta.content === "string" && delta.content.length > 0) {
+      content += delta.content;
+      onAssistantDelta?.(delta.content);
+    }
+
+    if (Array.isArray(delta.tool_calls)) {
+      for (const dt of delta.tool_calls) {
+        applyToolCallDelta(toolCalls, dt);
+      }
+    }
+  }
+
   try {
     while (true) {
       if (signal && signal.aborted) {
@@ -254,34 +283,21 @@ async function parseSseAssistant(stream, { signal, onAssistantDelta }) {
       // SSE events are separated by blank lines. Split on \n and walk.
       let nlIdx;
       while ((nlIdx = buffer.indexOf("\n")) !== -1) {
-        const rawLine = buffer.slice(0, nlIdx).replace(/\r$/, "");
+        const rawLine = buffer.slice(0, nlIdx);
         buffer = buffer.slice(nlIdx + 1);
-        if (!rawLine.startsWith("data:")) continue;
-        const data = rawLine.slice(5).trim();
-        if (data === "" || data === "[DONE]") continue;
-
-        let chunk;
-        try {
-          chunk = JSON.parse(data);
-        } catch {
-          // Skip unparseable lines; some upstreams sprinkle keep-alives.
-          continue;
-        }
-
-        const delta = chunk?.choices?.[0]?.delta;
-        if (!delta) continue;
-
-        if (typeof delta.content === "string" && delta.content.length > 0) {
-          content += delta.content;
-          onAssistantDelta?.(delta.content);
-        }
-
-        if (Array.isArray(delta.tool_calls)) {
-          for (const dt of delta.tool_calls) {
-            applyToolCallDelta(toolCalls, dt);
-          }
-        }
+        processSseLine(rawLine);
       }
+    }
+
+    // Flush trailing event (server closed without final \n). Some upstreams
+    // omit the terminating newline on the last event, so a `data:` line
+    // sitting in the buffer at EOF would otherwise be silently dropped.
+    if (buffer.trim().length > 0) {
+      const trailingLines = buffer.split("\n");
+      for (const line of trailingLines) {
+        processSseLine(line);
+      }
+      buffer = "";
     }
   } finally {
     try {

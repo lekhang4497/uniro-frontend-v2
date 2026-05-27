@@ -137,3 +137,11 @@ Warnings don't block deployment but are worth surfacing to the user:
   projection input references it. Either delete it or wire it up.
 - `unreachable_decision` - a lower-priority decision has the same rule
   tree as a higher-priority one and will never be selected.
+
+## Known limitations
+
+- Comments in YAML are NOT preserved across agent edits. Any tool that mutates
+  the router (add_signal, add_decision, update_decision, delete_node,
+  set_router_yaml) re-emits the YAML without comments. If the user adds
+  comments via the Monaco editor, warn them that the next agent edit will
+  drop them.

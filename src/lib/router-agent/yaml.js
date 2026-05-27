@@ -1,5 +1,14 @@
-// YAML helpers for the router-agent loop.
+// YAML helpers built on confbox/yaml.
 //
+// LIMITATION: confbox/yaml does not preserve comments across parse->stringify.
+// Tools that mutate YAML (add_signal, add_decision, update_decision, delete_node,
+// set_router_yaml) therefore drop any comments the user has written. The Monaco
+// YAML editor and direct user edits retain comments until the next agent mutation.
+//
+// A future iteration could swap in the `yaml` npm package's Document API for
+// comment-preserving round-trips; not in MVP scope.
+//
+// Exports:
 // - parseYaml(text)      -> {ok: true, data} | {ok: false, error}
 // - stringifyYaml(value) -> string (throws on cycles)
 // - summarizeYaml(text)  -> short one-line structural summary

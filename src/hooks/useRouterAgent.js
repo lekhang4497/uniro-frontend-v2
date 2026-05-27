@@ -110,11 +110,24 @@ export function useRouterAgent({ routerId }) {
   const [skills, setSkills] = useState([]);
 
   const abortRef = useRef(null);
+  const busyRef = useRef(false);
 
   // Reflect routerId into the store.
   useEffect(() => {
     setRouterId(routerId);
   }, [routerId, setRouterId]);
+
+  // Abort any in-flight loop when the hook unmounts so a navigation away
+  // doesn't leave a dangling SSE stream + state updates targeting an
+  // unmounted component.
+  useEffect(() => {
+    return () => {
+      if (abortRef.current) {
+        abortRef.current.abort();
+        abortRef.current = null;
+      }
+    };
+  }, []);
 
   // Bootstrap: thread + reasoning model + manifest.
   useEffect(() => {
@@ -202,7 +215,10 @@ export function useRouterAgent({ routerId }) {
         );
         return;
       }
-      if (streaming.active) return;
+      // Use a ref-based busy flag so two synchronous send() calls can't
+      // both see stale `streaming.active === false` from the same render.
+      if (busyRef.current) return;
+      busyRef.current = true;
 
       const trimmed = text;
       setError(null);
@@ -294,10 +310,11 @@ export function useRouterAgent({ routerId }) {
         }
       } finally {
         abortRef.current = null;
+        busyRef.current = false;
         setStreaming({ active: false, currentAssistantText: "" });
       }
     },
-    [messages, reasoningModel, routerId, skills, streaming.active, tools]
+    [messages, reasoningModel, routerId, skills, tools]
   );
 
   const cancel = useCallback(() => {
