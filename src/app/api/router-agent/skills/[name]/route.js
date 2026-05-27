@@ -9,35 +9,25 @@
 // 404 if the file doesn't exist; 500 on any other read error.
 
 import { NextResponse } from "next/server";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { isValidSkillName, readSkill } from "@/lib/router-agent/skills";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const SKILLS_DIR = path.join(process.cwd(), "src", "lib", "router-agent", "skills");
-const NAME_RE = /^[a-z0-9-]+$/;
-
-export async function GET(_request, { params }) {
+export async function GET(_req, { params }) {
+  const { name } = await params;
+  if (!isValidSkillName(name)) {
+    return NextResponse.json(
+      { error: "Skill name must match [a-z0-9-]+" },
+      { status: 400 }
+    );
+  }
   try {
-    const { name } = await params;
-    if (typeof name !== "string" || !NAME_RE.test(name)) {
-      return NextResponse.json(
-        { error: "invalid skill name; must match /^[a-z0-9-]+$/" },
-        { status: 400 }
-      );
+    const skill = await readSkill(name);
+    if (!skill) {
+      return NextResponse.json({ error: `Skill not found: ${name}` }, { status: 404 });
     }
-    const full = path.join(SKILLS_DIR, `${name}.md`);
-    let body;
-    try {
-      body = await readFile(full, "utf8");
-    } catch (err) {
-      if (err && (err.code === "ENOENT" || err.code === "ENOTDIR")) {
-        return NextResponse.json({ error: "skill not found" }, { status: 404 });
-      }
-      throw err;
-    }
-    return new NextResponse(body, {
+    return new NextResponse(skill.raw, {
       status: 200,
       headers: {
         "Content-Type": "text/markdown; charset=utf-8",
@@ -45,7 +35,7 @@ export async function GET(_request, { params }) {
       },
     });
   } catch (error) {
-    console.log("Error reading router-agent skill:", error);
+    console.log(`Error reading router-agent skill '${name}':`, error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -86,7 +86,7 @@ decisions:
 - A decision without `tier` has `tier: 0`. `tier` is only honored when
   `defaults.use_tiered_selection: true`.
 - A signal without `version` has `version: 1` and without `timeout_ms`
-  has `timeout_ms: 50`.
+  has `timeout_ms: 3000`.
 - A bare-string plugin (`plugins: [router_replay]`) is equivalent to
   `{type: router_replay, configuration: {}}`.
 

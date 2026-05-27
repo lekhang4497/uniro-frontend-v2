@@ -14,6 +14,10 @@ const nextConfig = {
   outputFileTracingExcludes: {
     "*": ["./gitbook/**/*"]
   },
+  outputFileTracingIncludes: {
+    "/api/router-agent/manifest": ["./src/lib/router-agent/skills/*.md"],
+    "/api/router-agent/skills/[name]": ["./src/lib/router-agent/skills/*.md"]
+  },
   images: {
     unoptimized: true
   },

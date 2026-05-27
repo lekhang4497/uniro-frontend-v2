@@ -12,12 +12,13 @@ Each entry in `signals:` is one signal block:
 - name: lang_vi          # REQUIRED, ^[a-zA-Z_][a-zA-Z0-9_]*$
   type: language         # REQUIRED, one of the 22 registered types
   version: 1             # optional, default 1
-  timeout_ms: 50         # optional, default 50
+  timeout_ms: 3000       # optional, default 3000 -- per-signal budget
   config: { ... }        # optional but usually required, shape depends on type
 ```
 
-Signals fire in parallel under their `timeout_ms`. A signal that errors
-or times out fails soft to `False` -- that is NOT a config error.
+Signals fire in parallel under their `timeout_ms` (default 3000 ms each).
+A signal that errors or times out fails soft to `False` -- that is NOT a
+config error.
 
 ## Type catalog (all 22)
 
@@ -43,17 +44,18 @@ Fires when the detected language matches a configured ISO 639-1 code.
 One signal per language; combine with `OR` to match a set.
 
 ### keyword
-Multi-method keyword match. `method` has NO default -- you MUST set it.
+Multi-method keyword match. `method` is optional and defaults to `regex`.
 ```yaml
 - name: urgent_markers
   type: keyword
   config:
-    method: bm25          # REQUIRED -- bm25 | ngram | fuzzy
+    method: regex         # optional -- regex | bm25 | ngram (default regex)
     keywords: [urgent, asap, "khan cap"]   # REQUIRED, non-empty
     operator: OR          # OR | AND (default OR)
     case_sensitive: false # default false
-    # method-specific knobs: bm25_threshold / ngram_threshold / fuzzy_threshold
+    # method-specific knobs: bm25_threshold / ngram_threshold
 ```
+`fuzzy_match: true` under `method: regex` enables Levenshtein matching.
 Note: YAML keyword strings accept UTF-8; use the source script for real deployments (e.g., Vietnamese diacritics). Examples here are ASCII for skill readability.
 
 ### domain

@@ -30,9 +30,15 @@ model fails validation. Use to keep a fleet-wide ban on an expensive
 or deprecated model.
 
 ### pii_block_outbound
-When `true`, every decision routing to a cloud model MUST include the
-`pii_redact` plugin. Validation will flag any decision that does not.
+When `true`, the router-service validator requires every decision routing
+to a cloud model to declare `pii_redact` in its `plugins` list. This is a
+reserved name the validator checks for as a string -- it is NOT one of
+the 13 registered plugin types in `plugin-reference`. If your deployment
+doesn't have `pii_redact` available, do not enable `pii_block_outbound`.
 Leave `false` unless the user explicitly asks for PII redaction.
+
+(Note for the JS shape validator: `pii_redact` is a known reserved name
+and should not be flagged as `unknown_plugin_type`.)
 
 ### max_model_cost_usd_per_m
 Validate-time cap. Any decision pointing at a model whose advertised
@@ -65,8 +71,9 @@ risk.
   they want to ban (deprecated, too expensive, contractually
   off-limits).
 - Set `pii_block_outbound: true` only when the user asks for
-  outbound PII blocking. Adding it implicitly forces a `pii_redact`
-  plugin on every cloud decision; don't surprise the user.
+  outbound PII blocking. Adding it forces the reserved string
+  `pii_redact` into every cloud decision's `plugins` list (validator
+  contract, not a registered plugin); don't surprise the user.
 - Set `observability.shadow: true` when the user wants to
   shadow-test a router against live traffic before turning it on.
 

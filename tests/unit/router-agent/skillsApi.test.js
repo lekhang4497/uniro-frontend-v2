@@ -9,22 +9,17 @@
 // src/lib/router-agent/skills/ directory and assert that every .md file
 // shows up in the manifest and is fetchable by name.
 
-import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Resolve the frontend root the same way vitest.config.js does.
+// Resolve the on-disk skills dir (independent of cwd). The route handlers
+// now resolve their own path via import.meta.url, so we don't need to
+// chdir for them -- only for this test's own readdir.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND_ROOT = path.resolve(__dirname, "../../..");
 const SKILLS_DIR = path.join(FRONTEND_ROOT, "src", "lib", "router-agent", "skills");
-
-// The route handlers read SKILLS_DIR off process.cwd(). Vitest's cwd is
-// frontend/tests by default; pin it to the frontend root for these tests.
-const originalCwd = process.cwd();
-beforeAll(() => {
-  process.chdir(FRONTEND_ROOT);
-});
 
 // Mock next/server so the route handlers can import { NextResponse }.
 // json(body, init) and `new NextResponse(body, init)` both return a
@@ -71,11 +66,11 @@ function readSkillFilenames() {
 }
 
 describe("router-agent skills directory shape", () => {
-  it("contains only .md files plus the _frontmatter.js helper", () => {
+  it("contains only .md files plus the parser + catalog helpers", () => {
     const entries = fs.readdirSync(SKILLS_DIR).sort();
     const mds = entries.filter((f) => f.endsWith(".md"));
     const others = entries.filter((f) => !f.endsWith(".md"));
-    expect(others).toEqual(["_frontmatter.js"]);
+    expect(others).toEqual(["_frontmatter.js", "index.js"]);
     // Nine skill files were defined by the spec; if that count drifts we
     // want a deliberate update.
     expect(mds.length).toBe(9);
@@ -192,9 +187,4 @@ describe("parseFrontmatter helper", () => {
     expect(parseFrontmatter("")).toEqual({ meta: {}, body: "" });
     expect(parseFrontmatter(null)).toEqual({ meta: {}, body: "" });
   });
-});
-
-// Restore cwd to avoid leaking to other tests.
-afterAll(() => {
-  process.chdir(originalCwd);
 });

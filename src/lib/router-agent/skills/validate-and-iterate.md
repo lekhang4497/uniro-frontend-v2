@@ -72,7 +72,7 @@ mistakes. Errors block; warnings are advisory.
 
 | Symptom | Cause / fix |
 |---|---|
-| `keyword_match: 'method' must be one of ('bm25','ngram','fuzzy')` | `keyword` signals MUST set `config.method` -- there is no default. |
+| `keyword_match: 'method' must be one of ('regex','bm25','ngram')` | Optional, defaults to 'regex'. Make sure you wrote one of regex/bm25/ngram. |
 | `decision '...' must specify either 'model' or 'modelRefs'` | The decision has neither (or both). Exactly one is required. |
 | `Extra inputs are not permitted` | A stray/typo'd key -- every block is `extra="forbid"`. Remove the unknown key. |
 | `rule leaf references unknown signal name '...'` | The leaf `name` isn't a declared signal or projection output. Add the signal, or fix the typo. |

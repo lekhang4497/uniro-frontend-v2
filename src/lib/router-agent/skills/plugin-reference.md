@@ -146,3 +146,11 @@ this decision's lane. See ROUTER_YAML.md Sec. 8.
 If `guardrails.pii_block_outbound: true`, every decision routing to a
 cloud model MUST include the `pii_redact` plugin. (See `guardrails`
 skill.)
+
+## Footnote: `pii_redact`
+
+`pii_redact` is NOT one of the 13 registered plugin types above. It is a
+reserved string the router-service validator checks for inside a
+decision's `plugins` list when `guardrails.pii_block_outbound: true`.
+The JS shape validator should treat `pii_redact` as a known name and not
+flag it as `unknown_plugin_type`.
