@@ -59,25 +59,25 @@ mistakes. Errors block; warnings are advisory.
 `path` is a JSON-pointer-ish string like `decisions[2].rules.conditions[1].name`.
 `code` is a short identifier the agent can branch on, e.g.:
 
-- `unknown_signal_type` — `signals[i].type` not in the registry.
-- `unresolved_leaf` — rule leaf `name` doesn't match any signal or
+- `unknown_signal_type` - `signals[i].type` not in the registry.
+- `unresolved_leaf` - rule leaf `name` doesn't match any signal or
   projection output.
-- `model_xor` — decision has both `model` and `modelRefs`, or neither.
-- `not_arity` — `NOT` composite has zero or 2+ children.
-- `bad_operator` — composite `operator` not in `{AND, OR, NOT}`.
-- `unknown_plugin_type` — plugin `type` not in the registry.
-- `unknown_top_key` — top-level key not in the allowed set.
+- `model_xor` - decision has both `model` and `modelRefs`, or neither.
+- `not_arity` - `NOT` composite has zero or 2+ children.
+- `bad_operator` - composite `operator` not in `{AND, OR, NOT}`.
+- `unknown_plugin_type` - plugin `type` not in the registry.
+- `unknown_top_key` - top-level key not in the allowed set.
 
-## Common pitfalls (from ROUTER_YAML.md §13)
+## Common pitfalls (from ROUTER_YAML.md Sec. 13)
 
 | Symptom | Cause / fix |
 |---|---|
-| `keyword_match: 'method' must be one of ('bm25','ngram','fuzzy')` | `keyword` signals MUST set `config.method` — there is no default. |
+| `keyword_match: 'method' must be one of ('bm25','ngram','fuzzy')` | `keyword` signals MUST set `config.method` -- there is no default. |
 | `decision '...' must specify either 'model' or 'modelRefs'` | The decision has neither (or both). Exactly one is required. |
-| `Extra inputs are not permitted` | A stray/typo'd key — every block is `extra="forbid"`. Remove the unknown key. |
+| `Extra inputs are not permitted` | A stray/typo'd key -- every block is `extra="forbid"`. Remove the unknown key. |
 | `rule leaf references unknown signal name '...'` | The leaf `name` isn't a declared signal or projection output. Add the signal, or fix the typo. |
 | `unknown type '...'` for a signal | The `type` isn't registered (one of the 22). Check spelling against `signal-reference`. |
-| Signal silently always `False` | Its ML dependency isn't installed in the deployment — install `.[ml]`, or the signal genuinely didn't fire. Not a config error. |
+| Signal silently always `False` | Its ML dependency isn't installed in the deployment -- install `.[ml]`, or the signal genuinely didn't fire. Not a config error. |
 | Decision never selected | Another decision with higher `priority` matches first, or the rule tree never evaluates true. Drop priorities, or test the inputs. |
 
 ## Fix recipes
@@ -133,7 +133,7 @@ mistakes. Errors block; warnings are advisory.
 
 Warnings don't block deployment but are worth surfacing to the user:
 
-- `unreferenced_signal` — a signal is declared but no decision rule or
+- `unreferenced_signal` - a signal is declared but no decision rule or
   projection input references it. Either delete it or wire it up.
-- `unreachable_decision` — a lower-priority decision has the same rule
+- `unreachable_decision` - a lower-priority decision has the same rule
   tree as a higher-priority one and will never be selected.

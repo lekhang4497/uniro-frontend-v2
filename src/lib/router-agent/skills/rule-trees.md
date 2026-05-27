@@ -7,7 +7,7 @@ version: 1
 # Rule Trees
 
 A decision's `rules:` is a recursive `RuleNode` tree. A node is **either
-a leaf or a composite — never both**.
+a leaf or a composite -- never both**.
 
 ## Leaf nodes
 
@@ -19,10 +19,10 @@ rules: { type: keyword, name: urgent_markers }
 
 Rules:
 
-- `type` — must match the declared signal's `type` (e.g. `keyword`,
+- `type` - must match the declared signal's `type` (e.g. `keyword`,
   `language`, `embedding`, `pii`, `jailbreak`...). For projection
   outputs use the literal string `projection` (see below).
-- `name` — must resolve to a declared `signals[].name` OR a projection
+- `name` - must resolve to a declared `signals[].name` OR a projection
   output name (partition member, mapping band, or score name).
 
 If a leaf's `name` doesn't resolve, validation fails with

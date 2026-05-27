@@ -23,7 +23,7 @@ plugins:
 A bare string is shorthand for `{type: <string>, configuration: {}}`.
 
 The **same plugin type may appear on different decisions with different
-`configuration`** — plugin config is per-decision.
+`configuration`** -- plugin config is per-decision.
 
 ## Registered plugin types (13)
 
@@ -32,7 +32,7 @@ Short-circuit the request with a canned reply. Use it on safety blocks.
 ```yaml
 - type: fast_response
   configuration:
-    message: "Xin lỗi, yêu cầu này không hợp lệ."
+    message: "Sorry, this request is not allowed."
     status_code: 200
 ```
 
@@ -73,7 +73,7 @@ Post-response hallucination/quality check.
 ```
 
 ### response_jailbreak
-Post-response jailbreak detector — flags model output that complied with
+Post-response jailbreak detector -- flags model output that complied with
 an injected directive.
 ```yaml
 - response_jailbreak
@@ -89,7 +89,7 @@ Cap or re-rank the tool list passed to the model. Use on agentic lanes.
 ```
 
 ### tools
-Inject a fixed tool set into the request. See ROUTER_YAML.md §8 for
+Inject a fixed tool set into the request. See ROUTER_YAML.md Sec. 8 for
 the full configuration shape.
 
 ### rag
@@ -104,10 +104,10 @@ Retrieval-augmented generation against a configured KB collection.
 
 ### memory
 Conversation-memory plugin (read/write a persistent memory store).
-See ROUTER_YAML.md §8.
+See ROUTER_YAML.md Sec. 8.
 
 ### image_gen
-Image-generation overlay — route diagram/illustration requests through
+Image-generation overlay -- route diagram/illustration requests through
 an image plugin. Use with the `modality` signal or a keyword backstop.
 ```yaml
 - type: image_gen
@@ -118,11 +118,11 @@ an image plugin. Use with the `modality` signal or a keyword backstop.
 
 ### header_mutation
 Mutate request/response headers before/after dispatch. See ROUTER_YAML.md
-§8.
+Sec. 8.
 
 ### request_params
 Override request parameters (temperature, top_p, max_tokens, etc.) for
-this decision's lane. See ROUTER_YAML.md §8.
+this decision's lane. See ROUTER_YAML.md Sec. 8.
 
 ## Picking plugins
 
@@ -137,7 +137,7 @@ this decision's lane. See ROUTER_YAML.md §8.
 - **Policy / legal / regulated lanes**: add `rag` over the policy
   collection plus `hallucination` post-check.
 - **Voice / persona overlays**: add `system_prompt` with the persona
-  text. Keep it short — long system prompts dilute the agent.
+  text. Keep it short -- long system prompts dilute the agent.
 - **Diagram / illustration lanes**: add `image_gen` triggered by the
   `modality` signal OR a Vietnamese/non-English keyword backstop.
 

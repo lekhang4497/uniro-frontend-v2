@@ -20,7 +20,7 @@ Every projection output (a partition member name, a mapping band
 name, or a named score) becomes a referenceable leaf with
 `type: projection` (see `rule-trees`).
 
-## Partitions — exclusive bucketing
+## Partitions -- exclusive bucketing
 
 A partition picks exactly one of N signals. Useful for intents or
 domains where you want one winner.
@@ -30,19 +30,19 @@ partitions:
   - name: intent
     semantics: exclusive            # exclusive | softmax_exclusive
     temperature: 1.0                # only used when semantics=softmax_exclusive
-    members: [billing, support, sales]   # signal names — >=1
+    members: [billing, support, sales]   # signal names -- >=1
     default: support                # optional fallback when nothing fires
 ```
 
-- `semantics: exclusive` — the winning member is the one whose signal
+- `semantics: exclusive` -- the winning member is the one whose signal
   fires (highest confidence breaks ties).
-- `semantics: softmax_exclusive` — softmax over member confidences with
+- `semantics: softmax_exclusive` -- softmax over member confidences with
   the given `temperature`; the argmax wins.
 - Every member name in `members` MUST be a declared signal `name`.
 - Reference a winner from a decision with
   `{ type: projection, name: billing }`.
 
-## Scores — weighted sum
+## Scores -- weighted sum
 
 A score blends multiple signals into a single number.
 
@@ -60,7 +60,7 @@ scores:
 ```
 
 - Each input must reference a declared signal by `type` + `name`.
-- `weight` is a float (positive OR negative — see the `difficulty_score`
+- `weight` is a float (positive OR negative -- see the `difficulty_score`
   example in `full_example.yaml` for negative weights that pull
   cheap/fast-QA traffic down).
 - `value_source: confidence` uses the signal's reported confidence
@@ -70,7 +70,7 @@ scores:
   `{ type: projection, name: risk_score }`, but more commonly it feeds
   into a `mapping`.
 
-## Mappings — threshold bands
+## Mappings -- threshold bands
 
 A mapping turns a score into named bands. Each band name becomes a
 referenceable leaf.
@@ -83,7 +83,7 @@ mappings:
     calibration:                    # optional
       method: sigmoid_distance
       slope: 10
-    outputs:                        # >=1 — each needs >=1 of lt/lte/gt/gte
+    outputs:                        # >=1 -- each needs >=1 of lt/lte/gt/gte
       - { name: risk_high,     gte: 0.7 }
       - { name: risk_elevated, lt: 0.7, gte: 0.3 }
       - { name: risk_low,      lt: 0.3 }
@@ -97,7 +97,7 @@ mappings:
 - `calibration` is optional. `sigmoid_distance` with a `slope`
   smooths the cutoff.
 
-## Worked example — risk gate
+## Worked example -- risk gate
 
 ```yaml
 projections:

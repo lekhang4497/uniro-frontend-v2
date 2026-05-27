@@ -14,26 +14,26 @@ only be added when the user describes a need for it.
 ## Step-by-step recipe
 
 1. Pick a `name` for the router (regex `^[a-zA-Z_][a-zA-Z0-9_-]*$`).
-2. Optionally add `defaults.on_no_match` — use `route_to_default` so
+2. Optionally add `defaults.on_no_match` -- use `route_to_default` so
    unmatched requests fall through to the caller's default model.
 3. Add at least one signal in `signals:`. Each signal needs:
-   - `name` — referenced by the decision rules. Snake-case identifier
+   - `name` - referenced by the decision rules. Snake-case identifier
      (`^[a-zA-Z_][a-zA-Z0-9_]*$`).
-   - `type` — one of the 22 registered signal types (see
+   - `type` - one of the 22 registered signal types (see
      `signal-reference`).
-   - `config` — type-specific. Some types (notably `keyword`) have
+   - `config` - type-specific. Some types (notably `keyword`) have
      required keys with no default.
 4. Add at least one decision in `decisions:` that references the
    signal. Each decision needs:
-   - `name` — `^[a-zA-Z_][a-zA-Z0-9_-]*$`.
-   - `rules` — a leaf `{type, name}` or a composite
+   - `name` - `^[a-zA-Z_][a-zA-Z0-9_-]*$`.
+   - `rules` - a leaf `{type, name}` or a composite
      `{operator, conditions: [...]}`.
    - Exactly one of `model:` (single model) or `modelRefs:` (weighted
      list). Never both, never neither.
    - Optional `priority` (default 0; higher wins) and `description`.
 5. (Optional) Add a higher-priority decision for an explicit
    catch-all using a `type: always` signal. The router service does NOT
-   include an implicit always-match — unmatched requests fall through
+   include an implicit always-match -- unmatched requests fall through
    to `defaults.on_no_match`.
 6. Validate before claiming the router is ready.
 
@@ -91,4 +91,4 @@ decisions:
   `{type: router_replay, configuration: {}}`.
 
 Ask the user for a default model and target language(s) before guessing.
-If the user says "cheap" you still need a model name — ask.
+If the user says "cheap" you still need a model name -- ask.

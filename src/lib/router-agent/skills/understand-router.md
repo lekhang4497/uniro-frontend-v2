@@ -8,7 +8,7 @@ version: 1
 
 A router YAML tells the UniRo Router Service how to route one request:
 which signals to extract, how to combine them, which model to pick, and
-which plugins to run. The service is stateless — the caller ships the
+which plugins to run. The service is stateless -- the caller ships the
 whole YAML on every request.
 
 ## Top-level blocks
@@ -16,19 +16,19 @@ whole YAML on every request.
 Only the following top-level keys are allowed. Unknown keys are rejected
 (`extra="forbid"` on every block).
 
-- `name` (REQUIRED) — `^[a-zA-Z_][a-zA-Z0-9_-]*$`.
-- `description` — one-line summary, optional.
-- `version`, `schema_version` — both default to 1.
-- `created_at`, `created_by`, `created_by_method` — informational only.
-- `defaults` — routing defaults (alpha, fallback_chain, on_no_match,
+- `name` (REQUIRED) - `^[a-zA-Z_][a-zA-Z0-9_-]*$`.
+- `description` - one-line summary, optional.
+- `version`, `schema_version` - both default to 1.
+- `created_at`, `created_by`, `created_by_method` - informational only.
+- `defaults` - routing defaults (alpha, fallback_chain, on_no_match,
   decision_strategy, use_tiered_selection).
-- `signals` — Layer 1 inputs. Array of signal blocks.
-- `projections` — Layer 2 derived facts. Object with optional
+- `signals` - Layer 1 inputs. Array of signal blocks.
+- `projections` - Layer 2 derived facts. Object with optional
   `partitions`, `scores`, `mappings`.
-- `decisions` — Layer 3 + 4 rule-to-model bindings. Array.
-- `guardrails` — safety / cost caps (daily_cost_cap_usd,
+- `decisions` - Layer 3 + 4 rule-to-model bindings. Array.
+- `guardrails` - safety / cost caps (daily_cost_cap_usd,
   forbidden_models, pii_block_outbound, max_model_cost_usd_per_m).
-- `observability` — flags (log_decisions, shadow).
+- `observability` - flags (log_decisions, shadow).
 
 A router with just `name` plus one signal plus one decision is valid;
 every other block has defaults.
@@ -75,10 +75,10 @@ defaults:
   use_tiered_selection: false
 ```
 
-- `on_no_match` — `route_to_default` lets the caller resolve a fallback;
+- `on_no_match` - `route_to_default` lets the caller resolve a fallback;
   `reject` returns a rejection; `use_operator_router` defers to an
   operator-defined router.
-- `decision_strategy` — `priority` picks the highest-priority matching
+- `decision_strategy` - `priority` picks the highest-priority matching
   decision; `confidence` weighs signal confidences.
 
 When in doubt about a block's shape, call the skill that covers it:

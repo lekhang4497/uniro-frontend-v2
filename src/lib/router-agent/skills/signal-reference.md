@@ -17,14 +17,14 @@ Each entry in `signals:` is one signal block:
 ```
 
 Signals fire in parallel under their `timeout_ms`. A signal that errors
-or times out fails soft to `False` — that is NOT a config error.
+or times out fails soft to `False` -- that is NOT a config error.
 
 ## Type catalog (all 22)
 
 The deep configs for the 10 most common types are spelled out below.
 Less common ones get a one-line purpose plus a pointer.
 
-## Common signals — full config
+## Common signals -- full config
 
 ### always
 Always returns `True`. Use as an explicit catch-all.
@@ -38,22 +38,23 @@ Fires when the detected language matches a configured ISO 639-1 code.
 - name: lang_vi
   type: language
   config:
-    language: vi          # REQUIRED — ISO 639-1
+    language: vi          # REQUIRED -- ISO 639-1
 ```
 One signal per language; combine with `OR` to match a set.
 
 ### keyword
-Multi-method keyword match. `method` has NO default — you MUST set it.
+Multi-method keyword match. `method` has NO default -- you MUST set it.
 ```yaml
 - name: urgent_markers
   type: keyword
   config:
-    method: bm25          # REQUIRED — bm25 | ngram | fuzzy
-    keywords: [urgent, asap, "khẩn cấp"]   # REQUIRED, non-empty
+    method: bm25          # REQUIRED -- bm25 | ngram | fuzzy
+    keywords: [urgent, asap, "khan cap"]   # REQUIRED, non-empty
     operator: OR          # OR | AND (default OR)
     case_sensitive: false # default false
     # method-specific knobs: bm25_threshold / ngram_threshold / fuzzy_threshold
 ```
+Note: YAML keyword strings accept UTF-8; use the source script for real deployments (e.g., Vietnamese diacritics). Examples here are ASCII for skill readability.
 
 ### domain
 MMLU-category classifier. `match_categories` lists the categories the
@@ -76,7 +77,7 @@ list of `utterances` keyed by the class name.
   config:
     class_name: refactor
     threshold: 0.55
-    enable_soft_matching: false   # optional — disable when you have many
+    enable_soft_matching: false   # optional -- disable when you have many
                                   # similar-vocabulary classes (avoids every
                                   # cluster firing on every prompt)
     utterances:
@@ -111,7 +112,7 @@ Hour, day-of-week, or business-hours flag.
 ```
 
 ### pii
-PII detector (HF classifier). Rule-based — supply at least one rule and
+PII detector (HF classifier). Rule-based -- supply at least one rule and
 point `match_rule` at it. `pii_types_allowed` is a whitelist of PII
 types to ignore.
 ```yaml
@@ -160,51 +161,51 @@ Kubernetes-style RBAC role binding from request metadata.
     match_role: vip
 ```
 
-## Less-common signals — terse
+## Less-common signals -- terse
 
-For each of the following, see ROUTER_YAML.md §4.2 or the matching
+For each of the following, see ROUTER_YAML.md Sec. 4.2 or the matching
 module under `router_service/uniro_router/signals/` for the full
 `config` shape.
 
 ### complexity
 Contrastive hard-vs-easy difficulty signal. Provide `rules[].threshold`
 plus `hard_examples` and `easy_examples` lists, then `match_rule`.
-See ROUTER_YAML.md §4.2.
+See ROUTER_YAML.md Sec. 4.2.
 
 ### token_estimator
-Estimated token count gate. See ROUTER_YAML.md §4.2.
+Estimated token count gate. See ROUTER_YAML.md Sec. 4.2.
 
 ### structure
 Request-structure predicates (regex / keyword density / sequence
-detection over the prompt). See ROUTER_YAML.md §4.2.
+detection over the prompt). See ROUTER_YAML.md Sec. 4.2.
 
 ### conversation
 Conversation feature predicate (message counts, tool definitions, role
-counts). See ROUTER_YAML.md §4.2.
+counts). See ROUTER_YAML.md Sec. 4.2.
 
 ### modality
 Output-route classifier (text / image / diffusion). See ROUTER_YAML.md
-§4.2.
+Sec. 4.2.
 
 ### user_feedback
 4-class user-feedback classifier (`wrong_answer`, `need_clarification`,
-etc.). Set `match_class`. See ROUTER_YAML.md §4.2.
+etc.). Set `match_class`. See ROUTER_YAML.md Sec. 4.2.
 
 ### reask
 Fires when the user repeats a question. Set `threshold` and `lookback`
-(turns to look back). See ROUTER_YAML.md §4.2.
+(turns to look back). See ROUTER_YAML.md Sec. 4.2.
 
 ### event_context
-Event / metadata-context predicate. See ROUTER_YAML.md §4.2.
+Event / metadata-context predicate. See ROUTER_YAML.md Sec. 4.2.
 
 ### session_metric
-Per-session metric gate. See ROUTER_YAML.md §4.2.
+Per-session metric gate. See ROUTER_YAML.md Sec. 4.2.
 
 ### knowledge_base_inmem
-In-memory KB match. See ROUTER_YAML.md §4.2.
+In-memory KB match. See ROUTER_YAML.md Sec. 4.2.
 
 ### preference_llm
-LLM-preference signal. See ROUTER_YAML.md §4.2.
+LLM-preference signal. See ROUTER_YAML.md Sec. 4.2.
 
 ## Naming and reuse
 
@@ -215,5 +216,5 @@ LLM-preference signal. See ROUTER_YAML.md §4.2.
   `config` (e.g. one `language` signal per ISO code).
 - Some signals (`domain`, `pii`, `jailbreak`, `fact_check`,
   `user_feedback`, `modality`, `embedding`) need ML deps in the
-  deployment. Without them the signal fails soft to `False` — it is
+  deployment. Without them the signal fails soft to `False` -- it is
   NOT a config error, and `validate()` does not flag it.

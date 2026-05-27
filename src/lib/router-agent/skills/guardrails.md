@@ -16,7 +16,7 @@ guardrails:
   daily_cost_cap_usd: 50.0           # optional
   forbidden_models: [gpt-5-pro]      # optional
   pii_block_outbound: false          # optional, default false
-  max_model_cost_usd_per_m: 10.0     # optional — validate-time per-model cap
+  max_model_cost_usd_per_m: 10.0     # optional -- validate-time per-model cap
 ```
 
 ### daily_cost_cap_usd
@@ -53,7 +53,7 @@ on a router; turn off only if log volume is a problem.
 
 ### shadow
 When `true`, the router runs end-to-end but the decision is **not**
-applied — the caller still uses its default. Pair with `log_decisions:
+applied -- the caller still uses its default. Pair with `log_decisions:
 true` to A/B a new router shape against production traffic without
 risk.
 
@@ -72,7 +72,7 @@ risk.
 
 ## Defaults to remember
 
-- Omitting `guardrails` is fine — no caps, no forbidden list, no
+- Omitting `guardrails` is fine -- no caps, no forbidden list, no
   outbound PII block.
 - Omitting `observability` leaves `log_decisions: true` and
   `shadow: false`.

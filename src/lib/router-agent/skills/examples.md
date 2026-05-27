@@ -10,11 +10,11 @@ Four worked examples live in `router_service/` (and the source folder
 they were authored in). Each demonstrates a different point along the
 complexity curve. Use them as starting templates when the user's
 description maps to one of these audiences. Do NOT paste the full
-example YAML into the router — copy the structural ideas and adapt.
+example YAML into the router -- copy the structural ideas and adapt.
 
 ## minimal_example
 
-**Use when:** the user wants the smallest viable router — split traffic
+**Use when:** the user wants the smallest viable router -- split traffic
 by one signal, fall through for the rest.
 
 **Demonstrates:**
