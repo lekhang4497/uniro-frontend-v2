@@ -323,6 +323,22 @@ export function useRouterAgent({ routerId }) {
     }
   }, []);
 
+  // Allow callers (Settings dialog) to refresh the reasoning model setting
+  // without forcing a page reload. Picks up whatever /api/agent-settings
+  // currently returns.
+  const refreshReasoningModel = useCallback(async () => {
+    try {
+      const res = await fetch("/api/agent-settings");
+      if (res.ok) {
+        const json = await res.json().catch(() => ({}));
+        setReasoningModel(json?.reasoningModel || "");
+        setReasoningModelLoaded(true);
+      }
+    } catch (e) {
+      console.log("[useRouterAgent] refreshReasoningModel failed:", e?.message || e);
+    }
+  }, []);
+
   const resetThread = useCallback(async () => {
     if (!routerId) {
       setMessages([]);
@@ -363,5 +379,6 @@ export function useRouterAgent({ routerId }) {
     lastToolCalls,
     loadInitialYaml,
     skills,
+    refreshReasoningModel,
   };
 }
