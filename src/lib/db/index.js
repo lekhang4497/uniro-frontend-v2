@@ -67,6 +67,18 @@ export {
   saveRequestDetail, getRequestDetails, getRequestDetailById,
 } from "./repos/requestDetailsRepo.js";
 
+// Routers (Router Builder agent)
+export {
+  listRouters, getRouter, createRouter, updateRouter, deleteRouter, ensureDefaultRouter,
+} from "./repos/routerRepo.js";
+
+// Router agent threads
+export {
+  getThread as getRouterAgentThread,
+  saveThread as saveRouterAgentThread,
+  deleteThread as deleteRouterAgentThread,
+} from "./repos/routerAgentThreadRepo.js";
+
 // Export/import full DB
 export async function exportDb() {
   const db = await getAdapter();
