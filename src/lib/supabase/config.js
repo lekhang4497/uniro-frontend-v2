@@ -41,13 +41,21 @@ export function isConnectedMode() {
   );
 }
 
-// Both the service-role key and the gateway secret moved to the Management
-// Service (see frontend/src/lib/routing/mgmtClient.js + UNIRO_MGMT_URL).
-// The frontend no longer needs admin Supabase credentials at all.
+// The Supabase service-role key moved to the Management Service (see
+// frontend/src/lib/routing/mgmtClient.js + UNIRO_MGMT_URL). The frontend
+// no longer needs admin Supabase credentials at all.
 //
-// `pickSecret()` is retained for back-compat with any legacy code path still
-// reading it server-side; new code should NOT use these.
+// `pickSecret()` is retained for back-compat with any legacy code path
+// still reading it server-side; new code should NOT use it.
 
 export function getMgmtUrl() {
   return process.env.UNIRO_MGMT_URL || "http://127.0.0.1:8859";
+}
+
+// The gateway secret is a separate, lower-privilege credential used to
+// authenticate posts to the `usage-events` Edge Function. It is not a
+// Supabase service-role key and is read directly from env, not via the
+// Management Service. usageQueue.js depends on it.
+export function getGatewaySecret() {
+  return process.env.UNIRO_GATEWAY_SECRET || null;
 }
