@@ -15,7 +15,7 @@ import Footer from "./components/Footer";
 export default function LandingPage() {
   const router = useRouter();
   return (
-    <div className="relative font-sans text-[var(--text-primary)] overflow-x-hidden antialiased selection:bg-[var(--accent-blue)] selection:text-[var(--text-inverted)]">
+    <div className="relative font-sans text-[var(--text-primary)] overflow-x-hidden antialiased selection:bg-[var(--bg-inverse)] selection:text-[var(--text-inverted)]">
       {/* Animated Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[var(--bg-primary)]">
         {/* Grid pattern */}
@@ -27,14 +27,14 @@ export default function LandingPage() {
           }}
         />
 
-        {/* Animated gradient orbs */}
-        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-[var(--accent-blue)]/12 rounded-full blur-[130px] animate-blob" />
+        {/* Animated soft halos — neutral so they blend into the gray system */}
+        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-[var(--bg-tertiary)] opacity-70 rounded-full blur-[130px] animate-blob" />
         <div
-          className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-[var(--accent-blue)]/8 rounded-full blur-[130px] animate-blob"
+          className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-[var(--bg-secondary)] opacity-60 rounded-full blur-[130px] animate-blob"
           style={{ animationDelay: "2s", animationDuration: "22s" }}
         />
         <div
-          className="absolute bottom-0 left-1/2 w-[650px] h-[650px] bg-[var(--accent-blue)]/6 rounded-full blur-[130px] animate-blob"
+          className="absolute bottom-0 left-1/2 w-[650px] h-[650px] bg-[var(--bg-tertiary)] opacity-50 rounded-full blur-[130px] animate-blob"
           style={{ animationDelay: "4s", animationDuration: "25s" }}
         />
 
@@ -67,7 +67,7 @@ export default function LandingPage() {
 
           {/* CTA Section */}
           <section className="relative py-32 px-6 overflow-hidden">
-            <div className="absolute inset-0 bg-linear-to-t from-[var(--accent-blue)]/6 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-t from-[var(--bg-secondary)] to-transparent opacity-60 pointer-events-none" />
             <div className="relative z-10 mx-auto max-w-4xl text-center">
               <h2 className="mb-6 text-4xl md:text-5xl font-black text-[var(--text-primary)]">
                 Ready to Simplify Your AI Infrastructure?
@@ -79,7 +79,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="h-14 w-full sm:w-auto px-10 rounded-lg bg-[var(--accent-blue)] text-[var(--text-inverted)] text-lg font-bold transition-all hover:brightness-110"
+                  className="h-14 w-full sm:w-auto px-10 rounded-lg bg-[var(--button-primary-bg)] text-[var(--button-primary-fg)] text-lg font-bold transition-colors hover:bg-[var(--button-primary-bg-hover)] active:bg-[var(--button-primary-bg-active)]"
                 >
                   Start Free
                 </button>
@@ -87,7 +87,7 @@ export default function LandingPage() {
                   onClick={() =>
                     window.open("https://github.com/your-org/uniro#readme", "_blank")
                   }
-                  className="h-14 w-full sm:w-auto px-10 rounded-lg border border-[var(--bg-secondary)] text-[var(--text-primary)] text-lg font-bold transition-all hover:bg-[var(--bg-tertiary)]"
+                  className="h-14 w-full sm:w-auto px-10 rounded-lg border border-[var(--button-secondary-border)] bg-[var(--button-secondary-bg)] text-[var(--button-secondary-fg)] text-lg font-bold transition-colors hover:bg-[var(--button-secondary-bg-hover)] active:bg-[var(--button-secondary-bg-active)]"
                 >
                   Read Documentation
                 </button>

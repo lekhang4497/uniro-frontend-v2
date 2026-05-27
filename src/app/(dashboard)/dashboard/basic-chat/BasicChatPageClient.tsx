@@ -956,7 +956,7 @@ export default function BasicChatPageClient() {
                         <Square className="h-4 w-4" />
                       </button>
                     ) : null}
-                    <button onClick={sendMessage} disabled={!canSend} className={`h-8 w-8 rounded-full flex items-center justify-center transition ${canSend ? 'bg-[var(--accent-blue)] text-[var(--text-inverted)] hover:brightness-95' : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] cursor-not-allowed'}`}>
+                    <button onClick={sendMessage} disabled={!canSend} className={`h-8 w-8 rounded-full flex items-center justify-center transition-colors ${canSend ? 'bg-[var(--button-primary-bg)] text-[var(--button-primary-fg)] hover:bg-[var(--button-primary-bg-hover)]' : 'bg-[var(--bg-secondary)] text-[var(--text-tertiary)] cursor-not-allowed'}`}>
                       <ArrowUp className="h-4 w-4" />
                     </button>
                   </div>

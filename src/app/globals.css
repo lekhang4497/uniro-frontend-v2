@@ -1,87 +1,259 @@
 @import "tailwindcss";
 
+/*
+ * Color system — sourced from /ui-colors.json.
+ *
+ * The gray scale uses a single key that inverts between light/dark themes
+ * (gray-0 = white light / near-black dark; gray-1000 = the opposite).
+ * Semantic tokens reference the scale so a single declaration adapts to
+ * both themes. Accents are mode-aware where the palette requires it.
+ */
+
 @layer base {
   :root {
     color-scheme: light;
-    /* === ChatGPT Apps SDK — Light === */
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #E8E8E8;
-    --bg-tertiary: #F3F3F3;
 
-    --text-primary: #0D0D0D;
-    --text-secondary: #5D5D5D;
-    --text-tertiary: #8F8F8F;
-    --text-inverted: #FFFFFF;
+    /* ===== Gray scale (light values) ===== */
+    --gray-0: #ffffff;
+    --gray-25: #fcfcfc;
+    --gray-50: #f9f9f9;
+    --gray-75: #f3f3f3;
+    --gray-100: #ededed;
+    --gray-150: #dfdfdf;
+    --gray-200: #cdcdcd;
+    --gray-250: #b9b9b9;
+    --gray-300: #afafaf;
+    --gray-350: #9f9f9f;
+    --gray-400: #8f8f8f;
+    --gray-450: #767676;
+    --gray-500: #5d5d5d;
+    --gray-550: #4f4f4f;
+    --gray-600: #414141;
+    --gray-650: #393939;
+    --gray-700: #303030;
+    --gray-750: #282828;
+    --gray-800: #212121;
+    --gray-850: #1c1c1c;
+    --gray-900: #181818;
+    --gray-925: #161616;
+    --gray-950: #131313;
+    --gray-975: #101010;
+    --gray-1000: #0d0d0d;
 
-    --icon-primary: #0D0D0D;
-    --icon-secondary: #5D5D5D;
-    --icon-tertiary: #8F8F8F;
-    --icon-inverted: #FFFFFF;
+    /* ===== Accent palette (shared across themes) ===== */
+    --green-400: #04b84c;
+    --green-500: #00a240;
+    --green-600: #008635;
+    --red-400: #fa423e;
+    --red-500: #e02e2a;
+    --red-600: #ba2623;
+    --red-200: #ff8583;
+    --orange-400: #fb6a22;
+    --orange-500: #e25507;
+    --orange-200: #ff9e6c;
+    --yellow-400: #ffc300;
+    --yellow-500: #e0ac00;
+    --blue-400: #0285ff;
+    --blue-500: #0169cc;
+    --purple-400: #924ff7;
+    --purple-500: #8046d9;
+    --pink-400: #ff66ad;
+    --pink-500: #e04c91;
 
-    --accent-blue: #0285FF;
-    --accent-red: #E02E2A;
-    --accent-orange: #E25507;
-    --accent-green: #008635;
+    /* ===== Semantic surfaces ===== */
+    --bg-primary: var(--gray-0);          /* page background           */
+    --bg-secondary: var(--gray-75);        /* raised surface            */
+    --bg-tertiary: var(--gray-100);        /* hover / sunken            */
+    --bg-elevated: var(--gray-0);          /* card / popover            */
+    --bg-inverse: var(--gray-1000);        /* black on light            */
 
-    /* === shadcn aliases (so primitives keep working) === */
+    /* ===== Borders ===== */
+    --border-subtle: var(--gray-100);
+    --border-default: var(--gray-150);
+    --border-strong: var(--gray-200);
+
+    /* ===== Foreground ===== */
+    --text-primary: var(--gray-1000);      /* near-black                */
+    --text-secondary: var(--gray-500);
+    --text-tertiary: var(--gray-400);
+    --text-disabled: var(--gray-300);
+    --text-inverted: var(--gray-0);        /* on inverse surface        */
+
+    --icon-primary: var(--text-primary);
+    --icon-secondary: var(--text-secondary);
+    --icon-tertiary: var(--text-tertiary);
+    --icon-inverted: var(--text-inverted);
+
+    /* ===== Accents (mode-aware where needed) ===== */
+    --accent-blue: var(--blue-400);
+    --accent-red: var(--red-500);
+    --accent-orange: var(--orange-500);
+    --accent-green: var(--green-600);
+    --accent-yellow: var(--yellow-500);
+    --accent-purple: var(--purple-500);
+    --accent-pink: var(--pink-500);
+
+    /* ===== Buttons =====
+     * Primary: solid inverse (black in light, white in dark)
+     * Secondary: fits the page surface, framed by a subtle border
+     */
+    --button-primary-bg: var(--gray-1000);
+    --button-primary-bg-hover: var(--gray-800);
+    --button-primary-bg-active: var(--gray-700);
+    --button-primary-fg: var(--gray-0);
+
+    --button-secondary-bg: var(--bg-primary);
+    --button-secondary-bg-hover: var(--gray-75);
+    --button-secondary-bg-active: var(--gray-100);
+    --button-secondary-fg: var(--text-primary);
+    --button-secondary-border: var(--border-default);
+
+    --button-ghost-bg-hover: var(--gray-75);
+    --button-ghost-bg-active: var(--gray-100);
+
+    --button-destructive-bg: var(--red-500);
+    --button-destructive-bg-hover: var(--red-600);
+    --button-destructive-fg: var(--gray-0);
+
+    /* ===== shadcn semantic aliases (primitives still resolve) ===== */
     --background: var(--bg-primary);
     --foreground: var(--text-primary);
-    --card: var(--bg-primary);
+    --card: var(--bg-elevated);
     --card-foreground: var(--text-primary);
-    --popover: var(--bg-primary);
+    --popover: var(--bg-elevated);
     --popover-foreground: var(--text-primary);
-    --primary: var(--accent-blue);
-    --primary-foreground: var(--text-inverted);
-    --secondary: var(--bg-secondary);
-    --secondary-foreground: var(--text-primary);
-    --muted: var(--bg-tertiary);
+    --primary: var(--button-primary-bg);
+    --primary-foreground: var(--button-primary-fg);
+    --secondary: var(--button-secondary-bg);
+    --secondary-foreground: var(--button-secondary-fg);
+    --muted: var(--bg-secondary);
     --muted-foreground: var(--text-secondary);
     --accent: var(--bg-secondary);
     --accent-foreground: var(--text-primary);
-    --destructive: var(--accent-red);
-    --destructive-foreground: var(--text-inverted);
-    --border: var(--bg-secondary);
-    --input: var(--bg-secondary);
-    --ring: var(--accent-blue);
+    --destructive: var(--button-destructive-bg);
+    --destructive-foreground: var(--button-destructive-fg);
+    --border: var(--border-default);
+    --input: var(--border-default);
+    --ring: var(--gray-1000);
 
-    /* === Radii (ChatGPT scale) === */
+    /* ===== Radii ===== */
     --radius-sm: 6px;
     --radius: 8px;
     --radius-md: 10px;
     --radius-lg: 12px;
 
-    /* === Floating layer shadow (only for popovers/dialogs) === */
-    --shadow-popover: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06);
+    /* ===== Elevation ===== */
+    --shadow-popover: 0 1px 2px rgba(13, 13, 13, 0.05),
+      0 8px 24px rgba(13, 13, 13, 0.08);
+    --shadow-button: 0 1px 0 rgba(13, 13, 13, 0.06);
 
-    /* === Type === */
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    /* ===== Type ===== */
+    --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji";
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
       Consolas, monospace;
   }
 
   .dark {
     color-scheme: dark;
-    --bg-primary: #212121;
-    --bg-secondary: #303030;
-    --bg-tertiary: #414141;
 
-    --text-primary: #FFFFFF;
-    --text-secondary: #CDCDCD;
-    --text-tertiary: #AFAFAF;
-    --text-inverted: #0D0D0D;
+    /* Gray scale (dark values — same names, inverted ramp) */
+    --gray-0: #0d0d0d;
+    --gray-25: #101010;
+    --gray-50: #131313;
+    --gray-75: #161616;
+    --gray-100: #181818;
+    --gray-150: #1c1c1c;
+    --gray-200: #212121;
+    --gray-250: #282828;
+    --gray-300: #303030;
+    --gray-350: #393939;
+    --gray-400: #414141;
+    --gray-450: #4f4f4f;
+    --gray-500: #5d5d5d;
+    --gray-550: #767676;
+    --gray-600: #8f8f8f;
+    --gray-650: #9f9f9f;
+    --gray-700: #afafaf;
+    --gray-750: #b9b9b9;
+    --gray-800: #cdcdcd;
+    --gray-850: #dcdcdc;
+    --gray-900: #ededed;
+    --gray-925: #f3f3f3;
+    --gray-950: #f3f3f3;
+    --gray-975: #f9f9f9;
+    --gray-1000: #ffffff;
 
-    --icon-primary: #FFFFFF;
-    --icon-secondary: #CDCDCD;
-    --icon-tertiary: #AFAFAF;
-    --icon-inverted: #0D0D0D;
+    /* Semantic surfaces (override the light defaults) */
+    --bg-primary: var(--gray-200);         /* #212121                   */
+    --bg-secondary: var(--gray-300);       /* #303030                   */
+    --bg-tertiary: var(--gray-400);        /* #414141                   */
+    --bg-elevated: var(--gray-250);        /* #282828 - cards / menus   */
+    --bg-inverse: var(--gray-1000);        /* white in dark             */
 
-    --accent-blue: #0285FF;
-    --accent-red: #FF8583;
-    --accent-orange: #FF9E6C;
-    --accent-green: #40C977;
+    --border-subtle: var(--gray-300);
+    --border-default: var(--gray-350);
+    --border-strong: var(--gray-450);
 
-    --shadow-popover: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+    --text-primary: var(--gray-1000);
+    --text-secondary: var(--gray-800);
+    --text-tertiary: var(--gray-700);
+    --text-disabled: var(--gray-500);
+    --text-inverted: var(--gray-0);
+
+    /* Accents shift slightly lighter to keep contrast on dark surfaces */
+    --accent-blue: var(--blue-400);
+    --accent-red: var(--red-200);
+    --accent-orange: var(--orange-200);
+    --accent-green: #40c977;
+    --accent-yellow: var(--yellow-400);
+    --accent-purple: var(--purple-400);
+    --accent-pink: var(--pink-400);
+
+    /* Buttons — inverse in dark = white surface, near-black text */
+    --button-primary-bg: var(--gray-1000);
+    --button-primary-bg-hover: var(--gray-800);
+    --button-primary-bg-active: var(--gray-700);
+    --button-primary-fg: var(--gray-0);
+
+    --button-secondary-bg: var(--bg-primary);
+    --button-secondary-bg-hover: var(--gray-300);
+    --button-secondary-bg-active: var(--gray-400);
+    --button-secondary-fg: var(--text-primary);
+    --button-secondary-border: var(--border-default);
+
+    --button-ghost-bg-hover: var(--gray-300);
+    --button-ghost-bg-active: var(--gray-400);
+
+    --button-destructive-bg: var(--red-500);
+    --button-destructive-bg-hover: var(--red-400);
+    --button-destructive-fg: var(--gray-0);
+
+    /* shadcn aliases refresh */
+    --background: var(--bg-primary);
+    --foreground: var(--text-primary);
+    --card: var(--bg-elevated);
+    --card-foreground: var(--text-primary);
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--button-primary-bg);
+    --primary-foreground: var(--button-primary-fg);
+    --secondary: var(--button-secondary-bg);
+    --secondary-foreground: var(--button-secondary-fg);
+    --muted: var(--bg-secondary);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--bg-secondary);
+    --accent-foreground: var(--text-primary);
+    --destructive: var(--button-destructive-bg);
+    --destructive-foreground: var(--button-destructive-fg);
+    --border: var(--border-default);
+    --input: var(--border-default);
+    --ring: var(--gray-1000);
+
+    --shadow-popover: 0 1px 2px rgba(0, 0, 0, 0.5),
+      0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-button: 0 1px 0 rgba(0, 0, 0, 0.25);
   }
 }
 
@@ -109,14 +281,25 @@
   --color-bg-primary: var(--bg-primary);
   --color-bg-secondary: var(--bg-secondary);
   --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-inverse: var(--bg-inverse);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-tertiary: var(--text-tertiary);
   --color-text-inverted: var(--text-inverted);
+
   --color-accent-blue: var(--accent-blue);
   --color-accent-red: var(--accent-red);
   --color-accent-orange: var(--accent-orange);
   --color-accent-green: var(--accent-green);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-pink: var(--accent-pink);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -124,7 +307,7 @@
 }
 
 @layer base {
-  * { border-color: var(--border); }
+  * { border-color: var(--border-default); }
   html { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
   body {
     background: var(--bg-primary);
@@ -144,13 +327,22 @@
     padding: 0;
   }
   button:focus-visible {
-    outline: 2px solid var(--accent-blue);
+    outline: 2px solid var(--ring);
     outline-offset: 2px;
+  }
+
+  /* Selection follows the inverse surface (black on light, white on dark) */
+  ::selection {
+    background: var(--bg-inverse);
+    color: var(--text-inverted);
   }
 
   /* Scrollbar tuning to match the rest of the chrome */
   ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-thumb { background: var(--bg-secondary); border-radius: 999px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--bg-tertiary); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
   ::-webkit-scrollbar-track { background: transparent; }
 }

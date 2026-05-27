@@ -10,7 +10,7 @@ export default function Navigation() {
   const router = useRouter();
 
   return (
-    <nav className="fixed top-0 z-50 w-full bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--bg-secondary)]">
+    <nav className="fixed top-0 z-50 w-full bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border-default)]">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <button
@@ -19,7 +19,7 @@ export default function Navigation() {
           onClick={() => router.push("/")}
           aria-label="Navigate to home"
         >
-          <div className="size-8 rounded bg-[var(--accent-blue)] flex items-center justify-center text-[var(--text-inverted)]">
+          <div className="size-8 rounded bg-[var(--bg-inverse)] flex items-center justify-center text-[var(--text-inverted)]">
             <UniroMark size={18} className="text-[var(--text-inverted)]" />
           </div>
           <h2 className="text-[var(--text-primary)] text-xl font-bold tracking-tight">
@@ -63,7 +63,7 @@ export default function Navigation() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.push("/dashboard")}
-            className="hidden sm:flex h-9 items-center justify-center rounded-lg px-4 bg-[var(--accent-blue)] hover:brightness-110 transition-all text-[var(--text-inverted)] text-sm font-bold"
+            className="hidden sm:flex h-9 items-center justify-center rounded-lg px-4 bg-[var(--button-primary-bg)] hover:bg-[var(--button-primary-bg-hover)] active:bg-[var(--button-primary-bg-active)] transition-colors text-[var(--button-primary-fg)] text-sm font-bold"
           >
             Get Started
           </button>
@@ -84,7 +84,7 @@ export default function Navigation() {
 
       {/* Mobile menu dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[var(--bg-secondary)] bg-[var(--bg-primary)]/95 backdrop-blur-md">
+        <div className="md:hidden border-t border-[var(--border-default)] bg-[var(--bg-primary)]/95 backdrop-blur-md">
           <div className="flex flex-col gap-4 p-6">
             <a
               className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm font-medium transition-colors"
@@ -119,7 +119,7 @@ export default function Navigation() {
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="h-9 rounded-lg bg-[var(--accent-blue)] hover:brightness-110 text-[var(--text-inverted)] text-sm font-bold"
+              className="h-9 rounded-lg bg-[var(--button-primary-bg)] hover:bg-[var(--button-primary-bg-hover)] active:bg-[var(--button-primary-bg-active)] text-[var(--button-primary-fg)] text-sm font-bold transition-colors"
             >
               Get Started
             </button>
