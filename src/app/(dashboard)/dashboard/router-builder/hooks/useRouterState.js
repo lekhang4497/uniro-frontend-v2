@@ -91,6 +91,7 @@ export function useRouterState() {
 
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
+      const snapshot = yaml;
       setSaveState((s) => ({ ...s, saving: true }));
       try {
         const res = await fetch(
@@ -98,11 +99,11 @@ export function useRouterState() {
           {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ yaml }),
+            body: JSON.stringify({ yaml: snapshot }),
           }
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        lastSavedYamlRef.current = yaml;
+        lastSavedYamlRef.current = snapshot;
         setSaveState({ saving: false, lastSavedAt: Date.now() });
       } catch (e) {
         // Non-fatal; keep the in-memory YAML and try again on next change.

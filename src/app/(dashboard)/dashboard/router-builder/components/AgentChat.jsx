@@ -15,7 +15,7 @@ import { ChevronDown, ChevronRight, Send, Settings, Square, Wrench } from "lucid
 
 import { cn } from "@/lib/utils";
 
-export function AgentChat({ agent, onOpenSettings }) {
+export function AgentChat({ agent, onOpenSettings, onFocusComposer }) {
   const {
     messages,
     streaming,
@@ -116,6 +116,7 @@ export function AgentChat({ agent, onOpenSettings }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
+          onFocus={onFocusComposer}
           rows={2}
           placeholder={
             reasoningModelMissing
