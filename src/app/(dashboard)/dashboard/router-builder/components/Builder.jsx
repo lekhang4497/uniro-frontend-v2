@@ -58,15 +58,19 @@ export function Builder() {
   // We derive {agentEditId, agentEditDescription} from the undoStack at
   // render time instead of mirroring it into state inside a useEffect.
   // That avoids the React 19 setState-in-effect lint warning AND a wasted
-  // re-render after each agent edit. The dismissedRef prevents toast
-  // resurrection after the user closes it (or after 5s -- handled inside
-  // AgentEditToast itself by index).
+  // re-render after each agent edit.
+  //
+  // ID intentionally omits the stack depth and only uses {timestamp, actor}.
+  // Timestamps are unique per setYaml call, so the same agent edit
+  // surfacing at different stack depths (undo / redo / branches) keeps the
+  // same id and respects a prior dismissal. AgentEditToast tracks dismissed
+  // ids in a Set so revisiting a previously-dismissed edit stays hidden.
   const agentEdit = useMemo(() => {
     if (undoStack.length === 0) return { id: null, description: "" };
     const newest = undoStack[undoStack.length - 1];
     if (!newest || newest.actor !== "agent") return { id: null, description: "" };
     return {
-      id: `${undoStack.length}-${newest.timestamp}`,
+      id: `${newest.timestamp}-${newest.actor}`,
       description: newest.description || "agent edit",
     };
   }, [undoStack]);

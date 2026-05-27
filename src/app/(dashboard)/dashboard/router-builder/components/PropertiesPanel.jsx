@@ -19,7 +19,13 @@ import {
   SIGNAL_NAME_RE,
 } from "@/lib/router-agent/validator/registries.js";
 
-export function PropertiesPanel({ yaml, setYaml, selectedNodeId, onOpenYaml }) {
+export function PropertiesPanel({
+  yaml,
+  setYaml,
+  selectedNodeId,
+  onOpenYaml,
+  streaming = false,
+}) {
   const selection = useMemo(
     () => parseSelection(selectedNodeId),
     [selectedNodeId]
@@ -43,6 +49,7 @@ export function PropertiesPanel({ yaml, setYaml, selectedNodeId, onOpenYaml }) {
       setYaml={setYaml}
       selection={selection}
       onOpenYaml={onOpenYaml}
+      streaming={streaming}
     />
   );
 }
@@ -67,7 +74,7 @@ function parseSelection(id) {
   return null;
 }
 
-function PropertiesBody({ yaml, setYaml, selection, onOpenYaml }) {
+function PropertiesBody({ yaml, setYaml, selection, onOpenYaml, streaming }) {
   const parsed = useMemo(() => parseYaml(yaml), [yaml]);
 
   if (!parsed.ok || !parsed.data || typeof parsed.data !== "object") {
@@ -104,6 +111,12 @@ function PropertiesBody({ yaml, setYaml, selection, onOpenYaml }) {
         onOpenYaml={onOpenYaml}
       />
 
+      {streaming && (
+        <div className="text-[11.5px] text-muted-foreground italic rounded-md border border-border bg-secondary/40 px-2.5 py-1.5">
+          Editing locked while agent is running.
+        </div>
+      )}
+
       {selection.kind === "signal" && (
         <SignalEditor
           // Keyed on the live YAML value so an external rename / change
@@ -111,6 +124,7 @@ function PropertiesBody({ yaml, setYaml, selection, onOpenYaml }) {
           // props-into-state effect).
           key={`s:${target.name}`}
           signal={target}
+          disabled={streaming}
           onPatch={(patch) =>
             applySignalPatch(doc, selection.name, patch, setYaml)
           }
@@ -120,6 +134,7 @@ function PropertiesBody({ yaml, setYaml, selection, onOpenYaml }) {
         <DecisionEditor
           key={`d:${target.name}:${target.priority ?? "_"}`}
           decision={target}
+          disabled={streaming}
           onPatch={(patch) =>
             applyDecisionPatch(doc, selection.name, patch, setYaml)
           }
@@ -162,11 +177,12 @@ function Heading({ kind, subkind, name, onOpenYaml }) {
 // SignalEditor is keyed on the signal's current name in the parent so an
 // external rename remounts this component with a fresh draft. That avoids
 // having to mirror props into state with a useEffect.
-function SignalEditor({ signal, onPatch }) {
+function SignalEditor({ signal, onPatch, disabled = false }) {
   const [name, setName] = useState(signal.name || "");
   const [nameError, setNameError] = useState(null);
 
   const commitName = () => {
+    if (disabled) return;
     const trimmed = name.trim();
     if (trimmed === signal.name) return;
     if (!SIGNAL_NAME_RE.test(trimmed)) {
@@ -188,7 +204,8 @@ function SignalEditor({ signal, onPatch }) {
           onKeyDown={(e) => {
             if (e.key === "Enter") e.currentTarget.blur();
           }}
-          className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm mono"
+          disabled={disabled}
+          className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm mono disabled:bg-secondary disabled:text-muted-foreground disabled:cursor-not-allowed"
         />
         {nameError && (
           <div className="text-[11px] text-destructive">{nameError}</div>
@@ -217,7 +234,7 @@ function SignalEditor({ signal, onPatch }) {
 // external rename / priority change remounts this component with a fresh
 // draft (see render below). That avoids mirroring props -> state with a
 // useEffect.
-function DecisionEditor({ decision, onPatch }) {
+function DecisionEditor({ decision, onPatch, disabled = false }) {
   const [name, setName] = useState(decision.name || "");
   const [nameError, setNameError] = useState(null);
   const [priority, setPriority] = useState(
@@ -225,6 +242,7 @@ function DecisionEditor({ decision, onPatch }) {
   );
 
   const commitName = () => {
+    if (disabled) return;
     const trimmed = name.trim();
     if (trimmed === decision.name) return;
     if (!NAME_RE.test(trimmed)) {
@@ -236,6 +254,7 @@ function DecisionEditor({ decision, onPatch }) {
   };
 
   const commitPriority = () => {
+    if (disabled) return;
     if (priority === "") {
       if (decision.priority !== undefined) {
         onPatch({ priority: null });
@@ -259,7 +278,8 @@ function DecisionEditor({ decision, onPatch }) {
           onKeyDown={(e) => {
             if (e.key === "Enter") e.currentTarget.blur();
           }}
-          className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm mono"
+          disabled={disabled}
+          className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm mono disabled:bg-secondary disabled:text-muted-foreground disabled:cursor-not-allowed"
         />
         {nameError && (
           <div className="text-[11px] text-destructive">{nameError}</div>
@@ -274,7 +294,8 @@ function DecisionEditor({ decision, onPatch }) {
           onKeyDown={(e) => {
             if (e.key === "Enter") e.currentTarget.blur();
           }}
-          className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm mono"
+          disabled={disabled}
+          className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm mono disabled:bg-secondary disabled:text-muted-foreground disabled:cursor-not-allowed"
           placeholder="(unset)"
         />
       </Field>

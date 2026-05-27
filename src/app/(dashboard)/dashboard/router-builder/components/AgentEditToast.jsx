@@ -3,31 +3,50 @@
 // "Last edit by Agent -- Undo" toast (spec §9.3). Lives for 5s after each
 // agent edit; clicking Undo calls the store's undo() once.
 //
-// The parent computes `editId` from the undo stack (a stable per-edit
-// token). We track which editId the user has dismissed so a manual close
-// doesn't get re-shown if the parent re-renders with the same edit. The
-// 5s timer flips `dismissedId` once it elapses, hiding the toast.
+// The parent computes `editId` from the undo stack as a stable per-snapshot
+// fingerprint (`${timestamp}-${actor}`). We track dismissed ids in a Set
+// stored in state so undoing past a dismissed agent edit -- and ending up
+// with that same edit on top of the stack again -- doesn't resurface the
+// toast.
+//
+// The 5s timer adds the current editId to the dismissed set when it
+// elapses, hiding the toast and treating the timeout the same as a manual
+// dismiss.
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Undo2 } from "lucide-react";
 
 const VISIBLE_MS = 5000;
 
 export function AgentEditToast({ editId, onUndo, description }) {
-  const [dismissedId, setDismissedId] = useState(null);
+  // Set lives in state so render sees the latest membership without
+  // reaching into a ref during render (which breaks the React rules of
+  // hooks lint). Cloning on add keeps the Set treated as immutable.
+  const [dismissed, setDismissed] = useState(() => new Set());
+
+  const dismiss = useCallback((id) => {
+    if (!id) return;
+    setDismissed((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
 
   // Schedule auto-hide for each new edit id. Setting state from inside an
   // effect callback that runs *after* a timer is fine -- the lint rule
   // targets *synchronous* setState in effect bodies.
   useEffect(() => {
-    if (!editId || editId === dismissedId) return undefined;
+    if (!editId) return undefined;
+    if (dismissed.has(editId)) return undefined;
     const t = setTimeout(() => {
-      setDismissedId(editId);
+      dismiss(editId);
     }, VISIBLE_MS);
     return () => clearTimeout(t);
-  }, [editId, dismissedId]);
+  }, [editId, dismissed, dismiss]);
 
-  const open = !!editId && editId !== dismissedId;
+  const open = !!editId && !dismissed.has(editId);
   if (!open) return null;
 
   return (
@@ -39,7 +58,7 @@ export function AgentEditToast({ editId, onUndo, description }) {
       <button
         type="button"
         onClick={() => {
-          setDismissedId(editId);
+          dismiss(editId);
           onUndo && onUndo();
         }}
         className="inline-flex items-center gap-1 text-[12px] text-foreground hover:text-primary"

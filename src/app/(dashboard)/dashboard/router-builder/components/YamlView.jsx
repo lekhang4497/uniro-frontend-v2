@@ -81,7 +81,7 @@ export function YamlView({ yaml, setYaml, validation, streaming }) {
         </span>
         {streaming && (
           <span className="text-[10.5px] text-muted-foreground italic">
-            agent editing -- read only
+            Disabled while agent is editing
           </span>
         )}
         <button
@@ -98,7 +98,11 @@ export function YamlView({ yaml, setYaml, validation, streaming }) {
           type="button"
           onClick={onSave}
           disabled={!dirty || streaming}
-          title="Save to YAML store"
+          title={
+            streaming
+              ? "Disabled while agent is editing"
+              : "Save to YAML store"
+          }
           className={cn(
             "inline-flex items-center gap-1 px-2 h-7 rounded-md text-[11.5px]",
             dirty && !streaming

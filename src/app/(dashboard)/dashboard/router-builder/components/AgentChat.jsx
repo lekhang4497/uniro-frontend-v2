@@ -96,8 +96,12 @@ export function AgentChat({ agent, onOpenSettings, onFocusComposer }) {
           <AssistantBubble streaming text={streaming.currentAssistantText} />
         )}
         {streaming.active && !streaming.currentAssistantText && (
-          <div className="text-[12px] text-muted-foreground italic">
-            Thinking...
+          <div className="flex items-center gap-2 px-1 text-[12px] text-muted-foreground italic">
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-pulse"
+              aria-hidden
+            />
+            Agent is thinking...
           </div>
         )}
 

@@ -70,6 +70,7 @@ export function RightDock({
             setYaml={setYaml}
             selectedNodeId={selectedNodeId}
             onOpenYaml={() => onTabChange("yaml")}
+            streaming={agent.streaming.active}
           />
         </TabsContent>
       </Tabs>
