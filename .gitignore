@@ -51,6 +51,7 @@ source/*
 docs/*
 !docs/ARCHITECTURE.md
 !docs/superpowers/
+!docs/superpowers/**
 test/*
 bin/*
 open-sse/test/*

@@ -32,6 +32,7 @@ import {
   Copy,
   Download,
   FileWarning,
+  MessageSquare,
   MoreHorizontal,
   Settings,
   Settings2,
@@ -50,6 +51,7 @@ import { Palette } from "./components/NodePalette";
 import { YamlPreview } from "./components/YamlPreview";
 import { PropertiesPanel } from "./components/inspector/Inspector";
 import { SettingsDrawer } from "./components/inspector/SettingsDrawer";
+import { AgentPanel } from "./components/AgentPanel";
 
 import {
   DRAG_TYPE,
@@ -90,7 +92,12 @@ function Builder() {
   const [showSettings, setShowSettings] = useState(false);
   const [showYaml, setShowYaml] = useState(true);
   const [showCloud, setShowCloud] = useState(false);
-  const [, setCloudActiveId] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
+  // Mount the agent dock lazily on first open, then keep it mounted (hidden
+  // via CSS when another view is active) so the conversation and the
+  // store<->canvas bridge survive tab switches.
+  const [chatMounted, setChatMounted] = useState(false);
+  const [cloudActiveId, setCloudActiveId] = useState<string | null>(null);
   const connectedMode = typeof window !== "undefined" && isConnectedMode();
   const [importError, setImportError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -1102,24 +1109,35 @@ function Builder() {
             OpenAI "24h / 7d / 30d / 90d" range pill */}
         <div className="inline-flex items-center rounded-full border border-[var(--bg-secondary)] bg-[var(--bg-primary)] p-0.5 mr-1">
           <ViewToggle
-            active={!showYaml && !showCloud}
-            onClick={() => { setShowYaml(false); setShowCloud(false); }}
+            active={!showYaml && !showCloud && !showChat}
+            onClick={() => { setShowYaml(false); setShowCloud(false); setShowChat(false); }}
             label="Canvas"
           />
           <ViewToggle
             active={showYaml}
-            onClick={() => { setShowYaml(true); setShowCloud(false); }}
+            onClick={() => { setShowYaml(true); setShowCloud(false); setShowChat(false); }}
             label="YAML"
             icon={<Code2 className="h-3 w-3" />}
           />
           {connectedMode && (
             <ViewToggle
               active={showCloud}
-              onClick={() => { setShowCloud(true); setShowYaml(false); }}
+              onClick={() => { setShowCloud(true); setShowYaml(false); setShowChat(false); }}
               label="Cloud"
               icon={<Cloud className="h-3 w-3" />}
             />
           )}
+          <ViewToggle
+            active={showChat}
+            onClick={() => {
+              setShowChat(true);
+              setChatMounted(true);
+              setShowYaml(false);
+              setShowCloud(false);
+            }}
+            label="Agent"
+            icon={<MessageSquare className="h-3 w-3" />}
+          />
         </div>
 
         {/* Overflow menu — Templates / Import / Copy YAML / Reset */}
@@ -1204,6 +1222,16 @@ function Builder() {
             loadYaml={loadFromYaml}
             activeName={state.name}
             onActiveIdChange={setCloudActiveId}
+          />
+        )}
+
+        {chatMounted && (
+          <AgentPanel
+            routerId={cloudActiveId}
+            currentYaml={yaml}
+            onApplyYaml={loadFromYaml}
+            hidden={!showChat}
+            onClose={() => setShowChat(false)}
           />
         )}
       </div>

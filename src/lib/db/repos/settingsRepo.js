@@ -30,6 +30,7 @@ const DEFAULT_SETTINGS = {
   rtkEnabled: true,
   cavemanEnabled: false,
   cavemanLevel: "full",
+  agentReasoningModel: "",
 };
 
 async function readRaw() {

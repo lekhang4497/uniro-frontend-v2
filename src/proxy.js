@@ -11,5 +11,9 @@ export const config = {
     "/api/keys/:path*",
     "/api/providers/client",
     "/api/provider-nodes/validate",
+    "/api/routers",
+    "/api/routers/:path*",
+    "/api/router-agent/:path*",
+    "/api/agent-settings",
   ],
 };

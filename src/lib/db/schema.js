@@ -1,5 +1,5 @@
 // Latest schema version — bumped when a migration is added in ./migrations/
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const PRAGMA_SQL = `
 PRAGMA journal_mode = WAL;
@@ -147,6 +147,23 @@ export const TABLES = {
       "CREATE INDEX IF NOT EXISTS idx_rd_model ON requestDetails(model)",
       "CREATE INDEX IF NOT EXISTS idx_rd_conn ON requestDetails(connectionId)",
     ],
+  },
+  routers: {
+    columns: {
+      id: "TEXT PRIMARY KEY",
+      name: "TEXT NOT NULL DEFAULT 'Untitled router'",
+      yaml: "TEXT NOT NULL DEFAULT ''",
+      createdAt: "INTEGER NOT NULL",
+      updatedAt: "INTEGER NOT NULL",
+    },
+    indexes: ["CREATE INDEX IF NOT EXISTS idx_routers_updated ON routers(updatedAt DESC)"],
+  },
+  routerAgentThreads: {
+    columns: {
+      routerId: "TEXT PRIMARY KEY",
+      messagesJson: "TEXT NOT NULL DEFAULT '[]'",
+      updatedAt: "INTEGER NOT NULL",
+    },
   },
 };
 

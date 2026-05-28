@@ -125,3 +125,62 @@ A **separate Node process** (not part of Next) that intercepts HTTPS traffic fro
 3. If OAuth-based, add a refresh function in `open-sse/services/tokenRefresh.js` and wire it into `refreshTokenByProvider`.
 4. If the provider needs format translation, ensure `translator/` covers the request/response shape (most upstreams reuse OpenAI or Anthropic Messages format).
 5. Add a unit test under `tests/unit/` mirroring an existing executor test.
+
+---
+
+## Router Builder agent
+
+The `/dashboard/router-builder` page hosts a conversational agent that authors
+router YAML from natural-language descriptions. Architecture (top-down):
+
+- **UI** at `src/app/(dashboard)/dashboard/router-builder/` — Builder shell +
+  Header / Palette / Canvas / RightDock with Chat/YAML/Properties tabs +
+  BottomToolbar + Toast. Single YAML store as source of truth.
+- **Agent loop** at `src/lib/router-agent/agent.js` — framework-agnostic,
+  streams OpenAI-compatible SSE from same-origin `/api/v1/chat/completions`.
+- **Tools** at `src/lib/router-agent/tools/` — 8 client-side tools
+  (`get_router`, `set_router_yaml`, `add_signal`, `add_decision`,
+  `update_decision`, `delete_node`, `validate_router`, `load_skill`).
+  Each exports `{definition, makeExecute}`.
+- **Validator** at `src/lib/router-agent/validator/` — pure JS shape validator
+  (not full parity with router_service's pydantic validator — see
+  REGISTERED_SIGNALS / REGISTERED_PLUGINS in `validator/registries.js`).
+- **Skills** at `src/lib/router-agent/skills/*.md` — agent-accessible reference
+  docs, loaded on demand via `load_skill` tool. Served from
+  `GET /api/router-agent/skills/[name]` and listed via
+  `GET /api/router-agent/manifest`. ASCII-only Markdown.
+- **Persistence** — `routers` and `routerAgentThreads` tables (see
+  `src/lib/db/migrations/002-router-agent.js`). Agent settings live in the
+  shared `settings` row (`agentReasoningModel` key).
+- **React hooks** — `src/hooks/useRouterAgent.js` (loop driver + thread
+  persistence) and `src/hooks/useRouterYamlStore.js` (zustand YAML store with
+  50-entry undo/redo).
+
+### Adding a skill
+
+1. Add `src/lib/router-agent/skills/your-skill.md` with frontmatter
+   (`name`, `description`, `version`). ASCII-only body.
+2. The manifest endpoint picks it up automatically (it reads the directory at
+   request time). No code change required.
+3. Update the agent's system prompt skill list at
+   `src/lib/router-agent/systemPrompt.js` so the agent knows the skill exists.
+
+### Adding a signal or plugin type to the validator
+
+1. Add the type name to `REGISTERED_SIGNALS` or `REGISTERED_PLUGINS` in
+   `src/lib/router-agent/validator/registries.js`.
+2. Mirror the entry in the relevant skill (`signal-reference.md` or
+   `plugin-reference.md`).
+3. The router_service must also have a matching registration in its
+   `signals/__init__.py` or `plugins/__init__.py` for the actual routing to
+   work end-to-end. See `/SSD_data2/shared/UniRo_shared/UniroCloud/router_service`.
+
+### Conventions
+
+- All agent code is JavaScript (no TS) and ASCII-only in user-facing strings.
+- The agent loop assumes `/api/v1/chat/completions` is reachable same-origin
+  without `Authorization` (i.e., `settings.requireApiKey` is false). If a
+  deployment enables API-key enforcement, the agent will need to attach a key.
+- YAML is parsed and stringified via `confbox/yaml`. **Comments are not
+  preserved across parse->stringify** — any tool that mutates the YAML wipes
+  user-authored comments. Documented in `src/lib/router-agent/yaml.js`.
